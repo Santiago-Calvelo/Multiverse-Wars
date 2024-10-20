@@ -132,9 +132,9 @@ public class MapSelectionScreen implements Screen {
     public void dispose() {
         stage.dispose();
         backgroundTexture.dispose();
-        //map1Texture.dispose();
-        //map2Texture.dispose();
-        //map3Texture.dispose();
-        //map4Texture.dispose();
+        map1Texture.dispose();
+        map2Texture.dispose();
+        map3Texture.dispose();
+        map4Texture.dispose();
     }
 }
