@@ -136,5 +136,8 @@ public class MapSelectionScreen implements Screen {
         map2Texture.dispose();
         map3Texture.dispose();
         map4Texture.dispose();
+        map4Texture.dispose();
+        map4Texture.dispose();
+        map4Texture.dispose();
     }
 }
