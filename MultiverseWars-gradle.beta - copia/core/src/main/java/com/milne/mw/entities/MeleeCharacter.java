@@ -12,8 +12,8 @@ public class MeleeCharacter extends Character {
     private Texture attack1Texture;
     private Texture attack2Texture;
 
-    public MeleeCharacter(Texture texture, Texture attack1Texture, Texture attack2Texture, Texture walk1Texture, Texture walk2Texture, float x, float y, int lives, EntityType entityType, EntityManager entityManager, boolean canMove, Stage stage) {
-        super(texture, x, y, lives, entityType, entityManager, canMove, walk1Texture, walk2Texture, stage);
+    public MeleeCharacter(Texture texture, Texture attack1Texture, Texture attack2Texture, Texture walk1Texture, Texture walk2Texture, float x, float y, int lives, EntityType entityType, EntityManager entityManager, boolean canMove, Stage stage, String type) {
+        super(texture, x, y, lives, entityType, entityManager, canMove, walk1Texture, walk2Texture, stage,type);
         this.attack1Texture = attack1Texture;
         this.attack2Texture = attack2Texture;
     }
@@ -42,7 +42,7 @@ public class MeleeCharacter extends Character {
             Character character = entityManager.getCharacters().get(i);
 
             // Si colisionamos con un enemigo y no es el propio personaje
-            if (this != character && super.hitbox.overlaps(character.getHitbox())) {
+            if (this != character && super.hitbox.overlaps(character.getHitbox()) && !character.getType().equalsIgnoreCase(this.getType())) {
                 collisionDetected = true;
 
                 character.takeDamage(5);  // Aquí llamamos al método general takeDamage()

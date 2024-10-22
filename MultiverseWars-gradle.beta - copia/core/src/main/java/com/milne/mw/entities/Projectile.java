@@ -12,17 +12,19 @@ import com.milne.mw.entities.EntityManager;
 public class Projectile {
     private Image image;
     private Rectangle hitbox;
-    private int damage = 0;
+    private int damage = 5;
     private Stage stage;
-    private EntityManager entityManager;  // Nueva referencia al EntityManager
+    private EntityManager entityManager;
+    private String type;
 
-    public Projectile(Texture texture, float x, float y, Stage stage, EntityManager entityManager) {
+    public Projectile(Texture texture, float x, float y, Stage stage, EntityManager entityManager, String type) {
         this.image = new Image(texture);
         this.image.setSize(20, 20);
         this.image.setPosition(x, y);
         this.stage = stage;
         this.hitbox = new Rectangle(x, y, 20, 20);
         this.entityManager = entityManager;  // Guardamos el EntityManager
+        this.type = type;
         moveAction();
     }
 
@@ -51,7 +53,7 @@ public class Projectile {
         for (int i = 0; i < entityManager.getCharacters().size; i++) {
             Character character = entityManager.getCharacters().get(i);
 
-            if (hitbox.overlaps(character.getHitbox())) {
+            if (hitbox.overlaps(character.getHitbox()) && !this.getType().equalsIgnoreCase(character.getType())) {
                 character.takeDamage(damage);  // Aquí llamamos al método general takeDamage()
                 Gdx.app.log("Projectile", "Character hit! Damage dealt: " + damage);
                 image.remove();  // Eliminamos el proyectil después de la colisión
@@ -62,5 +64,9 @@ public class Projectile {
 
     public Image getImage() {
         return image;
+    }
+
+    public String getType() {
+        return type;
     }
 }

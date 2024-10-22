@@ -12,8 +12,8 @@ public class RangedCharacter extends Character {
     protected Texture attack1Texture;
     protected Texture attack2Texture;
 
-    public RangedCharacter(Texture texture, Texture attack1Texture, Texture attack2Texture, Texture projectileTexture, Texture walk1Texture, Texture walk2Texture, float x, float y, int lives, EntityType entityType, EntityManager entityManager, boolean canMove, Stage stage) {
-        super(texture, x, y, lives, entityType, entityManager, canMove, walk1Texture, walk2Texture, stage);
+    public RangedCharacter(Texture texture, Texture attack1Texture, Texture attack2Texture, Texture projectileTexture, Texture walk1Texture, Texture walk2Texture, float x, float y, int lives, EntityType entityType, EntityManager entityManager, boolean canMove, Stage stage, String type) {
+        super(texture, x, y, lives, entityType, entityManager, canMove, walk1Texture, walk2Texture, stage, type);
         this.attack1Texture = attack1Texture;
         this.attack2Texture = attack2Texture;
         this.projectileTexture = projectileTexture;
@@ -39,7 +39,7 @@ public class RangedCharacter extends Character {
     public void attack() {
         // Crear el proyectil y añadirlo al stage
         Projectile projectile = new Projectile(projectileTexture, image.getX() + image.getWidth(),
-            image.getY() + image.getHeight() / 2, stage, entityManager);
+            image.getY() + image.getHeight() / 2, stage, entityManager, this.getType());
         stage.addActor(projectile.getImage());
 
         // Alternar las texturas de ataque para simular la animación

@@ -25,8 +25,9 @@ public abstract class Character {
     private Texture walk2Texture;
     protected Stage stage;
     protected MoveToAction moveAction = new MoveToAction();
+    private String type;
 
-    public Character(Texture texture, float x, float y, int lives, EntityType entityType, EntityManager entityManager, boolean canMove, Texture walk1Texture, Texture walk2Texture, Stage stage) {
+    public Character(Texture texture, float x, float y, int lives, EntityType entityType, EntityManager entityManager, boolean canMove, Texture walk1Texture, Texture walk2Texture, Stage stage, String type) {
         this.image = new Image(texture);
         this.image.setPosition(x, y);
         this.image.setSize(50, 50);
@@ -40,6 +41,7 @@ public abstract class Character {
         this.walk1Texture = walk1Texture;
         this.walk2Texture = walk2Texture;
         this.stage = stage;
+        this.type = type;
 
         // Si el personaje puede moverse, iniciamos la animación y el movimiento
         if (canMove) {
@@ -52,18 +54,17 @@ public abstract class Character {
         hitbox.setPosition(image.getX(), image.getY());  // Actualiza las coordenadas
     }
 
-    // Método para mover al personaje y actualizar la hitbox
     private void moveToAction() {
         animateWalk();  // Solo animar caminar si tiene las texturas
 
-
-        moveAction.setPosition(0, y);  // Movimiento hacia la izquierda
-        moveAction.setDuration(10);  // Duración del movimiento
+        moveAction.setPosition(0, y);
+        moveAction.setDuration(10);
 
         // Listener para actualizar la hitbox en cada cambio de posición
         image.addAction(moveAction);
         updateHitbox();
     }
+
 
     // Método para animar el caminar del personaje
     private void animateWalk() {
@@ -103,6 +104,10 @@ public abstract class Character {
     public Rectangle getHitbox() {
         updateHitbox();
         return hitbox;
+    }
+
+    public String getType() {
+        return type;
     }
 
     public int getLives() {

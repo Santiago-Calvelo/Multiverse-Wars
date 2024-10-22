@@ -9,6 +9,7 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 public class EntityManager {
     private Stage stage;
@@ -119,13 +120,21 @@ public class EntityManager {
     }
 
     private void spawnRandomEnemy() {
-        int gridRows = 6;
-        float cellHeight = stage.getHeight() * 2 / 3 / gridRows;
-        int randomRow = (int) (Math.random() * gridRows);
-        float spawnY = randomRow * cellHeight;
-        float spawnX = stage.getWidth();
+        Random r = new Random();
+
+        // Elegir una fila aleatoria
+        int randomRow = r.nextInt(ROWS);
+
+        // Obtener la coordenada Y del centro de la hitbox en la fila seleccionada
+        float spawnY = placementHitboxes.get(randomRow * COLS).y + placementHitboxes.get(randomRow * COLS).height / 2;
+
+        // Configurar la coordenada X fuera de la pantalla
+        float spawnX = viewport.getWorldWidth() + 50;  // X fuera de la pantalla, al borde derecho
+
+        // Colocar el enemigo alineado en Y, pero fuera de la pantalla en X
         spawnEntity(EntityType.SKELETON, spawnX, spawnY);
     }
+
 
     public void update(float delta) {
         for (Character character : characters) {
