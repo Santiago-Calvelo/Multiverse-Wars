@@ -1,48 +1,112 @@
 package com.milne.mw.entities;
 
+import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Timer;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class EntityManager {
     private Stage stage;
     private Array<Character> characters;
-    private Viewport viewport;  // Necesitamos el viewport para los cálculos de la cuadrícula
+    private Viewport viewport;
+    private List<Rectangle> placementHitboxes;  // Lista de hitboxes para los puntos de colocación
+    private boolean[] isOccupied;
+    private final float INITIAL_X = 33;
+    private final float INITIAL_Y = 42;
+    private final float CELL_WIDTH = 62;
+    private final float CELL_HEIGHT = 79;
+    private final int COLS = 10;
+    private final int ROWS = 5;
+    private final float HITBOX_SIZE = 60;  // Tamaño de las hitboxes de colocación
 
     public EntityManager(Stage stage, Viewport viewport) {
         this.stage = stage;
         this.viewport = viewport;
         characters = new Array<>();
+        this.placementHitboxes = new ArrayList<>();
+        initPlacementPoints();
     }
 
-    // Método que maneja la colocación de entidades en el mapa
-    public void handleEntityPlacement(EntityType entityType, float x, float y) {
-        int gridCols = 9;  // Número de columnas de la cuadrícula
-        int gridRows = 6;  // Número de filas de la cuadrícula
+    // Inicializar los puntos de colocación y sus hitboxes
+    public void initPlacementPoints() {
+        placementHitboxes.clear();
+        isOccupied = new boolean[COLS * ROWS];
+        for (int i = 0; i < COLS; i++) {
+            for (int j = 0; j < ROWS; j++) {
+                float centerX = INITIAL_X + i * CELL_WIDTH;
+                float centerY = INITIAL_Y + j * CELL_HEIGHT;
 
-        // Calcular la posición en la cuadrícula
-        int col = (int) (x / (viewport.getWorldWidth() / gridCols));
-        int row = (int) (y / (viewport.getWorldHeight() * 2 / 3 / gridRows));
+                // Crear una hitbox alrededor del punto central
+                Rectangle hitbox = new Rectangle(
+                    centerX - HITBOX_SIZE / 2,  // La esquina inferior izquierda de la hitbox
+                    centerY - HITBOX_SIZE / 2,
+                    HITBOX_SIZE,  // Ancho de la hitbox
+                    HITBOX_SIZE); // Alto de la hitbox
 
-        // Verificar si la posición está dentro de la cuadrícula
-        if (col >= 0 && col < gridCols && row >= 0 && row < gridRows) {
-            float cellX = col * (viewport.getWorldWidth() / gridCols);
-            float cellY = row * ((viewport.getWorldHeight() * 2 / 3) / gridRows);
-
-            // Crear la entidad y colocarla en el escenario
-            spawnEntity(entityType, cellX, cellY);
+                placementHitboxes.add(hitbox);  // Guardamos la hitbox
+            }
         }
     }
 
-    public void spawnEntity(EntityType entityType, float x, float y) {
-        Character entity = entityType.getEntity(x, y, stage, this);  // Crear la entidad desde el enum
-        stage.addActor(entity.getImage());  // Añadir la entidad al escenario
-        characters.add(entity);  // Añadir la entidad a la lista de personajes para renderizado y gestión
+    // Método que maneja la colocación de entidades en el mapa
+    public void handleEntityPlacement(EntityType entityType, float x, float y, float cardWidth, float cardHeight) {
+        boolean placed = false;  // Para saber si la entidad fue colocada
+        int i = 0;
+
+        // Creamos una hitbox representando toda la carta (área de la carta)
+        Rectangle cardArea = new Rectangle(x, y, cardWidth, cardHeight);
+
+        // Hacemos un do-while para recorrer todos los puntos hasta que se coloque la entidad o se terminen los puntos
+        do {
+            Rectangle hitbox = placementHitboxes.get(i);
+
+            // Verificamos si la hitbox de colocación se solapa con la hitbox de la carta
+            if (!isOccupied[i] && hitbox.overlaps(cardArea)) {
+                // Obtener el centro del rectángulo para colocar la entidad centrada
+                float centerX = hitbox.x + hitbox.width / 2;
+                float centerY = hitbox.y + hitbox.height / 2;
+
+                // Colocar la entidad en ese punto
+                spawnEntity(entityType, centerX, centerY);
+                isOccupied[i] = true;  // Marcar el punto como ocupado
+                placed = true;  // Indicamos que la entidad fue colocada
+            }
+
+            i++;  // Pasamos al siguiente punto
+        } while (!placed && i < placementHitboxes.size());
+
+        // Si no se encontró un punto válido cercano
+        if (!placed) {
+            System.out.println("No se encontró un punto válido cerca de x = " + x + ", y = " + y);
+        }
     }
 
-    public Array<Character> getCharacters() {
-        return characters;
+    // Colocar la entidad, centrando la hitbox sobre el punto
+    public void spawnEntity(EntityType entityType, float x, float y) {
+        Character entity = entityType.getEntity(x, y, stage, this);
+
+        // Obtener el tamaño de la hitbox del personaje
+        float hitboxWidth = entity.getImage().getWidth();
+        float hitboxHeight = entity.getImage().getHeight();
+
+        // Ajustar las coordenadas para centrar la hitbox sobre el punto de colocación
+        float adjustedX = x - hitboxWidth / 2;
+        float adjustedY = y - hitboxHeight / 2;
+
+        // Colocar el personaje centrado en el punto
+        entity.getImage().setPosition(adjustedX, adjustedY);
+        stage.addActor(entity.getImage());
+        characters.add(entity);
+    }
+
+    // Obtener las hitboxes de colocación para poder dibujarlas
+    public List<Rectangle> getPlacementHitboxes() {
+        return placementHitboxes;
     }
 
     public void startEnemySpawner(float spawnInterval) {
@@ -60,6 +124,16 @@ public class EntityManager {
         int randomRow = (int) (Math.random() * gridRows);
         float spawnY = randomRow * cellHeight;
         float spawnX = stage.getWidth();
-        spawnEntity(EntityType.SKELETON, spawnX, spawnY);  // Spawnear un enemigo Skeleton
+        spawnEntity(EntityType.SKELETON, spawnX, spawnY);
+    }
+
+    public void update(float delta) {
+        for (Character character : characters) {
+            character.checkForAttack();
+        }
+    }
+
+    public Array<Character> getCharacters() {
+        return characters;
     }
 }

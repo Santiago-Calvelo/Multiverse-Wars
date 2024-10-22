@@ -2,6 +2,7 @@ package com.milne.mw.entities;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.actions.MoveToAction;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
@@ -13,22 +14,23 @@ import com.badlogic.gdx.Gdx;
 
 public abstract class Character {
     protected Image image;
-    private Rectangle hitbox;
+    protected Rectangle hitbox;
     protected int lives;
     private float x;
     private float y;
     private EntityType entityType;
     protected EntityManager entityManager;
-    private boolean canMove;  // Ahora se decide si puede moverse
+    private boolean canMove;
     private Texture walk1Texture;
     private Texture walk2Texture;
     protected Stage stage;
+    protected MoveToAction moveAction = new MoveToAction();
 
     public Character(Texture texture, float x, float y, int lives, EntityType entityType, EntityManager entityManager, boolean canMove, Texture walk1Texture, Texture walk2Texture, Stage stage) {
         this.image = new Image(texture);
         this.image.setPosition(x, y);
         this.image.setSize(50, 50);
-        this.hitbox = new Rectangle(x, y, 50, 50);
+        this.hitbox = new Rectangle(x, y, 50, 50);  // Inicializamos la hitbox
         this.lives = lives;
         this.x = x;
         this.y = y;
@@ -45,18 +47,26 @@ public abstract class Character {
         }
     }
 
-    // Método para mover al personaje y animar caminar si tiene texturas
+    // Método para actualizar la hitbox a la nueva posición del personaje
+    private void updateHitbox() {
+        hitbox.setPosition(image.getX(), image.getY());  // Actualiza las coordenadas
+    }
+
+    // Método para mover al personaje y actualizar la hitbox
     private void moveToAction() {
         animateWalk();  // Solo animar caminar si tiene las texturas
 
-        MoveToAction moveAction = new MoveToAction();
+
         moveAction.setPosition(0, y);  // Movimiento hacia la izquierda
         moveAction.setDuration(10);  // Duración del movimiento
+
+        // Listener para actualizar la hitbox en cada cambio de posición
         image.addAction(moveAction);
+        updateHitbox();
     }
 
     // Método para animar el caminar del personaje
-    protected void animateWalk() {
+    private void animateWalk() {
         Timer.schedule(new Task() {
             @Override
             public void run() {
@@ -73,7 +83,9 @@ public abstract class Character {
 
     public abstract void attack();
 
-    public void takeDamage(int damage) {
+    public abstract void checkForAttack();
+
+    public void takeDamage(float damage) {
         this.lives -= damage;  // Reducir las vidas
         Gdx.app.log(this.getClass().getSimpleName(), "Hit! Remaining lives: " + lives);
 
@@ -89,6 +101,7 @@ public abstract class Character {
     }
 
     public Rectangle getHitbox() {
+        updateHitbox();
         return hitbox;
     }
 

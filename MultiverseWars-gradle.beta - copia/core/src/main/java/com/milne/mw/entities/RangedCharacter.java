@@ -51,4 +51,9 @@ public class RangedCharacter extends Character {
             }
         }, 0.5f);  // Cambiar la textura después de 0.5 segundos
     }
+
+    @Override
+    public void checkForAttack() {
+
+    }
 }

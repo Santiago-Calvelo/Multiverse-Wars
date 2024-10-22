@@ -1,5 +1,6 @@
 package com.milne.mw.entities;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -28,5 +29,47 @@ public class MeleeCharacter extends Character {
                 image.setDrawable(new TextureRegionDrawable(new TextureRegion(attack2Texture)));
             }
         }, 0.5f);
+    }
+
+    @Override
+    public void checkForAttack() {
+        int i = 0;
+        boolean collisionDetected = false;
+        int characterCount = entityManager.getCharacters().size;
+
+        // Usamos un do-while para recorrer los personajes
+        do {
+            Character character = entityManager.getCharacters().get(i);
+
+            // Si colisionamos con un enemigo y no es el propio personaje
+            if (this != character && super.hitbox.overlaps(character.getHitbox())) {
+                collisionDetected = true;
+
+                character.takeDamage(5);  // Aquí llamamos al método general takeDamage()
+                Gdx.app.log("Skeleton", "Character hit! Damage dealt: " + 5);
+
+                // Si hay una colisión, detenemos el movimiento
+                stopMovementAndAttack();  // Detenemos y atacamos
+            }
+            i++;
+        } while (i < characterCount && !collisionDetected);
+
+        // Si no hay colisiones, continuar moviéndose
+        if (!collisionDetected) {
+            resumeMovement();
+        }
+    }
+
+    // Método para detener el movimiento y atacar
+    private void stopMovementAndAttack() {
+        image.clearActions();  // Detener todas las acciones (incluyendo el movimiento)
+        attack();  // Iniciar el ataque
+    }
+
+    // Método para reanudar el movimiento si no hay colisiones
+    private void resumeMovement() {
+        if (!image.hasActions() && super.moveAction != null) {
+            image.addAction(super.moveAction);  // Reanudar el movimiento
+        }
     }
 }

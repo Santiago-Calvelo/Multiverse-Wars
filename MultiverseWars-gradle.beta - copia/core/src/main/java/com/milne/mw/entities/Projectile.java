@@ -12,7 +12,7 @@ import com.milne.mw.entities.EntityManager;
 public class Projectile {
     private Image image;
     private Rectangle hitbox;
-    private int damage = 15;
+    private int damage = 0;
     private Stage stage;
     private EntityManager entityManager;  // Nueva referencia al EntityManager
 

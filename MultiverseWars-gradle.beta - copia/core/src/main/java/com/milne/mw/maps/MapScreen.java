@@ -74,8 +74,13 @@ public class MapScreen implements Screen {
                     @Override
                     public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
                         if (playerSelected) {
-                            // Delegamos la lógica de colocación al EntityManager
-                            entityManager.handleEntityPlacement(entityType, cardImage.getX(), cardImage.getY());
+                            // Obtener las coordenadas donde se suelta la carta
+                            float cardX = cardImage.getX();
+                            float cardY = cardImage.getY();
+
+                            // Delegamos la lógica de colocación al EntityManager, pasando las coordenadas
+                            entityManager.handleEntityPlacement(entityType, cardImage.getX(), cardImage.getY(), cardImage.getWidth(), cardImage.getHeight());
+
 
                             // Volver a colocar la carta en su posición original
                             cardImage.setPosition(originalX, originalY);
@@ -98,7 +103,7 @@ public class MapScreen implements Screen {
 
     @Override
     public void render(float delta) {
-        renderManager.render(viewport, isPaused, entityManager);  // Pasar el entityManager para renderizar las entidades
+        renderManager.render(viewport, isPaused, entityManager, delta);  // Pasar el entityManager para renderizar las entidades
     }
 
     @Override
