@@ -14,38 +14,40 @@ import com.badlogic.gdx.Gdx;
 
 public abstract class Character {
     protected Image image;
-    protected Rectangle hitbox;
-    protected int lives;
+    private Rectangle hitbox;
+    private int lives;
     private float x;
     private float y;
     private EntityType entityType;
     protected EntityManager entityManager;
-    private boolean canMove;
+    private int speed;
     private Texture walk1Texture;
     private Texture walk2Texture;
-    protected Stage stage;
-    protected MoveToAction moveAction = new MoveToAction();
+    private Stage stage;
+    private MoveToAction moveAction;
+    private boolean isMoving;
     private String type;
 
-    public Character(Texture texture, float x, float y, int lives, EntityType entityType, EntityManager entityManager, boolean canMove, Texture walk1Texture, Texture walk2Texture, Stage stage, String type) {
+    public Character(Texture texture, float x, float y, int hitboxWidth, int hitboxHeight, int lives, EntityType entityType, EntityManager entityManager, int speed, Texture walk1Texture, Texture walk2Texture, Stage stage, String type) {
         this.image = new Image(texture);
         this.image.setPosition(x, y);
         this.image.setSize(50, 50);
-        this.hitbox = new Rectangle(x, y, 50, 50);  // Inicializamos la hitbox
+        this.hitbox = new Rectangle(x, y, hitboxWidth, hitboxHeight);  // Inicializamos la hitbox
         this.lives = lives;
         this.x = x;
         this.y = y;
         this.entityType = entityType;
         this.entityManager = entityManager;
-        this.canMove = canMove;
         this.walk1Texture = walk1Texture;
         this.walk2Texture = walk2Texture;
         this.stage = stage;
         this.type = type;
+        this.isMoving = false;
+        this.speed = speed;
 
         // Si el personaje puede moverse, iniciamos la animación y el movimiento
-        if (canMove) {
-            moveToAction();
+        if (speed != 0) {
+            startMovement();
         }
     }
 
@@ -54,17 +56,49 @@ public abstract class Character {
         hitbox.setPosition(image.getX(), image.getY());  // Actualiza las coordenadas
     }
 
-    private void moveToAction() {
-        animateWalk();  // Solo animar caminar si tiene las texturas
+    // Método para iniciar el movimiento en la dirección X
+    public void startMovement() {
+        if (!isMoving) {
+            animateWalk();
+            moveAction = new MoveToAction();
 
-        moveAction.setPosition(0, y);
-        moveAction.setDuration(10);
+            // Establecemos la posición final en el eje X (salir de la pantalla por el lado izquierdo)
+            float targetX = -image.getWidth();
 
-        // Listener para actualizar la hitbox en cada cambio de posición
-        image.addAction(moveAction);
-        updateHitbox();
+            // Calculamos la distancia que el personaje recorrerá en X
+            float distanceX = image.getX() - targetX;
+
+            // La duración del movimiento será inversamente proporcional a la velocidad.
+            // Ajustamos la fórmula para que el movimiento sea visible y proporcional al 'speed'.
+            float duration = distanceX / speed;  // Duración más directa
+
+            // Ajustamos la acción de movimiento
+            moveAction.setPosition(targetX, image.getY());  // Solo movemos en el eje X
+            moveAction.setDuration(duration);  // Usamos la duración calculada
+
+            // Añadimos la acción de movimiento al personaje
+            image.addAction(moveAction);
+            isMoving = true;
+        }
     }
 
+
+
+    // Método para detener el movimiento y atacar
+    public void stopMovementAndAttack() {
+        if (isMoving) {
+            image.clearActions();  // Detener todas las acciones
+            isMoving = false;
+        }
+        attack();  // Iniciar el ataque
+    }
+
+    // Método para reanudar el movimiento si no hay colisiones
+    public void resumeMovement() {
+        if (!isMoving && speed != 0) {
+            startMovement();
+        }
+    }
 
     // Método para animar el caminar del personaje
     private void animateWalk() {
@@ -86,7 +120,7 @@ public abstract class Character {
 
     public abstract void checkForAttack();
 
-    public void takeDamage(float damage) {
+    public void takeDamage(int damage) {
         this.lives -= damage;  // Reducir las vidas
         Gdx.app.log(this.getClass().getSimpleName(), "Hit! Remaining lives: " + lives);
 
@@ -118,7 +152,24 @@ public abstract class Character {
         return entityType;
     }
 
-    public boolean canMove() {
-        return canMove;
+    public float getX() {
+        return x;
     }
+
+    public float getY() {
+        return y;
+    }
+
+    public int getSpeed() {
+        return speed;
+    }
+
+    public void dispose() {
+        // Eliminar todas las acciones
+        image.clearActions();
+        // Removerlo del escenario
+        image.remove();
+    }
+
 }
+

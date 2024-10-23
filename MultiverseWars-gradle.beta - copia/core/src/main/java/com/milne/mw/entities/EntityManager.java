@@ -1,7 +1,6 @@
 package com.milne.mw.entities;
 
 import com.badlogic.gdx.math.Rectangle;
-import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Timer;
@@ -23,7 +22,7 @@ public class EntityManager {
     private final float CELL_HEIGHT = 79;
     private final int COLS = 10;
     private final int ROWS = 5;
-    private final float HITBOX_SIZE = 60;  // Tamaño de las hitboxes de colocación
+    private final float HITBOX_SIZE = 55;  // Tamaño de las hitboxes de colocación
 
     public EntityManager(Stage stage, Viewport viewport) {
         this.stage = stage;
@@ -65,7 +64,6 @@ public class EntityManager {
         // Hacemos un do-while para recorrer todos los puntos hasta que se coloque la entidad o se terminen los puntos
         do {
             Rectangle hitbox = placementHitboxes.get(i);
-
             // Verificamos si la hitbox de colocación se solapa con la hitbox de la carta
             if (!isOccupied[i] && hitbox.overlaps(cardArea)) {
                 // Obtener el centro del rectángulo para colocar la entidad centrada
@@ -88,17 +86,13 @@ public class EntityManager {
     }
 
     // Colocar la entidad, centrando la hitbox sobre el punto
-    public void spawnEntity(EntityType entityType, float x, float y) {
-        Character entity = entityType.getEntity(x, y, stage, this);
-
-        // Obtener el tamaño de la hitbox del personaje
-        float hitboxWidth = entity.getImage().getWidth();
-        float hitboxHeight = entity.getImage().getHeight();
+    public void spawnEntity(EntityType entityType, float x, float y) {;
 
         // Ajustar las coordenadas para centrar la hitbox sobre el punto de colocación
-        float adjustedX = x - hitboxWidth / 2;
-        float adjustedY = y - hitboxHeight / 2;
+        float adjustedX = x - (float) entityType.getHitboxWidth() / 2;
+        float adjustedY = y - (float) entityType.getHitboxHeight() / 2;
 
+        Character entity = entityType.getEntity(adjustedX,adjustedY,stage,this);
         // Colocar el personaje centrado en el punto
         entity.getImage().setPosition(adjustedX, adjustedY);
         stage.addActor(entity.getImage());
@@ -116,31 +110,55 @@ public class EntityManager {
             public void run() {
                 spawnRandomEnemy();
             }
-        }, 0, spawnInterval);  // Spawnear enemigos regularmente
+        }, 3, spawnInterval);  // Spawnear enemigos regularmente
     }
 
     private void spawnRandomEnemy() {
-        Random r = new Random();
+        Random random = new Random();
 
-        // Elegir una fila aleatoria
-        int randomRow = r.nextInt(ROWS);
+        int randomRow = random.nextInt(ROWS);
 
-        // Obtener la coordenada Y del centro de la hitbox en la fila seleccionada
-        float spawnY = placementHitboxes.get(randomRow * COLS).y + placementHitboxes.get(randomRow * COLS).height / 2;
+        Rectangle rowHitbox = placementHitboxes.get(randomRow);
+       // float spawnY = randomRow * CELL_HEIGHT + (CELL_HEIGHT / 2);
+        float spawnY = rowHitbox.y + (rowHitbox.height / 2);
+        float spawnX = viewport.getWorldWidth();
+        spawnEntity(EntityType.SKELETON,spawnX,spawnY);
 
-        // Configurar la coordenada X fuera de la pantalla
-        float spawnX = viewport.getWorldWidth() + 50;  // X fuera de la pantalla, al borde derecho
-
-        // Colocar el enemigo alineado en Y, pero fuera de la pantalla en X
-        spawnEntity(EntityType.SKELETON, spawnX, spawnY);
+        // Debug para verificar la colocación
+        System.out.println("Fila aleatoria seleccionada: " + randomRow);
+        System.out.println("Coordenada Y calculada para spawn: " + spawnY);
     }
-
 
     public void update(float delta) {
         for (Character character : characters) {
             character.checkForAttack();
         }
     }
+
+    public void removeOffScreenCharacters() {
+        Array<Character> charactersToRemove = new Array<>();  // Lista de personajes para eliminar
+
+        for (int i = 0; i < characters.size; i++) {
+            Character character = characters.get(i);
+            System.out.println("Posición X del personaje: " + character.getImage().getX());
+
+            if (character.getImage().getX() < 0) {  // Si el personaje ha salido de la pantalla
+                System.out.println("Personaje fuera de la pantalla. Marcando para eliminar...");
+                charactersToRemove.add(character);  // Añadir a la lista de personajes a eliminar
+            }
+        }
+
+        // Eliminar los personajes fuera de pantalla de manera controlada
+        if (!charactersToRemove.isEmpty()) {
+            for (Character character : charactersToRemove) {
+                character.getImage().remove();  // Eliminar del stage
+                stage.getActors().removeValue(character.getImage(), true);  // Asegurarnos de removerlo del stage
+                characters.removeValue(character, true);  // Remover de la lista de personajes
+                character.dispose();  // Liberar los recursos del personaje
+            }
+        }
+    }
+
 
     public Array<Character> getCharacters() {
         return characters;

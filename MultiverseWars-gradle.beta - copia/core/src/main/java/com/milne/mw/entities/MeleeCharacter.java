@@ -12,8 +12,8 @@ public class MeleeCharacter extends Character {
     private Texture attack1Texture;
     private Texture attack2Texture;
 
-    public MeleeCharacter(Texture texture, Texture attack1Texture, Texture attack2Texture, Texture walk1Texture, Texture walk2Texture, float x, float y, int lives, EntityType entityType, EntityManager entityManager, boolean canMove, Stage stage, String type) {
-        super(texture, x, y, lives, entityType, entityManager, canMove, walk1Texture, walk2Texture, stage,type);
+    public MeleeCharacter(Texture texture, int hitboxWidth, int hitboxHeight,Texture attack1Texture, Texture attack2Texture, Texture walk1Texture, Texture walk2Texture, float x, float y, int lives, EntityType entityType, EntityManager entityManager, int speed, Stage stage, String type) {
+        super(texture, x, y, hitboxWidth, hitboxHeight, lives, entityType, entityManager, speed, walk1Texture, walk2Texture, stage,type);
         this.attack1Texture = attack1Texture;
         this.attack2Texture = attack2Texture;
     }
@@ -42,7 +42,7 @@ public class MeleeCharacter extends Character {
             Character character = entityManager.getCharacters().get(i);
 
             // Si colisionamos con un enemigo y no es el propio personaje
-            if (this != character && super.hitbox.overlaps(character.getHitbox()) && !character.getType().equalsIgnoreCase(this.getType())) {
+            if (this != character && this.getHitbox().overlaps(character.getHitbox()) && !character.getType().equalsIgnoreCase(this.getType())) {
                 collisionDetected = true;
 
                 character.takeDamage(5);  // Aquí llamamos al método general takeDamage()
@@ -57,19 +57,6 @@ public class MeleeCharacter extends Character {
         // Si no hay colisiones, continuar moviéndose
         if (!collisionDetected) {
             resumeMovement();
-        }
-    }
-
-    // Método para detener el movimiento y atacar
-    private void stopMovementAndAttack() {
-        image.clearActions();  // Detener todas las acciones (incluyendo el movimiento)
-        attack();  // Iniciar el ataque
-    }
-
-    // Método para reanudar el movimiento si no hay colisiones
-    private void resumeMovement() {
-        if (!image.hasActions() && super.moveAction != null) {
-            image.addAction(super.moveAction);  // Reanudar el movimiento
         }
     }
 }

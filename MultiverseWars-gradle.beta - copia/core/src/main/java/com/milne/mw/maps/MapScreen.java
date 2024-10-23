@@ -4,6 +4,8 @@ import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
@@ -23,6 +25,9 @@ public class MapScreen implements Screen {
     private RenderManager renderManager;
     private EntityManager entityManager;
     private boolean isPaused = false;
+    private SpriteBatch batch;
+    private BitmapFont font;
+
 
     public MapScreen(Game game, Texture map) {
         this.game = game;
@@ -32,12 +37,13 @@ public class MapScreen implements Screen {
 
         renderManager = new RenderManager(map, stage);
         entityManager = new EntityManager(stage, viewport);  // Pasamos viewport a EntityManager para los cálculos
-
+        batch = new SpriteBatch();
+        font = new BitmapFont();
         // Añadir todas las cartas de los EntityType dinámicamente al panel
         addEntityCardsToPanel();
 
         // Iniciar el spawner de enemigos
-        entityManager.startEnemySpawner(5f);
+        entityManager.startEnemySpawner(1f);
     }
 
     // Método que añade las cartas al panel basado en el Enum EntityType
@@ -45,9 +51,10 @@ public class MapScreen implements Screen {
         float xPos = 105;  // Posición inicial X para las cartas
         float yPos = viewport.getWorldHeight() - 85;  // Posición en el panel (Y)
 
-        for (EntityType entityType : EnumSet.allOf(EntityType.class)) {
+        for (EntityType entityType : EntityType.values()) {
             // Verificamos si la entidad tiene una carta antes de crear la imagen
             if (entityType.getCardTexture() != null) {
+                // Crear una instancia única para cada Image y listener
                 final Image cardImage = new Image(entityType.getCardTexture());
                 cardImage.setSize(60, 80);
                 cardImage.setPosition(xPos, yPos);
@@ -79,8 +86,7 @@ public class MapScreen implements Screen {
                             float cardY = cardImage.getY();
 
                             // Delegamos la lógica de colocación al EntityManager, pasando las coordenadas
-                            entityManager.handleEntityPlacement(entityType, cardImage.getX(), cardImage.getY(), cardImage.getWidth(), cardImage.getHeight());
-
+                            entityManager.handleEntityPlacement(entityType, cardX, cardY, cardImage.getWidth(), cardImage.getHeight());
 
                             // Volver a colocar la carta en su posición original
                             cardImage.setPosition(originalX, originalY);
@@ -96,6 +102,7 @@ public class MapScreen implements Screen {
     }
 
 
+
     @Override
     public void show() {
         MusicManager.playMusic("tema d battala.mp3");
@@ -104,6 +111,10 @@ public class MapScreen implements Screen {
     @Override
     public void render(float delta) {
         renderManager.render(viewport, isPaused, entityManager, delta);  // Pasar el entityManager para renderizar las entidades
+        batch.begin();
+        font.draw(batch, "Personajes restantes: " + entityManager.getCharacters().size, 10, 20);
+        batch.end();
+        entityManager.removeOffScreenCharacters();
     }
 
     @Override
@@ -129,6 +140,8 @@ public class MapScreen implements Screen {
     public void dispose() {
         stage.dispose();
         renderManager.dispose();
+        batch.dispose();
+        font.dispose();  // Liberar la fuente
 
         // No liberar texturas aquí si planeas usarlas después
         for (EntityType entityType : EnumSet.allOf(EntityType.class)) {
@@ -141,6 +154,7 @@ public class MapScreen implements Screen {
             }
         }
     }
+
 
     public void setDifficulty(int difficultyLevel) {
 

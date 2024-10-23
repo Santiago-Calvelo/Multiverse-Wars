@@ -8,15 +8,18 @@ import com.badlogic.gdx.utils.Timer.Task;
 
 public class RangedCharacter extends Character {
 
-    protected Texture projectileTexture;
-    protected Texture attack1Texture;
-    protected Texture attack2Texture;
+    private Texture projectileTexture;
+    private Texture attack1Texture;
+    private Texture attack2Texture;
+    private Stage stage;
+    private Task attackTask; // Guardar referencia al Task de ataque
 
-    public RangedCharacter(Texture texture, Texture attack1Texture, Texture attack2Texture, Texture projectileTexture, Texture walk1Texture, Texture walk2Texture, float x, float y, int lives, EntityType entityType, EntityManager entityManager, boolean canMove, Stage stage, String type) {
-        super(texture, x, y, lives, entityType, entityManager, canMove, walk1Texture, walk2Texture, stage, type);
+    public RangedCharacter(Texture texture, int hitboxWidth, int hitboxHeight,Texture attack1Texture, Texture attack2Texture, Texture projectileTexture, Texture walk1Texture, Texture walk2Texture, float x, float y, int lives, EntityType entityType, EntityManager entityManager, int speed, Stage stage, String type) {
+        super(texture, x, y, hitboxWidth, hitboxHeight, lives, entityType, entityManager, speed, walk1Texture, walk2Texture, stage, type);
         this.attack1Texture = attack1Texture;
         this.attack2Texture = attack2Texture;
         this.projectileTexture = projectileTexture;
+        this.stage = stage;
 
         // Iniciar el ciclo de ataque (atacar cada 1 segundo)
         scheduleAttack();
@@ -24,14 +27,15 @@ public class RangedCharacter extends Character {
 
     // Programar el ataque cada cierto intervalo
     private void scheduleAttack() {
-        Timer.schedule(new Task() {
+        attackTask = new Task() {
             @Override
             public void run() {
-                if (lives > 0) {  // Solo atacamos si seguimos vivos
+                if (getLives() > 0) {  // Solo atacamos si seguimos vivos
                     attack();
                 }
             }
-        }, 0, 1);  // Atacar cada 1 segundo
+        };
+        Timer.schedule(attackTask, 0, 1);  // Atacar cada 1 segundo
     }
 
     // Implementación del ataque a distancia (disparar proyectil)
@@ -53,7 +57,16 @@ public class RangedCharacter extends Character {
     }
 
     @Override
-    public void checkForAttack() {
+    public void dispose() {
+        // Cancelar el ciclo de ataque antes de eliminar el personaje
+        if (attackTask != null) {
+            attackTask.cancel();  // Detener el Task de ataque
+        }
+        super.dispose();  // Llamamos al dispose de la clase padre para eliminar la imagen y demás
+    }
 
+    @Override
+    public void checkForAttack() {
+        // Lógica de chequeo de ataque (vacía en este caso)
     }
 }
