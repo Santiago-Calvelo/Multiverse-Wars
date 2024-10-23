@@ -11,6 +11,7 @@ import com.badlogic.gdx.utils.Timer;
 import com.badlogic.gdx.utils.Timer.Task;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.Gdx;
+import com.milne.mw.renders.RenderManager;
 
 public abstract class Character {
     protected Image image;
@@ -23,12 +24,16 @@ public abstract class Character {
     private int speed;
     private Texture walk1Texture;
     private Texture walk2Texture;
+    private Texture attack1Texture;
+    private Texture attack2Texture;
     private Stage stage;
     private MoveToAction moveAction;
     private boolean isMoving;
     private String type;
+    private boolean canAttack;
+    private float attackCooldown;
 
-    public Character(Texture texture, float x, float y, int hitboxWidth, int hitboxHeight, int lives, EntityType entityType, EntityManager entityManager, int speed, Texture walk1Texture, Texture walk2Texture, Stage stage, String type) {
+    public Character(Texture texture, float x, float y, int hitboxWidth, int hitboxHeight, int lives, EntityType entityType, EntityManager entityManager, int speed, Texture walk1Texture, Texture walk2Texture, Texture attack1Texture, Texture attack2Texture,  Stage stage, String type, float attackCooldown) {
         this.image = new Image(texture);
         this.image.setPosition(x, y);
         this.image.setSize(50, 50);
@@ -40,11 +45,14 @@ public abstract class Character {
         this.entityManager = entityManager;
         this.walk1Texture = walk1Texture;
         this.walk2Texture = walk2Texture;
+        this.attack1Texture = attack1Texture;
+        this.attack2Texture = attack2Texture;
         this.stage = stage;
         this.type = type;
         this.isMoving = false;
         this.speed = speed;
-
+        this.canAttack = true;
+        this.attackCooldown = attackCooldown;
         // Si el personaje puede moverse, iniciamos la animación y el movimiento
         if (speed != 0) {
             startMovement();
@@ -116,17 +124,37 @@ public abstract class Character {
         }, 0, 1);  // Cambiar texturas de caminar cada 0.5 segundos
     }
 
+    public void tryAttack() {
+        RenderManager renderManager = RenderManager.getInstance();
+        if (canAttack) {
+            attack();  // Las subclases implementan la lógica específica del ataque
+            renderManager.animateCharacterAttack(this,this.attackCooldown);
+            canAttack = false;  // Después de atacar, deshabilitamos el ataque temporalmente
+            startAttackCooldown();  // Iniciar el cooldown
+        }
+    }
+
+    // Método que controla el enfriamiento del ataque
+    private void startAttackCooldown() {
+        Timer.schedule(new Task() {
+            @Override
+            public void run() {
+                canAttack = true;  // Habilitar el ataque después del cooldown
+            }
+        }, attackCooldown);  // Ajustamos el enfriamiento con el valor de "attackCooldown"
+    }
+
+    // Las subclases deben implementar su propia lógica de ataque
     public abstract void attack();
 
     public abstract void checkForAttack();
-
     public void takeDamage(int damage) {
         this.lives -= damage;  // Reducir las vidas
         Gdx.app.log(this.getClass().getSimpleName(), "Hit! Remaining lives: " + lives);
 
         if (lives <= 0) {
             Gdx.app.log(this.getClass().getSimpleName(), "Died!");
-            image.remove();  // Eliminar del escenario
+            dispose();
             entityManager.getCharacters().removeValue(this, true);  // Remover de la lista de personajes
         }
     }
@@ -162,6 +190,14 @@ public abstract class Character {
 
     public int getSpeed() {
         return speed;
+    }
+
+    public Texture getAttack1Texture() {
+        return attack1Texture;
+    }
+
+    public Texture getAttack2Texture() {
+        return attack2Texture;
     }
 
     public void dispose() {

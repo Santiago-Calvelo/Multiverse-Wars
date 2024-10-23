@@ -119,7 +119,7 @@ public class EntityManager {
         int randomRow = random.nextInt(ROWS);
 
         Rectangle rowHitbox = placementHitboxes.get(randomRow);
-       // float spawnY = randomRow * CELL_HEIGHT + (CELL_HEIGHT / 2);
+        // float spawnY = randomRow * CELL_HEIGHT + (CELL_HEIGHT / 2);
         float spawnY = rowHitbox.y + (rowHitbox.height / 2);
         float spawnX = viewport.getWorldWidth();
         spawnEntity(EntityType.SKELETON,spawnX,spawnY);
@@ -130,17 +130,29 @@ public class EntityManager {
     }
 
     public void update(float delta) {
+
+        // Primera pasada: recorremos los personajes y los que están en rango los añadimos a la lista temporal
         for (Character character : characters) {
             character.checkForAttack();
         }
+
     }
+
 
     public void removeOffScreenCharacters() {
         Array<Character> charactersToRemove = new Array<>();  // Lista de personajes para eliminar
-
         for (int i = 0; i < characters.size; i++) {
             Character character = characters.get(i);
-            System.out.println("Posición X del personaje: " + character.getImage().getX());
+            if (character instanceof RangeListener) {
+                RangeListener rangedCharacter = (RangeListener) character;
+
+                for (Character enemy : characters) {
+                    // Si el enemigo es de tipo opuesto (evita atacar a compañeros)
+                    if (!character.getType().equalsIgnoreCase(enemy.getType())) {
+                        rangedCharacter.onEnemyInRange(enemy);  // Llamamos al listener
+                    }
+                }
+            }
 
             if (character.getImage().getX() < 0) {  // Si el personaje ha salido de la pantalla
                 System.out.println("Personaje fuera de la pantalla. Marcando para eliminar...");
@@ -159,8 +171,11 @@ public class EntityManager {
         }
     }
 
-
     public Array<Character> getCharacters() {
         return characters;
+    }
+
+    public float getCellWidth() {
+        return CELL_WIDTH;
     }
 }

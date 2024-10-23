@@ -1,11 +1,14 @@
 package com.milne.mw.renders;
 
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
+import com.badlogic.gdx.utils.Timer;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.Gdx;
@@ -15,16 +18,33 @@ import com.badlogic.gdx.math.Rectangle;
 import com.milne.mw.Global;
 
 public class RenderManager {
+    private static RenderManager instance;
     private SpriteBatch batch;
     private ShapeRenderer shapeRenderer;  // Añadimos ShapeRenderer para dibujar las zonas y hitboxes
     private Texture backgroundTexture;
     private Stage stage;
 
-    public RenderManager(Texture backgroundTexture, Stage stage) {
+    private RenderManager(Texture backgroundTexture, Stage stage) {
         this.backgroundTexture = backgroundTexture;
         this.stage = stage;
         this.batch = new SpriteBatch();
         this.shapeRenderer = new ShapeRenderer();  // Inicializamos ShapeRenderer
+    }
+
+    // Método para obtener la instancia única de RenderManager
+    public static RenderManager getInstance(Texture backgroundTexture, Stage stage) {
+        if (instance == null) {
+            instance = new RenderManager(backgroundTexture, stage);
+        }
+        return instance;
+    }
+
+    // Método para obtener la instancia existente de RenderManager
+    public static RenderManager getInstance() {
+        if (instance == null) {
+            throw new IllegalStateException("RenderManager no ha sido inicializado. Llama a getInstance() con parámetros primero.");
+        }
+        return instance;
     }
 
     public void render(Viewport viewport, boolean isPaused, EntityManager entityManager, float delta) {
@@ -81,6 +101,16 @@ public class RenderManager {
             character.getImage().draw(batch, 1);  // Dibujar cada personaje
         }
         batch.end();
+    }
+
+    public void animateCharacterAttack(Character character, float coolDown) {
+        character.getImage().setDrawable(new TextureRegionDrawable(new TextureRegion(character.getAttack1Texture())));
+        Timer.schedule(new Timer.Task() {
+            @Override
+            public void run() {
+                character.getImage().setDrawable(new TextureRegionDrawable(new TextureRegion(character.getAttack2Texture())));
+            }
+        }, coolDown);  // Cambiar a la siguiente textura después de 0.5 segundos
     }
 
     // Método para dibujar las hitboxes de los personajes (si está en modo debug)

@@ -6,67 +6,77 @@ import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Timer;
 import com.badlogic.gdx.utils.Timer.Task;
 
-public class RangedCharacter extends Character {
+public class RangedCharacter extends Character implements RangeListener {
 
     private Texture projectileTexture;
-    private Texture attack1Texture;
-    private Texture attack2Texture;
     private Stage stage;
-    private Task attackTask; // Guardar referencia al Task de ataque
+    private Character targetEnemy; // Referencia al enemigo objetivo
+    private int range;
 
-    public RangedCharacter(Texture texture, int hitboxWidth, int hitboxHeight,Texture attack1Texture, Texture attack2Texture, Texture projectileTexture, Texture walk1Texture, Texture walk2Texture, float x, float y, int lives, EntityType entityType, EntityManager entityManager, int speed, Stage stage, String type) {
-        super(texture, x, y, hitboxWidth, hitboxHeight, lives, entityType, entityManager, speed, walk1Texture, walk2Texture, stage, type);
-        this.attack1Texture = attack1Texture;
-        this.attack2Texture = attack2Texture;
+    public RangedCharacter(Texture texture, int hitboxWidth, int hitboxHeight, Texture attack1Texture, Texture attack2Texture, Texture projectileTexture, Texture walk1Texture, Texture walk2Texture, float x, float y, int lives, EntityType entityType, EntityManager entityManager, int speed, Stage stage, String type, int range, float attackCooldown) {
+        super(texture, x, y, hitboxWidth, hitboxHeight, lives, entityType, entityManager, speed, walk1Texture, walk2Texture, attack1Texture, attack2Texture, stage, type, attackCooldown);
         this.projectileTexture = projectileTexture;
         this.stage = stage;
-
-        // Iniciar el ciclo de ataque (atacar cada 1 segundo)
-        scheduleAttack();
-    }
-
-    // Programar el ataque cada cierto intervalo
-    private void scheduleAttack() {
-        attackTask = new Task() {
-            @Override
-            public void run() {
-                if (getLives() > 0) {  // Solo atacamos si seguimos vivos
-                    attack();
-                }
-            }
-        };
-        Timer.schedule(attackTask, 0, 1);  // Atacar cada 1 segundo
+        this.range = range;
     }
 
     // Implementación del ataque a distancia (disparar proyectil)
     @Override
     public void attack() {
-        // Crear el proyectil y añadirlo al stage
-        Projectile projectile = new Projectile(projectileTexture, image.getX() + image.getWidth(),
-            image.getY() + image.getHeight() / 2, stage, entityManager, this.getType());
-        stage.addActor(projectile.getImage());
+        if (targetEnemy == null || !isInRange(targetEnemy)) {
+            return;  // Si el enemigo está fuera de rango o no hay enemigo, no atacar
+        }
 
-        // Alternar las texturas de ataque para simular la animación
-        image.setDrawable(new TextureRegionDrawable(attack1Texture));
-        Timer.schedule(new Task() {
-            @Override
-            public void run() {
-                image.setDrawable(new TextureRegionDrawable(attack2Texture));
-            }
-        }, 0.5f);  // Cambiar la textura después de 0.5 segundos
+        // Crear el proyectil y añadirlo al stage
+        Projectile projectile = new Projectile(
+            projectileTexture,
+            image.getX() + image.getWidth(),
+            image.getY() + image.getHeight() / 2,
+            stage,
+            entityManager,
+            this.getType()
+        );
+        stage.addActor(projectile.getImage());
     }
 
     @Override
     public void dispose() {
-        // Cancelar el ciclo de ataque antes de eliminar el personaje
-        if (attackTask != null) {
-            attackTask.cancel();  // Detener el Task de ataque
-        }
-        super.dispose();  // Llamamos al dispose de la clase padre para eliminar la imagen y demás
+        super.dispose();  // Llamamos al dispose de la clase padre
     }
 
     @Override
     public void checkForAttack() {
-        // Lógica de chequeo de ataque (vacía en este caso)
+        if (targetEnemy != null && (targetEnemy.getLives() <= 0 || !isInRange(targetEnemy))) {
+            targetEnemy = null;
+        }
+
+        // Continuar atacando si hay un enemigo en rango y puede atacar
+        if (targetEnemy != null) {
+            tryAttack();  // Usa la lógica del padre para manejar el ataque y cooldown
+        }
+    }
+
+    // Implementación del listener para detectar enemigos en rango
+    @Override
+    public void onEnemyInRange(Character enemy) {
+        if (enemy != this && isInSameRow(enemy) && isInRange(enemy)) {
+            targetEnemy = enemy;  // Establecer al enemigo como objetivo
+            tryAttack();  // Usar la lógica de ataque directamente desde el padre
+        }
+    }
+
+    // Verifica si el enemigo está en la misma fila
+    private boolean isInSameRow(Character enemy) {
+        return this.getImage().getY() == enemy.getImage().getY();  // Ajustar la tolerancia si es necesario
+    }
+
+    // Verifica si el enemigo está dentro de 3 casillas de distancia
+    private boolean isInRange(Character enemy) {
+        float dx = enemy.getImage().getX() - this.getImage().getX();
+        float dy = enemy.getImage().getY() - this.getImage().getY();
+        float distance = (float) Math.sqrt(dx * dx + dy * dy);
+        float attackRange = this.range * entityManager.getCellWidth();
+        return distance <= attackRange;
     }
 }
+

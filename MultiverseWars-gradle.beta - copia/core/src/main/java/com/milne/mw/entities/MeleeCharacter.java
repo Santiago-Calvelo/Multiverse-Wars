@@ -12,10 +12,8 @@ public class MeleeCharacter extends Character {
     private Texture attack1Texture;
     private Texture attack2Texture;
 
-    public MeleeCharacter(Texture texture, int hitboxWidth, int hitboxHeight,Texture attack1Texture, Texture attack2Texture, Texture walk1Texture, Texture walk2Texture, float x, float y, int lives, EntityType entityType, EntityManager entityManager, int speed, Stage stage, String type) {
-        super(texture, x, y, hitboxWidth, hitboxHeight, lives, entityType, entityManager, speed, walk1Texture, walk2Texture, stage,type);
-        this.attack1Texture = attack1Texture;
-        this.attack2Texture = attack2Texture;
+    public MeleeCharacter(Texture texture, int hitboxWidth, int hitboxHeight,Texture attack1Texture, Texture attack2Texture, Texture walk1Texture, Texture walk2Texture, float x, float y, int lives, EntityType entityType, EntityManager entityManager, int speed, Stage stage, String type, float attackCooldown) {
+        super(texture, x, y, hitboxWidth, hitboxHeight, lives, entityType, entityManager, speed, walk1Texture, walk2Texture, attack1Texture, attack2Texture, stage,type, attackCooldown);
     }
 
     // Implementación del ataque cuerpo a cuerpo

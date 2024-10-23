@@ -35,7 +35,7 @@ public class MapScreen implements Screen {
         this.stage = new Stage(viewport);
         Gdx.input.setInputProcessor(stage);
 
-        renderManager = new RenderManager(map, stage);
+        RenderManager.getInstance(map, stage);
         entityManager = new EntityManager(stage, viewport);  // Pasamos viewport a EntityManager para los cálculos
         batch = new SpriteBatch();
         font = new BitmapFont();
@@ -43,7 +43,7 @@ public class MapScreen implements Screen {
         addEntityCardsToPanel();
 
         // Iniciar el spawner de enemigos
-        entityManager.startEnemySpawner(1f);
+        entityManager.startEnemySpawner(20f);
     }
 
     // Método que añade las cartas al panel basado en el Enum EntityType
@@ -110,6 +110,7 @@ public class MapScreen implements Screen {
 
     @Override
     public void render(float delta) {
+        RenderManager renderManager = RenderManager.getInstance();
         renderManager.render(viewport, isPaused, entityManager, delta);  // Pasar el entityManager para renderizar las entidades
         batch.begin();
         font.draw(batch, "Personajes restantes: " + entityManager.getCharacters().size, 10, 20);

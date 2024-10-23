@@ -5,19 +5,19 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 
 public enum EntityType {
-    PEASHOOTER("lanza guisantes carta.png", "guisante.png", "guisante3.png", "guisante2.png", "proyectil.png", 30, "tower", 50, 50, 0) {
+    PEASHOOTER("lanza guisantes carta.png", "guisante.png", "guisante3.png", "guisante2.png", "proyectil.png", 30, "tower", 50, 50, 0,4,1f) {
         @Override
         public Character getEntity(float x, float y, Stage stage, EntityManager entityManager) {
             // Peashooter no se mueve, pasamos canMove=false
-            return new RangedCharacter(this.getTexture(), this.getHitboxWidth(), this.getHitboxHeight(), this.getAttack1Texture(), this.getAttack2Texture(), this.getProjectileTexture(), null, null, x, y, this.getLives(), this, entityManager, this.getSpeed(), stage, this.getType());
+            return new RangedCharacter(this.getTexture(), this.getHitboxWidth(), this.getHitboxHeight(), this.getAttack1Texture(), this.getAttack2Texture(), this.getProjectileTexture(), null, null, x, y, this.getLives(), this, entityManager, this.getSpeed(), stage, this.getType(), this.getRange(), this.getAttackCooldown());
         }
     },
 
-    SKELETON("skeleton.png","skeleton.png", "skeleton paso.png", "skeleton.png", "skeleton2.png", "skeleton3.png", "rayo.png", 50, "enemy", 50, 50, 100) {
+    SKELETON("skeleton.png","skeleton.png", "skeleton paso.png", "skeleton.png", "skeleton2.png", "skeleton3.png", "rayo.png", 50, "enemy", 50, 50, 100,1f) {
         @Override
         public Character getEntity(float x, float y, Stage stage, EntityManager entityManager) {
             // Skeleton se mueve, pasamos canMove=true
-            return new MeleeCharacter(this.getTexture(), this.getHitboxWidth(), this.getHitboxHeight(), this.getAttack1Texture(), this.getAttack2Texture(), this.getWalk1Texture(), this.getWalk2Texture(), x, y, this.getLives(), this, entityManager, this.getSpeed(), stage, this.getType());
+            return new MeleeCharacter(this.getTexture(), this.getHitboxWidth(), this.getHitboxHeight(), this.getAttack1Texture(), this.getAttack2Texture(), this.getWalk1Texture(), this.getWalk2Texture(), x, y, this.getLives(), this, entityManager, this.getSpeed(), stage, this.getType(), this.getAttackCooldown());
         }
     };
 
@@ -33,9 +33,11 @@ public enum EntityType {
     private int hitboxWidth;
     private int hitboxHeight;
     private int speed;
+    private int range;
+    private float attackCooldown;
 
     // Constructor para personajes a distancia sin movimiento
-    EntityType(String cardTexturePath, String texturePath, String attack1Path, String attack2Path, String projectilePath, int lives, String type, int hitboxWidth, int hitboxHeight, int speed) {
+    EntityType(String cardTexturePath, String texturePath, String attack1Path, String attack2Path, String projectilePath, int lives, String type, int hitboxWidth, int hitboxHeight, int speed, int range, float attackCooldown) {
         if (cardTexturePath != null) {
             this.cardTexturePath = new Texture(Gdx.files.internal(cardTexturePath));
         }
@@ -50,10 +52,12 @@ public enum EntityType {
         this.hitboxWidth = hitboxWidth;
         this.hitboxHeight = hitboxHeight;
         this.speed = speed;
+        this.range = range;
+        this.attackCooldown = attackCooldown;
     }
 
     // Constructor para personajes cuerpo a cuerpo con movimiento
-    EntityType(String cardTexturePath,String texturePath, String walk1Path, String walk2Path, String attack1Path, String attack2Path, String projectilePath, int lives, String type, int hitboxWidth, int hitboxHeight, int speed) {
+    EntityType(String cardTexturePath,String texturePath, String walk1Path, String walk2Path, String attack1Path, String attack2Path, String projectilePath, int lives, String type, int hitboxWidth, int hitboxHeight, int speed, float attackCooldown) {
         if (cardTexturePath != null) {
             this.cardTexturePath = new Texture(Gdx.files.internal(cardTexturePath));
         }
@@ -68,6 +72,7 @@ public enum EntityType {
         this.hitboxWidth = hitboxWidth;
         this.hitboxHeight = hitboxHeight;
         this.speed = speed;
+        this.attackCooldown = attackCooldown;
     }
 
     public abstract Character getEntity(float x, float y, Stage stage, EntityManager entityManager);
@@ -118,5 +123,13 @@ public enum EntityType {
 
     public int getSpeed() {
         return speed;
+    }
+
+    public int getRange() {
+        return range;
+    }
+
+    public float getAttackCooldown() {
+        return attackCooldown;
     }
 }
