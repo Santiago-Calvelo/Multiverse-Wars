@@ -126,10 +126,12 @@ public abstract class Character {
 
     public void tryAttack() {
         RenderManager renderManager = RenderManager.getInstance();
+
         if (canAttack) {
             attack();  // Las subclases implementan la lógica específica del ataque
             renderManager.animateCharacterAttack(this,this.attackCooldown);
             canAttack = false;  // Después de atacar, deshabilitamos el ataque temporalmente
+
             startAttackCooldown();  // Iniciar el cooldown
         }
     }
@@ -148,6 +150,7 @@ public abstract class Character {
     public abstract void attack();
 
     public abstract void checkForAttack();
+
     public void takeDamage(int damage) {
         this.lives -= damage;  // Reducir las vidas
         Gdx.app.log(this.getClass().getSimpleName(), "Hit! Remaining lives: " + lives);

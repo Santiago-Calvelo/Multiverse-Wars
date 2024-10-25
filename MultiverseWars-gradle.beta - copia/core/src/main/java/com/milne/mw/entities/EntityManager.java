@@ -130,7 +130,6 @@ public class EntityManager {
     }
 
     public void update(float delta) {
-
         // Primera pasada: recorremos los personajes y los que están en rango los añadimos a la lista temporal
         for (Character character : characters) {
             character.checkForAttack();
@@ -141,20 +140,24 @@ public class EntityManager {
 
     public void removeOffScreenCharacters() {
         Array<Character> charactersToRemove = new Array<>();  // Lista de personajes para eliminar
+
         for (int i = 0; i < characters.size; i++) {
             Character character = characters.get(i);
-            if (character instanceof RangeListener) {
+
+            // Si es un personaje con rango, verifica si sigue activo antes de llamar al listener
+            if (character instanceof RangeListener && character.getLives() > 0) {
                 RangeListener rangedCharacter = (RangeListener) character;
 
                 for (Character enemy : characters) {
-                    // Si el enemigo es de tipo opuesto (evita atacar a compañeros)
-                    if (!character.getType().equalsIgnoreCase(enemy.getType())) {
-                        rangedCharacter.onEnemyInRange(enemy);  // Llamamos al listener
+                    // Solo llama al listener si el enemigo es de tipo opuesto y el personaje está activo
+                    if (!character.getType().equalsIgnoreCase(enemy.getType()) && !charactersToRemove.contains(enemy, true)) {
+                        rangedCharacter.onEnemyInRange(enemy);  // Llamar al listener de rango
                     }
                 }
             }
 
-            if (character.getImage().getX() < 0) {  // Si el personaje ha salido de la pantalla
+            // Verifica si el personaje ha salido de la pantalla para marcarlo como eliminado
+            if (character.getImage().getX() < 0) {
                 System.out.println("Personaje fuera de la pantalla. Marcando para eliminar...");
                 charactersToRemove.add(character);  // Añadir a la lista de personajes a eliminar
             }
@@ -170,6 +173,7 @@ public class EntityManager {
             }
         }
     }
+
 
     public Array<Character> getCharacters() {
         return characters;

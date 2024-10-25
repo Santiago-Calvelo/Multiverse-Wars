@@ -5,7 +5,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 
 public enum EntityType {
-    PEASHOOTER("lanza guisantes carta.png", "guisante.png", "guisante3.png", "guisante2.png", "proyectil.png", 30, "tower", 50, 50, 0,4,1f) {
+    PEASHOOTER("lanza guisantes carta.png", "guisante.png", "guisante3.png", "guisante2.png", "proyectil.png", 30, "tower", 50, 50, 0,5,1f) {
         @Override
         public Character getEntity(float x, float y, Stage stage, EntityManager entityManager) {
             // Peashooter no se mueve, pasamos canMove=false
@@ -13,7 +13,7 @@ public enum EntityType {
         }
     },
 
-    SKELETON("skeleton.png","skeleton.png", "skeleton paso.png", "skeleton.png", "skeleton2.png", "skeleton3.png", "rayo.png", 50, "enemy", 50, 50, 100,1f) {
+    SKELETON("skeleton.png","skeleton.png", "skeleton paso.png", "skeleton.png", "skeleton2.png", "skeleton3.png", "rayo.png", 5, "enemy", 50, 50, 100,1f) {
         @Override
         public Character getEntity(float x, float y, Stage stage, EntityManager entityManager) {
             // Skeleton se mueve, pasamos canMove=true

@@ -103,14 +103,14 @@ public class RenderManager {
         batch.end();
     }
 
-    public void animateCharacterAttack(Character character, float coolDown) {
+    public void animateCharacterAttack(Character character, float cooldown) {
         character.getImage().setDrawable(new TextureRegionDrawable(new TextureRegion(character.getAttack1Texture())));
         Timer.schedule(new Timer.Task() {
             @Override
             public void run() {
                 character.getImage().setDrawable(new TextureRegionDrawable(new TextureRegion(character.getAttack2Texture())));
             }
-        }, coolDown);  // Cambiar a la siguiente textura después de 0.5 segundos
+        }, cooldown);  // Cambiar a la siguiente textura después de 0.5 segundos
     }
 
     // Método para dibujar las hitboxes de los personajes (si está en modo debug)

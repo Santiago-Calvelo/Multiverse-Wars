@@ -27,6 +27,7 @@ public class RangedCharacter extends Character implements RangeListener {
             return;  // Si el enemigo está fuera de rango o no hay enemigo, no atacar
         }
 
+        System.out.println("Disparando proyectil");
         // Crear el proyectil y añadirlo al stage
         Projectile projectile = new Projectile(
             projectileTexture,
@@ -46,14 +47,6 @@ public class RangedCharacter extends Character implements RangeListener {
 
     @Override
     public void checkForAttack() {
-        if (targetEnemy != null && (targetEnemy.getLives() <= 0 || !isInRange(targetEnemy))) {
-            targetEnemy = null;
-        }
-
-        // Continuar atacando si hay un enemigo en rango y puede atacar
-        if (targetEnemy != null) {
-            tryAttack();  // Usa la lógica del padre para manejar el ataque y cooldown
-        }
     }
 
     // Implementación del listener para detectar enemigos en rango

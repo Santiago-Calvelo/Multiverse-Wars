@@ -12,10 +12,11 @@ import com.milne.mw.entities.EntityManager;
 public class Projectile {
     private Image image;
     private Rectangle hitbox;
-    private int damage = 5;
+    private int damage = 1;
     private Stage stage;
     private EntityManager entityManager;
     private String type;
+    private Timer.Task collisionTask;  // Referencia al Timer.Task específico para la colisión
 
     public Projectile(Texture texture, float x, float y, Stage stage, EntityManager entityManager, String type) {
         this.image = new Image(texture);
@@ -23,7 +24,7 @@ public class Projectile {
         this.image.setPosition(x, y);
         this.stage = stage;
         this.hitbox = new Rectangle(x, y, 20, 20);
-        this.entityManager = entityManager;  // Guardamos el EntityManager
+        this.entityManager = entityManager;
         this.type = type;
         moveAction();
     }
@@ -32,9 +33,10 @@ public class Projectile {
         MoveToAction moveAction = new MoveToAction();
         moveAction.setPosition(stage.getWidth(), image.getY());  // Mover el proyectil fuera del escenario
         moveAction.setDuration(2);  // El tiempo que toma el proyectil en recorrer la pantalla
-        image.addAction(moveAction);  // Añadimos la acción de movimiento al proyectil
+        image.addAction(moveAction);
 
-        Timer.schedule(new Timer.Task() {
+        // Programar el Timer.Task para la colisión y asignarlo a collisionTask
+        collisionTask = Timer.schedule(new Timer.Task() {
             @Override
             public void run() {
                 updateHitbox();
@@ -43,20 +45,24 @@ public class Projectile {
         }, 0, 0.1f);  // Revisamos las colisiones cada 0.1 segundos
     }
 
-
     private void updateHitbox() {
         hitbox.setPosition(image.getX(), image.getY());
     }
 
-    // Cambiamos para usar EntityManager en lugar de MapScreen
     private void checkForCollision() {
         for (int i = 0; i < entityManager.getCharacters().size; i++) {
             Character character = entityManager.getCharacters().get(i);
 
             if (hitbox.overlaps(character.getHitbox()) && !this.getType().equalsIgnoreCase(character.getType())) {
-                character.takeDamage(damage);  // Aquí llamamos al método general takeDamage()
+                character.takeDamage(damage);
                 Gdx.app.log("Projectile", "Character hit! Damage dealt: " + damage);
-                image.remove();  // Eliminamos el proyectil después de la colisión
+                image.remove();  // Eliminar el proyectil visualmente
+                stage.getActors().removeValue(image, true);
+
+                // Cancelar el Timer.Task específico para la colisión
+                if (collisionTask != null) {
+                    collisionTask.cancel();
+                }
                 break;
             }
         }
@@ -70,3 +76,4 @@ public class Projectile {
         return type;
     }
 }
+
