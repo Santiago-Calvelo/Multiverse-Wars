@@ -11,6 +11,7 @@ public class MeleeCharacter extends Character {
 
     private Texture attack1Texture;
     private Texture attack2Texture;
+    private Character targetEnemy;
 
     public MeleeCharacter(Texture texture, int hitboxWidth, int hitboxHeight,Texture attack1Texture, Texture attack2Texture, Texture walk1Texture, Texture walk2Texture, float x, float y, int lives, EntityType entityType, EntityManager entityManager, int speed, Stage stage, String type, float attackCooldown) {
         super(texture, x, y, hitboxWidth, hitboxHeight, lives, entityType, entityManager, speed, walk1Texture, walk2Texture, attack1Texture, attack2Texture, stage,type, attackCooldown);
@@ -19,15 +20,12 @@ public class MeleeCharacter extends Character {
     // Implementación del ataque cuerpo a cuerpo
     @Override
     public void attack() {
-        // Cambiar la textura para reflejar el ataque
-        image.setDrawable(new TextureRegionDrawable(new TextureRegion(attack1Texture)));
-        Timer.schedule(new Timer.Task() {
-            @Override
-            public void run() {
-                image.setDrawable(new TextureRegionDrawable(new TextureRegion(attack2Texture)));
-            }
-        }, 0.5f);
+        if (targetEnemy != null) {
+            targetEnemy.takeDamage(1);  // Aplica daño solo si `targetEnemy` está asignado
+            targetEnemy = null;  // Restablece `targetEnemy` después del ataque
+        }
     }
+
 
     @Override
     public void checkForAttack() {
@@ -38,15 +36,11 @@ public class MeleeCharacter extends Character {
         // Usamos un do-while para recorrer los personajes
         do {
             Character character = entityManager.getCharacters().get(i);
-
-            // Si colisionamos con un enemigo y no es el propio personaje
             if (this != character && this.getHitbox().overlaps(character.getHitbox()) && !character.getType().equalsIgnoreCase(this.getType())) {
                 collisionDetected = true;
-
-                character.takeDamage(5);  // Aquí llamamos al método general takeDamage()
-                Gdx.app.log("Skeleton", "Character hit! Damage dealt: " + 5);
-
-                // Si hay una colisión, detenemos el movimiento
+                targetEnemy = character;
+                System.out.println(targetEnemy);
+                tryAttack();
                 stopMovementAndAttack();  // Detenemos y atacamos
             }
             i++;
