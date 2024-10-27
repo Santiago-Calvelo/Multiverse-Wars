@@ -150,7 +150,7 @@ public class EntityManager {
 
                 for (Character enemy : characters) {
                     // Solo llama al listener si el enemigo es de tipo opuesto y el personaje está activo
-                    if (!character.getType().equalsIgnoreCase(enemy.getType()) && !charactersToRemove.contains(enemy, true)) {
+                    if (!character.getType().equalsIgnoreCase(enemy.getType())) {
                         rangedCharacter.onEnemyInRange(enemy);  // Llamar al listener de rango
                     }
                 }
