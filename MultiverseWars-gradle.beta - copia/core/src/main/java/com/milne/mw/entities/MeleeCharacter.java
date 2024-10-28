@@ -8,9 +8,6 @@ import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Timer;
 
 public class MeleeCharacter extends Character {
-
-    private Texture attack1Texture;
-    private Texture attack2Texture;
     private Character targetEnemy;
 
     public MeleeCharacter(Texture texture, int hitboxWidth, int hitboxHeight,Texture attack1Texture, Texture attack2Texture, Texture walk1Texture, Texture walk2Texture, float x, float y, int lives, EntityType entityType, EntityManager entityManager, int speed, Stage stage, String type, float attackCooldown) {
@@ -21,7 +18,7 @@ public class MeleeCharacter extends Character {
     @Override
     public void attack() {
         if (targetEnemy != null) {
-            targetEnemy.takeDamage(1);  // Aplica daño solo si `targetEnemy` está asignado
+            targetEnemy.takeDamage(15);  // Aplica daño solo si `targetEnemy` está asignado
             targetEnemy = null;  // Restablece `targetEnemy` después del ataque
         }
     }
@@ -39,8 +36,6 @@ public class MeleeCharacter extends Character {
             if (this != character && this.getHitbox().overlaps(character.getHitbox()) && !character.getType().equalsIgnoreCase(this.getType())) {
                 collisionDetected = true;
                 targetEnemy = character;
-                System.out.println(targetEnemy);
-                tryAttack();
                 stopMovementAndAttack();  // Detenemos y atacamos
             }
             i++;

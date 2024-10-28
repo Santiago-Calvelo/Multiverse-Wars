@@ -98,7 +98,7 @@ public abstract class Character {
             image.clearActions();  // Detener todas las acciones
             isMoving = false;
         }
-        attack();  // Iniciar el ataque
+        tryAttack(); // Iniciar el ataque
     }
 
     // Método para reanudar el movimiento si no hay colisiones
