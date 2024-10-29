@@ -3,26 +3,29 @@ package com.milne.mw.entities;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.Timer;
+
 import com.badlogic.gdx.utils.viewport.Viewport;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 public class EntityManager {
     private Stage stage;
     private Array<Character> characters;
     private Viewport viewport;
-    private List<Rectangle> placementHitboxes;  // Lista de hitboxes para los puntos de colocación
+    private List<Rectangle> placementHitboxes;
     private boolean[] isOccupied;
     private final float INITIAL_X = 33;
     private final float INITIAL_Y = 42;
     private final float CELL_WIDTH = 62;
     private final float CELL_HEIGHT = 79;
+    private final float ZONE_WIDTH = 100;
     private final int COLS = 10;
     private final int ROWS = 5;
-    private final float HITBOX_SIZE = 55;  // Tamaño de las hitboxes de colocación
+    private final float HITBOX_SIZE = 55;
+    private float spawnInterval;
+    private float spawnAccumulator;  // Acumulador para controlar el spawn de enemigos
+    private boolean isPaused = false;
+    private HashMap<Integer, Array<RangedCharacter>> zoneMap;
 
     public EntityManager(Stage stage, Viewport viewport) {
         this.stage = stage;
@@ -30,6 +33,7 @@ public class EntityManager {
         characters = new Array<>();
         this.placementHitboxes = new ArrayList<>();
         initPlacementPoints();
+        this.zoneMap = new HashMap<>();
     }
 
     // Inicializar los puntos de colocación y sus hitboxes
@@ -41,59 +45,51 @@ public class EntityManager {
                 float centerX = INITIAL_X + i * CELL_WIDTH;
                 float centerY = INITIAL_Y + j * CELL_HEIGHT;
 
-                // Crear una hitbox alrededor del punto central
                 Rectangle hitbox = new Rectangle(
-                    centerX - HITBOX_SIZE / 2,  // La esquina inferior izquierda de la hitbox
+                    centerX - HITBOX_SIZE / 2,
                     centerY - HITBOX_SIZE / 2,
-                    HITBOX_SIZE,  // Ancho de la hitbox
-                    HITBOX_SIZE); // Alto de la hitbox
+                    HITBOX_SIZE,
+                    HITBOX_SIZE
+                );
 
-                placementHitboxes.add(hitbox);  // Guardamos la hitbox
+                placementHitboxes.add(hitbox);
             }
         }
     }
 
-    // Método que maneja la colocación de entidades en el mapa
+    // Método para colocar una entidad en el mapa
     public void handleEntityPlacement(EntityType entityType, float x, float y, float cardWidth, float cardHeight) {
-        boolean placed = false;  // Para saber si la entidad fue colocada
+        boolean placed = false;
         int i = 0;
-
-        // Creamos una hitbox representando toda la carta (área de la carta)
         Rectangle cardArea = new Rectangle(x, y, cardWidth, cardHeight);
 
-        // Hacemos un do-while para recorrer todos los puntos hasta que se coloque la entidad o se terminen los puntos
         do {
             Rectangle hitbox = placementHitboxes.get(i);
-            // Verificamos si la hitbox de colocación se solapa con la hitbox de la carta
             if (!isOccupied[i] && hitbox.overlaps(cardArea)) {
-                // Obtener el centro del rectángulo para colocar la entidad centrada
                 float centerX = hitbox.x + hitbox.width / 2;
                 float centerY = hitbox.y + hitbox.height / 2;
-
-                // Colocar la entidad en ese punto
                 spawnEntity(entityType, centerX, centerY);
-                isOccupied[i] = true;  // Marcar el punto como ocupado
-                placed = true;  // Indicamos que la entidad fue colocada
+                isOccupied[i] = true;
+                placed = true;
             }
-
-            i++;  // Pasamos al siguiente punto
+            i++;
         } while (!placed && i < placementHitboxes.size());
 
-        // Si no se encontró un punto válido cercano
         if (!placed) {
             System.out.println("No se encontró un punto válido cerca de x = " + x + ", y = " + y);
         }
     }
 
     // Colocar la entidad, centrando la hitbox sobre el punto
-    public void spawnEntity(EntityType entityType, float x, float y) {;
-
-        // Ajustar las coordenadas para centrar la hitbox sobre el punto de colocación
+    public void spawnEntity(EntityType entityType, float x, float y) {
         float adjustedX = x - (float) entityType.getHitboxWidth() / 2;
         float adjustedY = y - (float) entityType.getHitboxHeight() / 2;
 
-        Character entity = entityType.getEntity(adjustedX,adjustedY,stage,this);
-        // Colocar el personaje centrado en el punto
+        Character entity = entityType.getEntity(adjustedX, adjustedY, stage, this);
+        if (entity instanceof RangedCharacter) {
+            assignCharacterToZone(entity);
+        }
+
         entity.getImage().setPosition(adjustedX, adjustedY);
         stage.addActor(entity.getImage());
         characters.add(entity);
@@ -104,58 +100,42 @@ public class EntityManager {
         return placementHitboxes;
     }
 
+    // Inicia el temporizador interno de spawn usando un acumulador
     public void startEnemySpawner(float spawnInterval) {
-        Timer.schedule(new Timer.Task() {
-            @Override
-            public void run() {
-                spawnRandomEnemy();
-            }
-        }, 3, spawnInterval);  // Spawnear enemigos regularmente
+        this.spawnInterval = spawnInterval;
+        this.spawnAccumulator = 0;  // Reiniciar acumulador de spawn
     }
 
     private void spawnRandomEnemy() {
         Random random = new Random();
-
         int randomRow = random.nextInt(ROWS);
-
         Rectangle rowHitbox = placementHitboxes.get(randomRow);
-        // float spawnY = randomRow * CELL_HEIGHT + (CELL_HEIGHT / 2);
         float spawnY = rowHitbox.y + (rowHitbox.height / 2);
         float spawnX = viewport.getWorldWidth();
-        spawnEntity(EntityType.SKELETON,spawnX,spawnY);
-
-        // Debug para verificar la colocación
-        System.out.println("Fila aleatoria seleccionada: " + randomRow);
-        System.out.println("Coordenada Y calculada para spawn: " + spawnY);
+        spawnEntity(EntityType.SKELETON, spawnX, spawnY);
     }
 
+    // Actualización por frame
     public void update(float delta) {
-        // Primera pasada: recorremos los personajes y los que están en rango los añadimos a la lista temporal
-        for (Character character : characters) {
-            character.checkForAttack();
-        }
+        if (!isPaused) {
+            // Acumulador para el spawn de enemigos
+            spawnAccumulator += delta;
+            if (spawnAccumulator >= spawnInterval) {
+                spawnRandomEnemy();
+                spawnAccumulator = 0;  // Reiniciar el acumulador
+            }
 
+            for (Character character : characters) {
+                character.checkForAttack();
+            }
+        }
     }
 
 
     public void removeOffScreenCharacters() {
         Array<Character> charactersToRemove = new Array<>();  // Lista de personajes para eliminar
 
-        for (int i = 0; i < characters.size; i++) {
-            Character character = characters.get(i);
-
-            // Si es un personaje con rango, verifica si sigue activo antes de llamar al listener
-            if (character instanceof RangeListener && character.getLives() > 0) {
-                RangeListener rangedCharacter = (RangeListener) character;
-
-                for (Character enemy : characters) {
-                    // Solo llama al listener si el enemigo es de tipo opuesto y el personaje está activo
-                    if (!character.getType().equalsIgnoreCase(enemy.getType())) {
-                        rangedCharacter.onEnemyInRange(enemy);  // Llamar al listener de rango
-                    }
-                }
-            }
-
+        for (Character character : characters) {
             // Verifica si el personaje ha salido de la pantalla para marcarlo como eliminado
             if (character.getImage().getX() < 0) {
                 System.out.println("Personaje fuera de la pantalla. Marcando para eliminar...");
@@ -164,23 +144,51 @@ public class EntityManager {
         }
 
         // Eliminar los personajes fuera de pantalla de manera controlada
-        if (!charactersToRemove.isEmpty()) {
-            for (Character character : charactersToRemove) {
-                character.getImage().remove();  // Eliminar del stage
-                stage.getActors().removeValue(character.getImage(), true);  // Asegurarnos de removerlo del stage
-                characters.removeValue(character, true);  // Remover de la lista de personajes
-                character.dispose();  // Liberar los recursos del personaje
+        for (Character character : charactersToRemove) {
+            character.getImage().remove();  // Eliminar del stage
+            stage.getActors().removeValue(character.getImage(), true);  // Asegurarnos de removerlo del stage
+            characters.removeValue(character, true);  // Remover de la lista de personajes
+            character.dispose();  // Liberar los recursos del personaje
+        }
+    }
+
+    // Asignar personajes a zonas
+    public void assignCharacterToZone(RangedCharacter character) {
+        int zone = (int) (character.getX() / ZONE_WIDTH);  // Calcular zona en base a la posición X
+        zoneMap.putIfAbsent(zone, new Array<>());
+        zoneMap.get(zone).add(character);
+    }
+
+    // Detectar entrada de enemigos en la zona de rango de RangedCharacters
+    public void notifyEnemiesInZone(Character enemy) {
+        int enemyZone = (int) (enemy.getX() / ZONE_WIDTH);  // Obtener zona del enemigo
+        Array<RangedCharacter> charactersInZone = zoneMap.get(enemyZone);
+
+        if (charactersInZone != null) {
+            for (RangedCharacter rangedCharacter : charactersInZone) {
+                rangedCharacter.onEnemyInRange(enemy);  // Notificar al personaje
             }
         }
     }
 
+    // Método para actualizar la posición de los enemigos y notificar a los RangedCharacters si cambian de zona
+    public void updateEnemiesPosition(Character enemy) {
+        // Lógica para actualizar posición y, si entra en una nueva zona, notificar
+        notifyEnemiesInZone(enemy);
+    }
+
+
+    // Método para pausar el juego
     public void pause() {
+        isPaused = true;
         for (Character character : characters) {
             character.pause();
         }
     }
 
+    // Método para reanudar el juego
     public void resume() {
+        isPaused = false;
         for (Character character : characters) {
             character.resumeMovement();
         }
@@ -192,5 +200,15 @@ public class EntityManager {
 
     public float getCellWidth() {
         return CELL_WIDTH;
+    }
+
+    public void dispose() {
+        for (Character character : characters) {
+            character.getImage().remove();
+            stage.getActors().removeValue(character.getImage(), true);
+            characters.removeValue(character, true);
+            character.dispose();
+        }
+        characters.clear();
     }
 }

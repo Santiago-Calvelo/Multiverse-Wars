@@ -5,7 +5,6 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
@@ -26,13 +25,8 @@ public class MapScreen implements Screen {
     private Viewport viewport;
     private RenderManager renderManager;
     private EntityManager entityManager;
-    private SpriteBatch batch;
     private BitmapFont font;
-    private TextButton resumeButton;
-    private TextButton mainMenuButton;
-    private Image pauseBackground;
     private PauseButton pauseButton;
-
 
     public MapScreen(Game game, Texture map) {
         this.game = game;
@@ -40,35 +34,29 @@ public class MapScreen implements Screen {
         this.stage = new Stage(viewport);
         Gdx.input.setInputProcessor(stage);
 
-        RenderManager.getInstance(map, stage);
-        entityManager = new EntityManager(stage, viewport);  // Pasamos viewport a EntityManager para los cálculos
-        pauseButton = new PauseButton(viewport,game,entityManager);
-        batch = new SpriteBatch();
+        RenderManager.resetInstance();
+        renderManager = RenderManager.getInstance(map, stage);
+        entityManager = new EntityManager(stage, viewport);
+        pauseButton = new PauseButton(viewport, stage, game, entityManager);
         font = new BitmapFont();
-        // Añadir todas las cartas de los EntityType dinámicamente al panel
-        addEntityCardsToPanel();
 
-        // Iniciar el spawner de enemigos
-        entityManager.startEnemySpawner(20f);
+        addEntityCardsToPanel();
+        entityManager.startEnemySpawner(5f);
     }
 
-    // Método que añade las cartas al panel basado en el Enum EntityType
     private void addEntityCardsToPanel() {
-        float xPos = 105;  // Posición inicial X para las cartas
-        float yPos = viewport.getWorldHeight() - 85;  // Posición en el panel (Y)
+        float xPos = 105;
+        float yPos = viewport.getWorldHeight() - 85;
 
         for (EntityType entityType : EntityType.values()) {
-            // Verificamos si la entidad tiene una carta antes de crear la imagen
             if (entityType.getCardTexture() != null) {
-                // Crear una instancia única para cada Image y listener
                 final Image cardImage = new Image(entityType.getCardTexture());
                 cardImage.setSize(60, 80);
                 cardImage.setPosition(xPos, yPos);
 
-                // Listener para manejar arrastrar y soltar
                 cardImage.addListener(new InputListener() {
                     boolean playerSelected = false;
-                    final float originalX = cardImage.getX();  // Guardamos la posición original
+                    final float originalX = cardImage.getX();
                     final float originalY = cardImage.getY();
 
                     @Override
@@ -87,27 +75,20 @@ public class MapScreen implements Screen {
                     @Override
                     public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
                         if (playerSelected) {
-                            // Obtener las coordenadas donde se suelta la carta
                             float cardX = cardImage.getX();
                             float cardY = cardImage.getY();
-
-                            // Delegamos la lógica de colocación al EntityManager, pasando las coordenadas
                             entityManager.handleEntityPlacement(entityType, cardX, cardY, cardImage.getWidth(), cardImage.getHeight());
-
-                            // Volver a colocar la carta en su posición original
                             cardImage.setPosition(originalX, originalY);
                             playerSelected = false;
                         }
                     }
                 });
 
-                stage.addActor(cardImage);  // Añadir la carta al panel
-                xPos += 70;  // Incrementar la posición X para la siguiente carta
+                stage.addActor(cardImage);
+                xPos += 70;
             }
         }
     }
-
-
 
     @Override
     public void show() {
@@ -122,55 +103,47 @@ public class MapScreen implements Screen {
             Vector2 worldTouch = viewport.unproject(new Vector2(touchX, touchY));
             pauseButton.handleInput(worldTouch.x, worldTouch.y);
         }
-
-        RenderManager renderManager = RenderManager.getInstance();
-        renderManager.render(viewport, pauseButton.getIsPaused(), entityManager, delta, pauseButton);  // Pasar el entityManager para renderizar las entidades
-        batch.begin();
-        font.draw(batch, "Personajes restantes: " + entityManager.getCharacters().size, 10, 20);
-        batch.end();
-        entityManager.removeOffScreenCharacters();
+        renderManager.render(viewport, pauseButton.getIsPaused(), entityManager, delta, pauseButton);
+        entityManager.checkRangeListeners();
+        //entityManager.removeOffScreenCharacters();
     }
 
     @Override
     public void resize(int width, int height) {
         viewport.update(width, height, true);
-        stage.getViewport().update(width, height, true);
     }
 
     @Override
-    public void pause() {}
+    public void pause() {
+
+    }
 
     @Override
-    public void resume() {}
+    public void resume() {
+
+    }
 
     @Override
     public void hide() {
         MusicManager.stopMusic();
-        MusicManager.playMusic("bye bye.mp3");
+        stage.clear();
         dispose();
     }
 
     @Override
     public void dispose() {
-        stage.dispose();
-        renderManager.dispose();
-        batch.dispose();
-        font.dispose();  // Liberar la fuente
-
-        // No liberar texturas aquí si planeas usarlas después
-        for (EntityType entityType : EnumSet.allOf(EntityType.class)) {
-            if (entityType.getCardTexture() != null) {
-                entityType.getCardTexture().dispose();
-            }
-            entityType.getTexture().dispose();
-            if (entityType.getProjectileTexture() != null) {
-                entityType.getProjectileTexture().dispose();
-            }
+        if (entityManager != null) {
+            entityManager.dispose();
         }
+        if (renderManager != null) {
+            renderManager.dispose();
+            RenderManager.resetInstance();
+        }
+        stage.clear(); // Limpia todos los actores del stage
+        stage.dispose();
     }
 
 
     public void setDifficulty(int difficultyLevel) {
-
     }
 }

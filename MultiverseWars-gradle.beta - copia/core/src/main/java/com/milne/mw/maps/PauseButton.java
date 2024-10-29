@@ -1,6 +1,8 @@
 package com.milne.mw.maps;
 
 import com.badlogic.gdx.Game;
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -26,25 +28,28 @@ public class PauseButton {
     private EntityManager entityManager;
     private Image pauseBackground;
     public Circle pauseButtonHitbox;
+    private Stage stage;  // Referencia al Stage para añadir o eliminar actores
 
-    public PauseButton(Viewport viewport, Game game, EntityManager entityManager) {
+    public PauseButton(Viewport viewport, Stage stage, Game game, EntityManager entityManager) {
         this.viewport = viewport;
         this.game = game;
         this.entityManager = entityManager;
+        this.stage = stage;
 
-        pauseButtonHitbox = new Circle(viewport.getWorldWidth() - 35, viewport.getWorldHeight() - 35, 25);
+        pauseButtonHitbox = new Circle(viewport.getWorldWidth() - 257, viewport.getWorldHeight() - 40, 30);
         createPauseMenuButtons();
     }
 
     private void createPauseMenuButtons() {
         TextButton.TextButtonStyle textButtonStyle = new TextButton.TextButtonStyle();
-        textButtonStyle.font = new BitmapFont();  // Fuente por defecto
-        textButtonStyle.fontColor = Color.WHITE;  // Color de fuente
-        pauseBackground = new Image(new Texture("escena-pausa.png")); // Asegúrate de tener esta imagen en tu carpeta de assets
+        textButtonStyle.font = new BitmapFont();
+        textButtonStyle.fontColor = Color.WHITE;
+
+        pauseBackground = new Image(new Texture("escena-pausa.png"));
         pauseBackground.setSize(viewport.getWorldWidth(), viewport.getWorldHeight());
 
         resumeButton = new TextButton("Reanudar", textButtonStyle);
-        resumeButton.setPosition(viewport.getWorldWidth() / 2f - resumeButton.getWidth() / 2, this.viewport.getWorldHeight() / 2f + 90);
+        resumeButton.setPosition(viewport.getWorldWidth() / 2f - resumeButton.getWidth() / 2, viewport.getWorldHeight() / 2f + 90);
         resumeButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -53,12 +58,12 @@ public class PauseButton {
         });
 
         mainMenuButton = new TextButton("Volver al Menu", textButtonStyle);
-        mainMenuButton.setPosition(viewport.getWorldWidth() / 2f - mainMenuButton.getWidth() / 2, this.viewport.getWorldHeight() / 2f - 50);
+        mainMenuButton.setPosition(viewport.getWorldWidth() / 2f - mainMenuButton.getWidth() / 2, viewport.getWorldHeight() / 2f - 55);
         mainMenuButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 game.setScreen(new MainMenuScreen((MultiverseWars) game));
-                MusicManager.playMusic("bye bye.mp3"); // Reanudar la música principal al volver al menú
+                MusicManager.playMusic("bye bye.mp3");
             }
         });
     }
@@ -69,6 +74,12 @@ public class PauseButton {
         }
     }
 
+    public void checkForEscapeKey() {
+        if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
+            togglePause();  // Llama a togglePause si se presiona ESC
+        }
+    }
+
     public void togglePause() {
         isPaused = !isPaused;
 
@@ -76,32 +87,35 @@ public class PauseButton {
             Timer.instance().stop();
             entityManager.pause();
             MusicManager.pauseMusic();
+            addPauseMenuToStage();
         } else {
             Timer.instance().start();
             entityManager.resume();
             MusicManager.resumeMusic();
+            removePauseMenuFromStage();
         }
+    }
+
+    private void addPauseMenuToStage() {
+        stage.addActor(pauseBackground);
+        stage.addActor(resumeButton);
+        stage.addActor(mainMenuButton);
+    }
+
+    private void removePauseMenuFromStage() {
+        pauseBackground.remove();
+        resumeButton.remove();
+        mainMenuButton.remove();
     }
 
     public boolean getIsPaused() {
         return isPaused;
     }
 
-    public Image getPauseBackground() {
-        return pauseBackground;
-    }
-
-    public TextButton getMainMenuButton() {
-        return mainMenuButton;
-    }
-
-    public TextButton getResumeButton() {
-        return resumeButton;
-    }
-
     public void dispose() {
-        resumeButton.remove();
+        removePauseMenuFromStage();
         pauseBackground.remove();
+        resumeButton.remove();
         mainMenuButton.remove();
     }
 }
