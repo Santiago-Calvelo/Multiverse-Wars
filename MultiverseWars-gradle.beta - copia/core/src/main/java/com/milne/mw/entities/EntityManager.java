@@ -174,6 +174,17 @@ public class EntityManager {
         }
     }
 
+    public void pause() {
+        for (Character character : characters) {
+            character.pause();
+        }
+    }
+
+    public void resume() {
+        for (Character character : characters) {
+            character.resumeMovement();
+        }
+    }
 
     public Array<Character> getCharacters() {
         return characters;

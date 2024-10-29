@@ -210,5 +210,11 @@ public abstract class Character {
         image.remove();
     }
 
+    public void pause() {
+        if (isMoving) {
+            image.clearActions();  // Detener todas las acciones
+            isMoving = false;
+        }
+    }
 }
 

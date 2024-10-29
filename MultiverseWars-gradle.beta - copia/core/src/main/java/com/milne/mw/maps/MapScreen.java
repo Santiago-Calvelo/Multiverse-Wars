@@ -6,6 +6,7 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.utils.viewport.FitViewport;
@@ -25,14 +26,12 @@ public class MapScreen implements Screen {
     private Viewport viewport;
     private RenderManager renderManager;
     private EntityManager entityManager;
-    private boolean isPaused = false;
     private SpriteBatch batch;
     private BitmapFont font;
-    private TextButton pauseButton;
     private TextButton resumeButton;
     private TextButton mainMenuButton;
     private Image pauseBackground;
-
+    private PauseButton pauseButton;
 
 
     public MapScreen(Game game, Texture map) {
@@ -43,6 +42,7 @@ public class MapScreen implements Screen {
 
         RenderManager.getInstance(map, stage);
         entityManager = new EntityManager(stage, viewport);  // Pasamos viewport a EntityManager para los cálculos
+        pauseButton = new PauseButton(viewport,game,entityManager);
         batch = new SpriteBatch();
         font = new BitmapFont();
         // Añadir todas las cartas de los EntityType dinámicamente al panel
@@ -116,8 +116,15 @@ public class MapScreen implements Screen {
 
     @Override
     public void render(float delta) {
+        if (Gdx.input.justTouched()) {
+            float touchX = Gdx.input.getX();
+            float touchY = Gdx.input.getY();
+            Vector2 worldTouch = viewport.unproject(new Vector2(touchX, touchY));
+            pauseButton.handleInput(worldTouch.x, worldTouch.y);
+        }
+
         RenderManager renderManager = RenderManager.getInstance();
-        renderManager.render(viewport, isPaused, entityManager, delta);  // Pasar el entityManager para renderizar las entidades
+        renderManager.render(viewport, pauseButton.getIsPaused(), entityManager, delta, pauseButton);  // Pasar el entityManager para renderizar las entidades
         batch.begin();
         font.draw(batch, "Personajes restantes: " + entityManager.getCharacters().size, 10, 20);
         batch.end();

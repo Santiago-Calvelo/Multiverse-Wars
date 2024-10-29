@@ -16,6 +16,7 @@ import com.milne.mw.entities.EntityManager;
 import com.milne.mw.entities.Character;
 import com.badlogic.gdx.math.Rectangle;
 import com.milne.mw.Global;
+import com.milne.mw.maps.PauseButton;
 
 public class RenderManager {
     private static RenderManager instance;
@@ -47,45 +48,48 @@ public class RenderManager {
         return instance;
     }
 
-    public void render(Viewport viewport, boolean isPaused, EntityManager entityManager, float delta) {
+    public void render(Viewport viewport, boolean isPaused, EntityManager entityManager, float delta, PauseButton pauseButton) {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
         // Sincronizar la proyección del SpriteBatch con el viewport
         batch.setProjectionMatrix(viewport.getCamera().combined);
-        batch.begin();
+        stage.getBatch().begin();
 
         // Dibujamos el fondo
         if (backgroundTexture != null) {
-            batch.draw(backgroundTexture, 0, 0, viewport.getWorldWidth(), viewport.getWorldHeight());
+            stage.getBatch().draw(backgroundTexture, 0, 0, viewport.getWorldWidth(), viewport.getWorldHeight());
         }
 
-        batch.end();
-
-        // Dibujar todas las entidades
         drawEntities(entityManager);
 
-        // Dibujar las zonas de colocación de personajes (los círculos)
+        if (isPaused) {
+            // Dibujar fondo de pausa y botones de manera fija encima de las entidades
+            pauseButton.getPauseBackground().draw(stage.getBatch(), 1f);
+            pauseButton.getResumeButton().draw(stage.getBatch(), 1f);
+            pauseButton.getMainMenuButton().draw(stage.getBatch(), 1f);
+        }
+        stage.getBatch().end();
 
+        if (!isPaused) {
+            stage.act();
+            entityManager.update(delta);
+        }
+        stage.draw();
 
         // Si no está pausado, dibujar las hitboxes si está en modo debug
         if (!isPaused && Global.debugMode) {
             drawHitboxes(entityManager, viewport);
-            drawPlacementZones(viewport, entityManager);
+            drawPlacementZones(viewport, entityManager, pauseButton);
         }
-
-        entityManager.update(delta);
-
-        // Actualizar el stage
-        stage.act();
-        stage.draw();
     }
 
     // Método para dibujar las zonas de colocación (celdas con círculos)
-    private void drawPlacementZones(Viewport viewport, EntityManager entityManager) {
+    private void drawPlacementZones(Viewport viewport, EntityManager entityManager, PauseButton pauseButton) {
         shapeRenderer.setProjectionMatrix(viewport.getCamera().combined);
         shapeRenderer.begin(ShapeRenderer.ShapeType.Line);  // Dibujo de líneas para las hitboxes
         shapeRenderer.setColor(Color.GREEN);  // Color para las hitboxes
 
+        shapeRenderer.circle(pauseButton.pauseButtonHitbox.x, pauseButton.pauseButtonHitbox.y, pauseButton.pauseButtonHitbox.radius);
         for (Rectangle hitbox : entityManager.getPlacementHitboxes()) {
             shapeRenderer.rect(hitbox.x, hitbox.y, hitbox.width, hitbox.height);  // Dibujamos la hitbox
         }
@@ -96,11 +100,9 @@ public class RenderManager {
 
     // Método para dibujar todas las entidades
     private void drawEntities(EntityManager entityManager) {
-        batch.begin();
         for (Character character : entityManager.getCharacters()) {
-            character.getImage().draw(batch, 1);  // Dibujar cada personaje
+            character.getImage().draw(stage.getBatch(), 1);  // Dibujar cada personaje
         }
-        batch.end();
     }
 
     public void animateCharacterAttack(Character character, float cooldown) {
