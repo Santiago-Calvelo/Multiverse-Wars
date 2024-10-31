@@ -18,6 +18,7 @@ public class RenderManager {
     private ShapeRenderer shapeRenderer;
     private Stage stage;
     private Image backgroundImage;
+    private float walkAnimationTime;
     private float attackAnimationTime;
     private boolean isAnimatingAttack;
 
@@ -54,6 +55,8 @@ public class RenderManager {
         if (!isPaused) {
             stage.act(delta);
             entityManager.update(delta);
+            updateWalkAnimation(delta, entityManager);
+            updateAttackAnimation(delta, entityManager);
         }
         pauseButton.checkForEscapeKey();
         stage.draw();
@@ -62,9 +65,22 @@ public class RenderManager {
             drawHitboxes(entityManager, viewport);
             drawPlacementZones(viewport, entityManager, pauseButton);
         }
+    }
 
-        if (isAnimatingAttack) {
-            updateAttackAnimation(delta,entityManager);
+    private void updateWalkAnimation(float delta, EntityManager entityManager) {
+        walkAnimationTime += delta;
+
+        // Alterna la textura de caminata cada 0.5 segundos
+        if (walkAnimationTime >= 0.5f) {
+            for (Character character : entityManager.getCharacters()) {
+                TextureRegionDrawable currentDrawable = (TextureRegionDrawable) character.getImage().getDrawable();
+                TextureRegionDrawable nextDrawable = (currentDrawable.getRegion().getTexture() == character.getWalk1Texture())
+                    ? new TextureRegionDrawable(character.getWalk2Texture())
+                    : new TextureRegionDrawable(character.getWalk1Texture());
+
+                character.getImage().setDrawable(nextDrawable);
+            }
+            walkAnimationTime = 0;
         }
     }
 
@@ -75,6 +91,8 @@ public class RenderManager {
     }
 
     private void updateAttackAnimation(float delta, EntityManager entityManager) {
+        if (!isAnimatingAttack) return;
+
         attackAnimationTime += delta;
         if (attackAnimationTime >= 0.5f) {
             for (Character character : entityManager.getCharacters()) {

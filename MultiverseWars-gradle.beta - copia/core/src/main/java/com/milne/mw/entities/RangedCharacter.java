@@ -9,12 +9,12 @@ public class RangedCharacter extends Character implements RangeListener {
     private Character targetEnemy;
     private int range;
 
-    public RangedCharacter(Texture texture, int hitboxWidth, int hitboxHeight,
-                           Texture attack1Texture, Texture attack2Texture, Texture projectileTexture,
-                           Texture walk1Texture, Texture walk2Texture, float x, float y, int lives,
-                           EntityType entityType, EntityManager entityManager, int speed,
+    public RangedCharacter(Texture texture, int hitboxWidth, int hitboxHeight, Texture walk1Texture,
+                           Texture walk2Texture, Texture attack1Texture, Texture attack2Texture,
+                           Texture projectileTexture, float x, float y, int lives,
+                           int speed, EntityManager entityManager,
                            Stage stage, String type, int range, float attackCooldown) {
-        super(texture, x, y, hitboxWidth, hitboxHeight, lives, entityType, entityManager, speed,
+        super(texture, x, y, hitboxWidth, hitboxHeight, lives, entityManager, speed,
             walk1Texture, walk2Texture, attack1Texture, attack2Texture, stage, type, attackCooldown);
         this.projectileTexture = projectileTexture;
         this.range = range;
@@ -30,7 +30,8 @@ public class RangedCharacter extends Character implements RangeListener {
 
     @Override
     public void checkForAttack(Array<Character> characters) {
-        for (Character enemy : characters) {
+        for (int i = 0; i < characters.size; i++) {
+            Character enemy = characters.get(i);
             onEnemyInRange(enemy);
         }
     }

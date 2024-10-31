@@ -4,7 +4,6 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.actions.MoveToAction;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
-import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Array;
 import com.milne.mw.renders.RenderManager;
@@ -22,11 +21,10 @@ public abstract class Character {
     private MoveToAction moveAction;
     private boolean isMoving, canAttack;
     private float attackCooldown, cooldownElapsed;
-    private float animationElapsed;
     private String type;
 
     public Character(Texture texture, float x, float y, int hitboxWidth, int hitboxHeight, int lives,
-                     EntityType entityType, EntityManager entityManager, int speed,
+                     EntityManager entityManager, int speed,
                      Texture walk1Texture, Texture walk2Texture, Texture attack1Texture,
                      Texture attack2Texture, Stage stage, String type, float attackCooldown) {
         this.image = new Image(texture);
@@ -36,7 +34,6 @@ public abstract class Character {
         this.lives = lives;
         this.x = x;
         this.y = y;
-        this.entityType = entityType;
         this.entityManager = entityManager;
         this.walk1Texture = walk1Texture;
         this.walk2Texture = walk2Texture;
@@ -49,7 +46,7 @@ public abstract class Character {
         this.canAttack = true;
         this.attackCooldown = attackCooldown;
         this.cooldownElapsed = 0;
-        this.animationElapsed = 0;
+
         if (speed != 0) {
             startMovement();
         }
@@ -73,21 +70,7 @@ public abstract class Character {
             cooldownElapsed += delta;
         } else {
             canAttack = true;
-        }
-
-        // Actualizar animación de caminar
-        animationElapsed += delta;
-        if (animationElapsed >= 1f) {
-            animateWalk();
-            animationElapsed = 0;
-        }
-    }
-
-    private void animateWalk() {
-        if (image.getDrawable() == null || image.getDrawable().equals(new TextureRegionDrawable(walk2Texture))) {
-            image.setDrawable(new TextureRegionDrawable(walk1Texture));
-        } else {
-            image.setDrawable(new TextureRegionDrawable(walk2Texture));
+            cooldownElapsed = 0;
         }
     }
 
@@ -117,6 +100,14 @@ public abstract class Character {
 
     public String getType() {
         return type;
+    }
+
+    public Texture getWalk1Texture() {
+        return walk1Texture;
+    }
+
+    public Texture getWalk2Texture() {
+        return walk2Texture;
     }
 
     public Texture getAttack1Texture() {

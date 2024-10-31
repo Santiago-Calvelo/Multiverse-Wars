@@ -9,7 +9,7 @@ public enum EntityType {
         @Override
         public Character getEntity(float x, float y, Stage stage, EntityManager entityManager) {
             // Peashooter no se mueve, pasamos canMove=false
-            return new RangedCharacter(this.getTexture(), this.getHitboxWidth(), this.getHitboxHeight(), this.getAttack1Texture(), this.getAttack2Texture(), this.getProjectileTexture(), null, null, x, y, this.getLives(), this, entityManager, this.getSpeed(), stage, this.getType(), this.getRange(), this.getAttackCooldown());
+            return new RangedCharacter(this.getTexture(), this.getHitboxWidth(), this.getHitboxHeight(), this.getWalk1Texture(), this.getWalk2Texture(), this.getAttack1Texture(), this.getAttack2Texture(), this.getProjectileTexture(), x, y, this.getLives(), this.getSpeed(), entityManager, stage, this.getType(), this.getRange(), this.getAttackCooldown());
         }
     },
 
@@ -17,7 +17,7 @@ public enum EntityType {
         @Override
         public Character getEntity(float x, float y, Stage stage, EntityManager entityManager) {
             // Skeleton se mueve, pasamos canMove=true
-            return new MeleeCharacter(this.getTexture(), this.getHitboxWidth(), this.getHitboxHeight(), this.getAttack1Texture(), this.getAttack2Texture(), this.getWalk1Texture(), this.getWalk2Texture(), x, y, this.getLives(), this, entityManager, this.getSpeed(), stage, this.getType(), this.getAttackCooldown());
+            return new MeleeCharacter(this.getTexture(), this.getHitboxWidth(), this.getHitboxHeight(), this.getAttack1Texture(), this.getAttack2Texture(), this.getWalk1Texture(), this.getWalk2Texture(), x, y, this.getLives(), this.getSpeed(), entityManager, stage, this.getType(), this.getAttackCooldown());
         }
     };
 
@@ -42,11 +42,11 @@ public enum EntityType {
             this.cardTexturePath = new Texture(Gdx.files.internal(cardTexturePath));
         }
         this.texture = new Texture(Gdx.files.internal(texturePath));
+        this.walk1Texture = new Texture(Gdx.files.internal(texturePath));
+        this.walk2Texture = new Texture(Gdx.files.internal(attack2Path));
         this.attack1Texture = new Texture(Gdx.files.internal(attack1Path));
         this.attack2Texture = new Texture(Gdx.files.internal(attack2Path));
         this.projectileTexture = new Texture(Gdx.files.internal(projectilePath));
-        this.walk1Texture = null;  // No necesita caminar
-        this.walk2Texture = null;
         this.lives = lives;
         this.type = type;
         this.hitboxWidth = hitboxWidth;
@@ -56,7 +56,6 @@ public enum EntityType {
         this.attackCooldown = attackCooldown;
     }
 
-    // Constructor para personajes cuerpo a cuerpo con movimiento
     EntityType(String cardTexturePath,String texturePath, String walk1Path, String walk2Path, String attack1Path, String attack2Path, String projectilePath, int lives, String type, int hitboxWidth, int hitboxHeight, int speed, float attackCooldown) {
         if (cardTexturePath != null) {
             this.cardTexturePath = new Texture(Gdx.files.internal(cardTexturePath));

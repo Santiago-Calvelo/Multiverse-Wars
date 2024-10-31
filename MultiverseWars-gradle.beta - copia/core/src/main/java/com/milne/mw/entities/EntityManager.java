@@ -120,13 +120,14 @@ public class EntityManager {
             }
 
             for (Character character : characters) {
+                character.update(delta);
                 character.checkForAttack(characters);
             }
         }
     }
 
 
-   /* public void removeOffScreenCharacters() {
+    public void removeOffScreenCharacters() {
         Array<Character> charactersToRemove = new Array<>();  // Lista de personajes para eliminar
 
         for (Character character : characters) {
@@ -144,7 +145,7 @@ public class EntityManager {
             characters.removeValue(character, true);  // Remover de la lista de personajes
             character.dispose();  // Liberar los recursos del personaje
         }
-    } */
+    }
 
     // Método para pausar el juego
     public void pause() {
