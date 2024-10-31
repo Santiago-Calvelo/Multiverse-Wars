@@ -18,14 +18,12 @@ public class EntityManager {
     private final float INITIAL_Y = 42;
     private final float CELL_WIDTH = 62;
     private final float CELL_HEIGHT = 79;
-    private final float ZONE_WIDTH = 100;
     private final int COLS = 10;
     private final int ROWS = 5;
     private final float HITBOX_SIZE = 55;
     private float spawnInterval;
     private float spawnAccumulator;  // Acumulador para controlar el spawn de enemigos
     private boolean isPaused = false;
-    private HashMap<Integer, Array<RangedCharacter>> zoneMap;
 
     public EntityManager(Stage stage, Viewport viewport) {
         this.stage = stage;
@@ -33,7 +31,6 @@ public class EntityManager {
         characters = new Array<>();
         this.placementHitboxes = new ArrayList<>();
         initPlacementPoints();
-        this.zoneMap = new HashMap<>();
     }
 
     // Inicializar los puntos de colocación y sus hitboxes
@@ -86,9 +83,6 @@ public class EntityManager {
         float adjustedY = y - (float) entityType.getHitboxHeight() / 2;
 
         Character entity = entityType.getEntity(adjustedX, adjustedY, stage, this);
-        if (entity instanceof RangedCharacter) {
-            assignCharacterToZone(entity);
-        }
 
         entity.getImage().setPosition(adjustedX, adjustedY);
         stage.addActor(entity.getImage());
@@ -126,13 +120,13 @@ public class EntityManager {
             }
 
             for (Character character : characters) {
-                character.checkForAttack();
+                character.checkForAttack(characters);
             }
         }
     }
 
 
-    public void removeOffScreenCharacters() {
+   /* public void removeOffScreenCharacters() {
         Array<Character> charactersToRemove = new Array<>();  // Lista de personajes para eliminar
 
         for (Character character : characters) {
@@ -150,33 +144,7 @@ public class EntityManager {
             characters.removeValue(character, true);  // Remover de la lista de personajes
             character.dispose();  // Liberar los recursos del personaje
         }
-    }
-
-    // Asignar personajes a zonas
-    public void assignCharacterToZone(RangedCharacter character) {
-        int zone = (int) (character.getX() / ZONE_WIDTH);  // Calcular zona en base a la posición X
-        zoneMap.putIfAbsent(zone, new Array<>());
-        zoneMap.get(zone).add(character);
-    }
-
-    // Detectar entrada de enemigos en la zona de rango de RangedCharacters
-    public void notifyEnemiesInZone(Character enemy) {
-        int enemyZone = (int) (enemy.getX() / ZONE_WIDTH);  // Obtener zona del enemigo
-        Array<RangedCharacter> charactersInZone = zoneMap.get(enemyZone);
-
-        if (charactersInZone != null) {
-            for (RangedCharacter rangedCharacter : charactersInZone) {
-                rangedCharacter.onEnemyInRange(enemy);  // Notificar al personaje
-            }
-        }
-    }
-
-    // Método para actualizar la posición de los enemigos y notificar a los RangedCharacters si cambian de zona
-    public void updateEnemiesPosition(Character enemy) {
-        // Lógica para actualizar posición y, si entra en una nueva zona, notificar
-        notifyEnemiesInZone(enemy);
-    }
-
+    } */
 
     // Método para pausar el juego
     public void pause() {

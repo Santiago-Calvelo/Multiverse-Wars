@@ -104,7 +104,6 @@ public class MapScreen implements Screen {
             pauseButton.handleInput(worldTouch.x, worldTouch.y);
         }
         renderManager.render(viewport, pauseButton.getIsPaused(), entityManager, delta, pauseButton);
-        entityManager.checkRangeListeners();
         //entityManager.removeOffScreenCharacters();
     }
 

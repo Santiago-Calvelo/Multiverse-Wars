@@ -2,6 +2,7 @@ package com.milne.mw.entities;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.utils.Array;
 
 public class RangedCharacter extends Character implements RangeListener {
     private Texture projectileTexture;
@@ -28,7 +29,11 @@ public class RangedCharacter extends Character implements RangeListener {
     }
 
     @Override
-    public void checkForAttack() {}
+    public void checkForAttack(Array<Character> characters) {
+        for (Character enemy : characters) {
+            onEnemyInRange(enemy);
+        }
+    }
 
     @Override
     public void onEnemyInRange(Character enemy) {

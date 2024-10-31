@@ -1,10 +1,8 @@
 package com.milne.mw.entities;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
+import com.badlogic.gdx.utils.Array;
 
 public class MeleeCharacter extends Character {
     private Character targetEnemy;
@@ -24,21 +22,20 @@ public class MeleeCharacter extends Character {
 
 
     @Override
-    public void checkForAttack() {
+    public void checkForAttack(Array<Character> characters) {
         int i = 0;
         boolean collisionDetected = false;
-        int characterCount = entityManager.getCharacters().size;
 
         // Usamos un do-while para recorrer los personajes
         do {
-            Character character = entityManager.getCharacters().get(i);
+            Character character = characters.get(i);
             if (this != character && this.getHitbox().overlaps(character.getHitbox()) && !character.getType().equalsIgnoreCase(this.getType())) {
                 collisionDetected = true;
                 targetEnemy = character;
                 stopMovementAndAttack();  // Detenemos y atacamos
             }
             i++;
-        } while (i < characterCount && !collisionDetected);
+        } while (i < characters.size && !collisionDetected);
 
         // Si no hay colisiones, continuar moviéndose
         if (!collisionDetected) {

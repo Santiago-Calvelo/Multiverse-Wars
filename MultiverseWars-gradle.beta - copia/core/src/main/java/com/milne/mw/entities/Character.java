@@ -6,6 +6,7 @@ import com.badlogic.gdx.scenes.scene2d.actions.MoveToAction;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.utils.Array;
 import com.milne.mw.renders.RenderManager;
 
 public abstract class Character {
@@ -100,7 +101,7 @@ public abstract class Character {
     }
 
     public abstract void attack();
-    public abstract void checkForAttack();
+    public abstract void checkForAttack(Array<Character> characters);
 
     public void takeDamage(int damage) {
         this.lives -= damage;
