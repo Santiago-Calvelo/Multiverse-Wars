@@ -13,7 +13,7 @@ public class Projectile {
     private EntityManager entityManager;
     private String type;
 
-    public Projectile(Texture texture, float x, float y, Stage stage, EntityManager entityManager, String type) {
+    public Projectile(Texture texture, float x, float y, EntityManager entityManager, String type) {
         this.image = new Image(texture);
         this.image.setSize(20, 20);
         this.image.setPosition(x, y);
@@ -44,7 +44,7 @@ public class Projectile {
         for (Character character : entityManager.getCharacters()) {
             if (hitbox.overlaps(character.getHitbox()) && !this.type.equalsIgnoreCase(character.getType())) {
                 character.takeDamage(damage);
-                dispose();
+                entityManager.removeProjectile(this);
                 break;
             }
         }
@@ -60,5 +60,6 @@ public class Projectile {
 
     public void dispose() {
         image.remove();
+
     }
 }

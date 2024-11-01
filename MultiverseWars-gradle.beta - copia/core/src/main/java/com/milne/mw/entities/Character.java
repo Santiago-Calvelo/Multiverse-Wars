@@ -17,7 +17,7 @@ public abstract class Character {
     protected EntityManager entityManager;
     private int speed;
     private Texture walk1Texture, walk2Texture, attack1Texture, attack2Texture;
-    protected Stage stage;
+    private Stage stage;
     private MoveToAction moveAction;
     private boolean isMoving, canAttack;
     private float attackCooldown, cooldownElapsed;

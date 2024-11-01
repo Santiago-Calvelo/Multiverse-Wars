@@ -24,11 +24,13 @@ public class EntityManager {
     private float spawnInterval;
     private float spawnAccumulator;  // Acumulador para controlar el spawn de enemigos
     private boolean isPaused = false;
+    private Array<Projectile> projectiles;
 
     public EntityManager(Stage stage, Viewport viewport) {
         this.stage = stage;
         this.viewport = viewport;
         characters = new Array<>();
+        projectiles = new Array<>();
         this.placementHitboxes = new ArrayList<>();
         initPlacementPoints();
     }
@@ -89,6 +91,17 @@ public class EntityManager {
         characters.add(entity);
     }
 
+    public void addProjectile(Projectile projectile) {
+        projectiles.add(projectile);
+        stage.addActor(projectile.getImage());
+    }
+
+    public void removeProjectile(Projectile projectile) {
+        projectiles.removeValue(projectile, true);
+        stage.getActors().removeValue(projectile.getImage(), true);
+        projectile.dispose();
+    }
+
     // Obtener las hitboxes de colocación para poder dibujarlas
     public List<Rectangle> getPlacementHitboxes() {
         return placementHitboxes;
@@ -122,6 +135,10 @@ public class EntityManager {
             for (Character character : characters) {
                 character.update(delta);
                 character.checkForAttack(characters);
+            }
+
+            for (Projectile projectile : projectiles) {
+                projectile.update(delta);
             }
         }
     }

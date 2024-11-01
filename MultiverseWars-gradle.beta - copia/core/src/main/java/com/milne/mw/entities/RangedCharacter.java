@@ -24,8 +24,8 @@ public class RangedCharacter extends Character implements RangeListener {
     public void attack() {
         if (targetEnemy == null || !isInRange(targetEnemy)) return;
         Projectile projectile = new Projectile(projectileTexture, image.getX() + image.getWidth(),
-            image.getY() + image.getHeight() / 2, stage, entityManager, getType());
-        stage.addActor(projectile.getImage());
+            image.getY() + image.getHeight() / 2, entityManager, getType());
+        entityManager.addProjectile(projectile);
     }
 
     @Override
