@@ -2,68 +2,54 @@ package com.milne.mw.entities;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
-import com.badlogic.gdx.utils.Timer;
-import com.badlogic.gdx.utils.Timer.Task;
+import com.badlogic.gdx.utils.Array;
 
 public class RangedCharacter extends Character implements RangeListener {
-
     private Texture projectileTexture;
-    private Stage stage;
-    private Character targetEnemy; // Referencia al enemigo objetivo
+    private Character targetEnemy;
     private int range;
 
-    public RangedCharacter(Texture texture, int hitboxWidth, int hitboxHeight, Texture attack1Texture, Texture attack2Texture, Texture projectileTexture, Texture walk1Texture, Texture walk2Texture, float x, float y, int lives, EntityType entityType, EntityManager entityManager, int speed, Stage stage, String type, int range, float attackCooldown) {
-        super(texture, x, y, hitboxWidth, hitboxHeight, lives, entityType, entityManager, speed, walk1Texture, walk2Texture, attack1Texture, attack2Texture, stage, type, attackCooldown);
+    public RangedCharacter(Texture texture, int hitboxWidth, int hitboxHeight, Texture walk1Texture,
+                           Texture walk2Texture, Texture attack1Texture, Texture attack2Texture,
+                           Texture projectileTexture, float x, float y, int lives,
+                           int speed, EntityManager entityManager,
+                           Stage stage, String type, int range, float attackCooldown) {
+        super(texture, x, y, hitboxWidth, hitboxHeight, lives, entityManager, speed,
+            walk1Texture, walk2Texture, attack1Texture, attack2Texture, stage, type, attackCooldown);
         this.projectileTexture = projectileTexture;
-        this.stage = stage;
         this.range = range;
     }
 
-    // Implementación del ataque a distancia (disparar proyectil)
     @Override
     public void attack() {
-        if (targetEnemy == null || !isInRange(targetEnemy)) {
-            return;  // Si el enemigo está fuera de rango o no hay enemigo, no atacar
+        if (targetEnemy == null || !isInRange(targetEnemy)) return;
+        Projectile projectile = new Projectile(projectileTexture, image.getX() + image.getWidth(),
+            image.getY() + image.getHeight() / 2, entityManager, getType());
+        entityManager.addProjectile(projectile);
+    }
+
+    @Override
+    public void checkForAttack(Array<Character> characters) {
+        for (int i = 0; i < characters.size; i++) {
+            Character enemy = characters.get(i);
+            if (!enemy.getType().equalsIgnoreCase(getType())) {
+                onEnemyInRange(enemy);
+            }
         }
-
-        System.out.println("Disparando proyectil");
-        // Crear el proyectil y añadirlo al stage
-        Projectile projectile = new Projectile(
-            projectileTexture,
-            image.getX() + image.getWidth(),
-            image.getY() + image.getHeight() / 2,
-            stage,
-            entityManager,
-            this.getType()
-        );
-        stage.addActor(projectile.getImage());
     }
 
-    @Override
-    public void dispose() {
-        super.dispose();  // Llamamos al dispose de la clase padre
-    }
-
-    @Override
-    public void checkForAttack() {
-    }
-
-    // Implementación del listener para detectar enemigos en rango
     @Override
     public void onEnemyInRange(Character enemy) {
         if (enemy != this && isInSameRow(enemy) && isInRange(enemy)) {
-            targetEnemy = enemy;  // Establecer al enemigo como objetivo
-            tryAttack();  // Usar la lógica de ataque directamente desde el padre
+            targetEnemy = enemy;
+            tryAttack();
         }
     }
 
-    // Verifica si el enemigo está en la misma fila
     private boolean isInSameRow(Character enemy) {
-        return this.getImage().getY() == enemy.getImage().getY();  // Ajustar la tolerancia si es necesario
+        return this.getImage().getY() == enemy.getImage().getY();
     }
 
-    // Verifica si el enemigo está dentro de 3 casillas de distancia
     private boolean isInRange(Character enemy) {
         float dx = enemy.getImage().getX() - this.getImage().getX();
         float dy = enemy.getImage().getY() - this.getImage().getY();
@@ -72,4 +58,3 @@ public class RangedCharacter extends Character implements RangeListener {
         return distance <= attackRange;
     }
 }
-

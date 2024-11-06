@@ -5,35 +5,40 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import com.milne.mw.screens.PlayOptionsScreen;
+import com.milne.mw.screens.IntroductionScreen;
+import com.milne.mw.screens.ExitConfirmationScreen;
 
 public class MainMenuScreen implements Screen {
-    private Texture menuImage;
-    private SpriteBatch batch;
     private Game game;
     private Stage stage;
     private Skin skin;
+    private Texture menuImage;
     private Viewport viewport;
 
     public MainMenuScreen(Game game) {
         this.game = game;
-        this.viewport = new FitViewport(800, 600); // Tamaño base, se ajustará
-        stage = new Stage(viewport);
+        this.viewport = new FitViewport(800, 600);
+        this.stage = new Stage(viewport);
         Gdx.input.setInputProcessor(stage);
-        skin = new Skin(Gdx.files.internal("uiskin.json"));
-        batch = new SpriteBatch();
+        this.skin = new Skin(Gdx.files.internal("uiskin.json"));
     }
 
     @Override
     public void show() {
-        menuImage = new Texture(Gdx.files.internal("menu.png")); // Cargar la imagen de fondo
+        menuImage = new Texture(Gdx.files.internal("menu.png"));
+        Image background = new Image(menuImage);
+        background.setSize(viewport.getWorldWidth(), viewport.getWorldHeight());
+        stage.addActor(background);
+
         createMenuButtons();
     }
 
@@ -73,27 +78,24 @@ public class MainMenuScreen implements Screen {
     @Override
     public void render(float delta) {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-
-        batch.setProjectionMatrix(viewport.getCamera().combined);
-        batch.begin();
-        batch.draw(menuImage, 0, 0, viewport.getWorldWidth(), viewport.getWorldHeight());
-        batch.end();
-
-        stage.act();
+        stage.act(delta);
         stage.draw();
     }
 
     @Override
     public void resize(int width, int height) {
         viewport.update(width, height, true);
-        stage.getViewport().update(width, height, true);
     }
 
     @Override
-    public void pause() {}
+    public void pause() {
+
+    }
 
     @Override
-    public void resume() {}
+    public void resume() {
+
+    }
 
     @Override
     public void hide() {
@@ -104,7 +106,6 @@ public class MainMenuScreen implements Screen {
     public void dispose() {
         stage.dispose();
         skin.dispose();
-        batch.dispose();
         menuImage.dispose();
     }
 }

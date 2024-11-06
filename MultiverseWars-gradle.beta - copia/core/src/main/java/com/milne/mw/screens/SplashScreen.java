@@ -2,8 +2,10 @@ package com.milne.mw.screens;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.utils.Timer;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
@@ -12,34 +14,36 @@ import com.milne.mw.MultiverseWars;
 public class SplashScreen implements Screen {
 
     private MultiverseWars game;
+    private Stage stage;
     private Texture splashImage;
     private Viewport viewport;
 
     public SplashScreen(MultiverseWars game) {
         this.game = game;
-        this.viewport = new FitViewport(800, 600); // Tamaño base, se ajustará
+        this.viewport = new FitViewport(800, 600);
+        this.stage = new Stage(viewport);
     }
 
     @Override
     public void show() {
-        splashImage = new Texture(Gdx.files.internal("splash.png")); // Asegúrate de tener esta imagen en tu carpeta assets
+        splashImage = new Texture(Gdx.files.internal("splash.png"));
+        Image splash = new Image(splashImage);
+        splash.setSize(viewport.getWorldWidth(), viewport.getWorldHeight());
+        stage.addActor(splash);
 
-        // Temporizador para cambiar a la pantalla del menú después de 3 segundos
         Timer.schedule(new Timer.Task() {
             @Override
             public void run() {
-                game.setScreen(new MainMenuScreen(game)); // Cambia a la pantalla del menú principal
+                game.setScreen(new MainMenuScreen(game));
             }
-        }, 3); // 3 segundos
+        }, 3);
     }
 
     @Override
     public void render(float delta) {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-        game.getBatch().setProjectionMatrix(viewport.getCamera().combined);
-        game.getBatch().begin();
-        game.getBatch().draw(splashImage, 0, 0, viewport.getWorldWidth(), viewport.getWorldHeight());
-        game.getBatch().end();
+        stage.act(delta);
+        stage.draw();
     }
 
     @Override
@@ -48,10 +52,14 @@ public class SplashScreen implements Screen {
     }
 
     @Override
-    public void pause() {}
+    public void pause() {
+        
+    }
 
     @Override
-    public void resume() {}
+    public void resume() {
+
+    }
 
     @Override
     public void hide() {
@@ -60,6 +68,7 @@ public class SplashScreen implements Screen {
 
     @Override
     public void dispose() {
+        stage.dispose();
         splashImage.dispose();
     }
 }
