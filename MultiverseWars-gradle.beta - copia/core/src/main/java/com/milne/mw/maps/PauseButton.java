@@ -12,8 +12,6 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
-import com.badlogic.gdx.utils.Timer;
-import com.badlogic.gdx.utils.viewport.Viewport;
 import com.milne.mw.MultiverseWars;
 import com.milne.mw.MusicManager;
 import com.milne.mw.entities.EntityManager;
@@ -23,20 +21,18 @@ public class PauseButton {
     private TextButton resumeButton;
     private TextButton mainMenuButton;
     private boolean isPaused = false;
-    private Viewport viewport;
     private Game game;
     private EntityManager entityManager;
     private Image pauseBackground;
     public Circle pauseButtonHitbox;
-    private Stage stage;  // Referencia al Stage para añadir o eliminar actores
+    private Stage stage;
 
-    public PauseButton(Viewport viewport, Stage stage, Game game, EntityManager entityManager) {
-        this.viewport = viewport;
+    public PauseButton(Stage stage, Game game, EntityManager entityManager) {
+        this.stage = stage;
         this.game = game;
         this.entityManager = entityManager;
-        this.stage = stage;
 
-        pauseButtonHitbox = new Circle(viewport.getWorldWidth() - 257, viewport.getWorldHeight() - 40, 30);
+        pauseButtonHitbox = new Circle(stage.getViewport().getWorldWidth() - 257, stage.getViewport().getWorldHeight() - 40, 30);
         createPauseMenuButtons();
     }
 
@@ -46,10 +42,10 @@ public class PauseButton {
         textButtonStyle.fontColor = Color.WHITE;
 
         pauseBackground = new Image(new Texture("escena-pausa.png"));
-        pauseBackground.setSize(viewport.getWorldWidth(), viewport.getWorldHeight());
+        pauseBackground.setSize(stage.getViewport().getWorldWidth(), stage.getViewport().getWorldHeight());
 
         resumeButton = new TextButton("Reanudar", textButtonStyle);
-        resumeButton.setPosition(viewport.getWorldWidth() / 2f - resumeButton.getWidth() / 2, viewport.getWorldHeight() / 2f + 90);
+        resumeButton.setPosition(stage.getViewport().getWorldWidth() / 2f - resumeButton.getWidth() / 2, stage.getViewport().getWorldHeight() / 2f + 90);
         resumeButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -58,7 +54,7 @@ public class PauseButton {
         });
 
         mainMenuButton = new TextButton("Volver al Menu", textButtonStyle);
-        mainMenuButton.setPosition(viewport.getWorldWidth() / 2f - mainMenuButton.getWidth() / 2, viewport.getWorldHeight() / 2f - 55);
+        mainMenuButton.setPosition(stage.getViewport().getWorldWidth() / 2f - mainMenuButton.getWidth() / 2, stage.getViewport().getWorldHeight() / 2f - 55);
         mainMenuButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -76,7 +72,7 @@ public class PauseButton {
 
     public void checkForEscapeKey() {
         if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
-            togglePause();  // Llama a togglePause si se presiona ESC
+            togglePause();
         }
     }
 
@@ -84,12 +80,10 @@ public class PauseButton {
         isPaused = !isPaused;
 
         if (isPaused) {
-            Timer.instance().stop();
             entityManager.pause();
             MusicManager.pauseMusic();
             addPauseMenuToStage();
         } else {
-            Timer.instance().start();
             entityManager.resume();
             MusicManager.resumeMusic();
             removePauseMenuFromStage();

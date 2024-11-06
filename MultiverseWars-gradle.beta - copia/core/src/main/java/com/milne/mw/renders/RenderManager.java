@@ -7,7 +7,6 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
-import com.badlogic.gdx.utils.viewport.Viewport;
 import com.milne.mw.entities.Character;
 import com.milne.mw.entities.EntityManager;
 import com.milne.mw.Global;
@@ -51,7 +50,7 @@ public class RenderManager {
         return instance;
     }
 
-    public void render(Viewport viewport, boolean isPaused, EntityManager entityManager, float delta, PauseButton pauseButton) {
+    public void render(boolean isPaused, EntityManager entityManager, float delta, PauseButton pauseButton) {
         if (!isPaused) {
             stage.act(delta);
             entityManager.update(delta);
@@ -62,8 +61,8 @@ public class RenderManager {
         stage.draw();
 
         if (!isPaused && Global.debugMode) {
-            drawHitboxes(entityManager, viewport);
-            drawPlacementZones(viewport, entityManager, pauseButton);
+            drawHitboxes(entityManager);
+            drawPlacementZones(entityManager, pauseButton);
         }
     }
 
@@ -102,8 +101,8 @@ public class RenderManager {
         }
     }
 
-    private void drawPlacementZones(Viewport viewport, EntityManager entityManager, PauseButton pauseButton) {
-        shapeRenderer.setProjectionMatrix(viewport.getCamera().combined);
+    private void drawPlacementZones(EntityManager entityManager, PauseButton pauseButton) {
+        shapeRenderer.setProjectionMatrix(stage.getViewport().getCamera().combined);
         shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
         shapeRenderer.setColor(Color.GREEN);
 
@@ -115,8 +114,8 @@ public class RenderManager {
         shapeRenderer.end();
     }
 
-    private void drawHitboxes(EntityManager entityManager, Viewport viewport) {
-        shapeRenderer.setProjectionMatrix(viewport.getCamera().combined);
+    private void drawHitboxes(EntityManager entityManager) {
+        shapeRenderer.setProjectionMatrix(stage.getViewport().getCamera().combined);
         shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
         shapeRenderer.setColor(Color.RED);
 

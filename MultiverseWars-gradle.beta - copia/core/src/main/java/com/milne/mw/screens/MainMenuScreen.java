@@ -7,27 +7,21 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
-import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.viewport.FitViewport;
-import com.badlogic.gdx.utils.viewport.Viewport;
-import com.milne.mw.screens.PlayOptionsScreen;
-import com.milne.mw.screens.IntroductionScreen;
-import com.milne.mw.screens.ExitConfirmationScreen;
 
 public class MainMenuScreen implements Screen {
     private Game game;
     private Stage stage;
     private Skin skin;
     private Texture menuImage;
-    private Viewport viewport;
 
     public MainMenuScreen(Game game) {
         this.game = game;
-        this.viewport = new FitViewport(800, 600);
-        this.stage = new Stage(viewport);
+        this.stage = new Stage(new FitViewport(800, 600));
         Gdx.input.setInputProcessor(stage);
         this.skin = new Skin(Gdx.files.internal("uiskin.json"));
     }
@@ -36,7 +30,7 @@ public class MainMenuScreen implements Screen {
     public void show() {
         menuImage = new Texture(Gdx.files.internal("menu.png"));
         Image background = new Image(menuImage);
-        background.setSize(viewport.getWorldWidth(), viewport.getWorldHeight());
+        background.setSize(stage.getViewport().getWorldWidth(), stage.getViewport().getWorldHeight());
         stage.addActor(background);
 
         createMenuButtons();
@@ -44,7 +38,7 @@ public class MainMenuScreen implements Screen {
 
     private void createMenuButtons() {
         TextButton playButton = new TextButton("Jugar", skin);
-        playButton.setPosition(viewport.getWorldWidth() / 2f - playButton.getWidth() / 2, viewport.getWorldHeight() / 2f - 100);
+        playButton.setPosition(stage.getViewport().getWorldWidth() / 2f - playButton.getWidth() / 2, stage.getViewport().getWorldHeight() / 2f - 100);
         playButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -53,7 +47,7 @@ public class MainMenuScreen implements Screen {
         });
 
         TextButton introButton = new TextButton("Introduccion", skin);
-        introButton.setPosition(viewport.getWorldWidth() / 2f - introButton.getWidth() / 2, viewport.getWorldHeight() / 2f - 150);
+        introButton.setPosition(stage.getViewport().getWorldWidth() / 2f - introButton.getWidth() / 2, stage.getViewport().getWorldHeight() / 2f - 150);
         introButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -62,7 +56,7 @@ public class MainMenuScreen implements Screen {
         });
 
         TextButton exitButton = new TextButton("Salir del Juego", skin);
-        exitButton.setPosition(viewport.getWorldWidth() / 2f - exitButton.getWidth() / 2, viewport.getWorldHeight() / 2f - 200);
+        exitButton.setPosition(stage.getViewport().getWorldWidth() / 2f - exitButton.getWidth() / 2, stage.getViewport().getWorldHeight() / 2f - 200);
         exitButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -84,18 +78,14 @@ public class MainMenuScreen implements Screen {
 
     @Override
     public void resize(int width, int height) {
-        viewport.update(width, height, true);
+        stage.getViewport().update(width, height, true);
     }
 
     @Override
-    public void pause() {
-
-    }
+    public void pause() {}
 
     @Override
-    public void resume() {
-
-    }
+    public void resume() {}
 
     @Override
     public void hide() {

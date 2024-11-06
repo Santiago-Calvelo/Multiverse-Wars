@@ -4,48 +4,40 @@ import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.utils.viewport.FitViewport;
-import com.badlogic.gdx.utils.viewport.Viewport;
+import com.milne.mw.MultiverseWars;
 import com.milne.mw.renders.RenderManager;
 import com.milne.mw.entities.EntityManager;
 import com.milne.mw.entities.EntityType;
 import com.milne.mw.MusicManager;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
-import com.badlogic.gdx.scenes.scene2d.ui.Image;
-import java.util.EnumSet;
 
 public class MapScreen implements Screen {
     private Game game;
     private Stage stage;
-    private Viewport viewport;
     private RenderManager renderManager;
     private EntityManager entityManager;
-    private BitmapFont font;
     private PauseButton pauseButton;
 
     public MapScreen(Game game, Texture map) {
         this.game = game;
-        this.viewport = new FitViewport(800, 600);
-        this.stage = new Stage(viewport);
+        this.stage = new Stage(new FitViewport(800, 600));
         Gdx.input.setInputProcessor(stage);
-            
         renderManager = RenderManager.getInstance(map, stage);
-        entityManager = new EntityManager(stage, viewport);
-        pauseButton = new PauseButton(viewport, stage, game, entityManager);
-        font = new BitmapFont();
+        entityManager = new EntityManager(stage);
+        pauseButton = new PauseButton(stage, game, entityManager);
 
         addEntityCardsToPanel();
         entityManager.startEnemySpawner(5f);
     }
 
     private void addEntityCardsToPanel() {
-        float xPos = 105;
-        float yPos = viewport.getWorldHeight() - 85;
+        float xPos = 97;
+        float yPos = stage.getViewport().getWorldHeight() - 82.5f;
 
         for (EntityType entityType : EntityType.values()) {
             if (entityType.getCardTexture() != null) {
@@ -99,27 +91,23 @@ public class MapScreen implements Screen {
         if (Gdx.input.justTouched()) {
             float touchX = Gdx.input.getX();
             float touchY = Gdx.input.getY();
-            Vector2 worldTouch = viewport.unproject(new Vector2(touchX, touchY));
+            Vector2 worldTouch = stage.getViewport().unproject(new Vector2(touchX, touchY));
             pauseButton.handleInput(worldTouch.x, worldTouch.y);
         }
-        renderManager.render(viewport, pauseButton.getIsPaused(), entityManager, delta, pauseButton);
+        renderManager.render(pauseButton.getIsPaused(), entityManager, delta, pauseButton);
         entityManager.removeOffScreenCharacters();
     }
 
     @Override
     public void resize(int width, int height) {
-        viewport.update(width, height, true);
+        stage.getViewport().update(width, height, true);
     }
 
     @Override
-    public void pause() {
-
-    }
+    public void pause() {}
 
     @Override
-    public void resume() {
-
-    }
+    public void resume() {}
 
     @Override
     public void hide() {
@@ -135,11 +123,9 @@ public class MapScreen implements Screen {
         if (renderManager != null) {
             RenderManager.resetInstance();
         }
-        stage.clear(); // Limpia todos los actores del stage
+        stage.clear();
         stage.dispose();
     }
 
-
-    public void setDifficulty(int difficultyLevel) {
-    }
+    public void setDifficulty(int difficultyLevel) {}
 }
