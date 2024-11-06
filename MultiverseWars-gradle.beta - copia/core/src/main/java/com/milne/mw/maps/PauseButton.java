@@ -62,7 +62,7 @@ public class PauseButton {
         mainMenuButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                game.setScreen(new MainMenuScreen((MultiverseWars) game));
+                Gdx.app.postRunnable(() -> game.setScreen(new MainMenuScreen(game)));
                 MusicManager.playMusic("bye bye.mp3");
             }
         });

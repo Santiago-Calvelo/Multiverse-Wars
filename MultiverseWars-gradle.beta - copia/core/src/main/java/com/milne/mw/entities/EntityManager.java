@@ -13,7 +13,7 @@ public class EntityManager {
     private Array<Character> characters;
     private Viewport viewport;
     private List<Rectangle> placementHitboxes;
-    private boolean[] isOccupied;
+    private HashMap<Integer, Character> positionMap;
     private final float INITIAL_X = 33;
     private final float INITIAL_Y = 42;
     private final float CELL_WIDTH = 62;
@@ -38,7 +38,7 @@ public class EntityManager {
     // Inicializar los puntos de colocación y sus hitboxes
     public void initPlacementPoints() {
         placementHitboxes.clear();
-        isOccupied = new boolean[COLS * ROWS];
+        positionMap = new HashMap<>();
         for (int i = 0; i < COLS; i++) {
             for (int j = 0; j < ROWS; j++) {
                 float centerX = INITIAL_X + i * CELL_WIDTH;
@@ -64,11 +64,11 @@ public class EntityManager {
 
         do {
             Rectangle hitbox = placementHitboxes.get(i);
-            if (!isOccupied[i] && hitbox.overlaps(cardArea)) {
+            if (!positionMap.containsKey(i) && hitbox.overlaps(cardArea)) {
                 float centerX = hitbox.x + hitbox.width / 2;
                 float centerY = hitbox.y + hitbox.height / 2;
-                spawnEntity(entityType, centerX, centerY);
-                isOccupied[i] = true;
+                Character entity = spawnEntity(entityType, centerX, centerY);
+                positionMap.put(i, entity);
                 placed = true;
             }
             i++;
@@ -80,7 +80,7 @@ public class EntityManager {
     }
 
     // Colocar la entidad, centrando la hitbox sobre el punto
-    public void spawnEntity(EntityType entityType, float x, float y) {
+    public Character spawnEntity(EntityType entityType, float x, float y) {
         float adjustedX = x - (float) entityType.getHitboxWidth() / 2;
         float adjustedY = y - (float) entityType.getHitboxHeight() / 2;
 
@@ -89,6 +89,8 @@ public class EntityManager {
         entity.getImage().setPosition(adjustedX, adjustedY);
         stage.addActor(entity.getImage());
         characters.add(entity);
+
+        return entity;
     }
 
     public void addProjectile(Projectile projectile) {
@@ -157,10 +159,22 @@ public class EntityManager {
 
         // Eliminar los personajes fuera de pantalla de manera controlada
         for (Character character : charactersToRemove) {
-            character.getImage().remove();  // Eliminar del stage
-            stage.getActors().removeValue(character.getImage(), true);  // Asegurarnos de removerlo del stage
-            characters.removeValue(character, true);  // Remover de la lista de personajes
-            character.dispose();  // Liberar los recursos del personaje
+            removeCharacter(character);
+        }
+    }
+
+    public void releasePosition(Character character) {
+        Integer index = null;
+
+        // Buscar la posición ocupada por el personaje
+        for (Map.Entry<Integer, Character> entry : positionMap.entrySet()) {
+            if (entry.getValue() == character) {
+                index = entry.getKey();
+            }
+        }
+
+        if (index != null) {
+            positionMap.remove(index);  // Liberar la casilla del HashMap
         }
     }
 
@@ -188,12 +202,16 @@ public class EntityManager {
         return CELL_WIDTH;
     }
 
+    public void removeCharacter(Character character) {
+        character.getImage().remove();
+        stage.getActors().removeValue(character.getImage(), true);
+        characters.removeValue(character, true);
+        character.dispose();
+    }
+
     public void dispose() {
         for (Character character : characters) {
-            character.getImage().remove();
-            stage.getActors().removeValue(character.getImage(), true);
-            characters.removeValue(character, true);
-            character.dispose();
+            removeCharacter(character);
         }
         characters.clear();
     }

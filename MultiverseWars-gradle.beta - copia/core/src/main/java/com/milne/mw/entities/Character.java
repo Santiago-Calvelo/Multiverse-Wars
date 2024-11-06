@@ -90,6 +90,7 @@ public abstract class Character {
         this.lives -= damage;
         if (lives <= 0) {
             dispose();
+            entityManager.releasePosition(this);
             entityManager.getCharacters().removeValue(this, true);
         }
     }
@@ -123,11 +124,6 @@ public abstract class Character {
         return hitbox;
     }
 
-    public void dispose() {
-        image.clearActions();
-        image.remove();
-    }
-
     public void pause() {
         if (isMoving) {
             image.clearActions();
@@ -151,5 +147,10 @@ public abstract class Character {
 
     public float getX() {
         return x;
+    }
+
+    public void dispose() {
+        image.clearActions();
+        image.remove();
     }
 }

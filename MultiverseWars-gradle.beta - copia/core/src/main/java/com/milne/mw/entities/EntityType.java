@@ -5,10 +5,17 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 
 public enum EntityType {
-    PEASHOOTER("lanza guisantes carta.png", "guisante.png", "guisante3.png", "guisante2.png", "proyectil.png", 30, "tower", 50, 50, 0,5,1f) {
+    PEASHOOTER("lanza guisantes carta.png", "guisante.png", "guisante.png", "guisante2.png", "guisante3.png", "guisante2.png", "proyectil.png", 30, "tower", 50, 50, 0,5,1f) {
         @Override
         public Character getEntity(float x, float y, Stage stage, EntityManager entityManager) {
             // Peashooter no se mueve, pasamos canMove=false
+            return new RangedCharacter(this.getTexture(), this.getHitboxWidth(), this.getHitboxHeight(), this.getWalk1Texture(), this.getWalk2Texture(), this.getAttack1Texture(), this.getAttack2Texture(), this.getProjectileTexture(), x, y, this.getLives(), this.getSpeed(), entityManager, stage, this.getType(), this.getRange(), this.getAttackCooldown());
+        }
+    },
+
+    COWBOY("CARTA VAQUERO.jpg", "vaqwalk1.png", "vaqwalk1.png", "vaqwalk2.png", "vaqattack2.png", "vaqattack1.png", "bala.png", 50, "tower", 50, 50, 0, 7,1.5f) {
+        @Override
+        public Character getEntity(float x, float y, Stage stage, EntityManager entityManager) {
             return new RangedCharacter(this.getTexture(), this.getHitboxWidth(), this.getHitboxHeight(), this.getWalk1Texture(), this.getWalk2Texture(), this.getAttack1Texture(), this.getAttack2Texture(), this.getProjectileTexture(), x, y, this.getLives(), this.getSpeed(), entityManager, stage, this.getType(), this.getRange(), this.getAttackCooldown());
         }
     },
@@ -37,13 +44,13 @@ public enum EntityType {
     private float attackCooldown;
 
     // Constructor para personajes a distancia sin movimiento
-    EntityType(String cardTexturePath, String texturePath, String attack1Path, String attack2Path, String projectilePath, int lives, String type, int hitboxWidth, int hitboxHeight, int speed, int range, float attackCooldown) {
+    EntityType(String cardTexturePath, String texturePath, String walk1Path, String walk2Path, String attack1Path, String attack2Path, String projectilePath, int lives, String type, int hitboxWidth, int hitboxHeight, int speed, int range, float attackCooldown) {
         if (cardTexturePath != null) {
             this.cardTexturePath = new Texture(Gdx.files.internal(cardTexturePath));
         }
         this.texture = new Texture(Gdx.files.internal(texturePath));
-        this.walk1Texture = new Texture(Gdx.files.internal(texturePath));
-        this.walk2Texture = new Texture(Gdx.files.internal(attack2Path));
+        this.walk1Texture = new Texture(Gdx.files.internal(walk1Path));
+        this.walk2Texture = new Texture(Gdx.files.internal(walk2Path));
         this.attack1Texture = new Texture(Gdx.files.internal(attack1Path));
         this.attack2Texture = new Texture(Gdx.files.internal(attack2Path));
         this.projectileTexture = new Texture(Gdx.files.internal(projectilePath));

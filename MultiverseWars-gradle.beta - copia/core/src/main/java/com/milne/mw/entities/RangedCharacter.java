@@ -32,7 +32,9 @@ public class RangedCharacter extends Character implements RangeListener {
     public void checkForAttack(Array<Character> characters) {
         for (int i = 0; i < characters.size; i++) {
             Character enemy = characters.get(i);
-            onEnemyInRange(enemy);
+            if (!enemy.getType().equalsIgnoreCase(getType())) {
+                onEnemyInRange(enemy);
+            }
         }
     }
 

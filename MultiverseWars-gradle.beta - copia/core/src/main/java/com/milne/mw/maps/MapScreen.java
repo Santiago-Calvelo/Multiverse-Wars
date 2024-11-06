@@ -33,8 +33,7 @@ public class MapScreen implements Screen {
         this.viewport = new FitViewport(800, 600);
         this.stage = new Stage(viewport);
         Gdx.input.setInputProcessor(stage);
-
-        RenderManager.resetInstance();
+            
         renderManager = RenderManager.getInstance(map, stage);
         entityManager = new EntityManager(stage, viewport);
         pauseButton = new PauseButton(viewport, stage, game, entityManager);
@@ -104,7 +103,7 @@ public class MapScreen implements Screen {
             pauseButton.handleInput(worldTouch.x, worldTouch.y);
         }
         renderManager.render(viewport, pauseButton.getIsPaused(), entityManager, delta, pauseButton);
-        //entityManager.removeOffScreenCharacters();
+        entityManager.removeOffScreenCharacters();
     }
 
     @Override
@@ -125,7 +124,6 @@ public class MapScreen implements Screen {
     @Override
     public void hide() {
         MusicManager.stopMusic();
-        stage.clear();
         dispose();
     }
 
@@ -135,7 +133,6 @@ public class MapScreen implements Screen {
             entityManager.dispose();
         }
         if (renderManager != null) {
-            renderManager.dispose();
             RenderManager.resetInstance();
         }
         stage.clear(); // Limpia todos los actores del stage
