@@ -124,6 +124,14 @@ public abstract class Character {
         return hitbox;
     }
 
+    public int getSpeed() {
+        return speed;
+    }
+
+    public int getLives() {
+        return lives;
+    }
+
     public void pause() {
         if (isMoving) {
             image.clearActions();

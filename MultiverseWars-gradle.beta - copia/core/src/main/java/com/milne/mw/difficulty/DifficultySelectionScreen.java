@@ -1,4 +1,4 @@
-package com.milne.mw.screens;
+package com.milne.mw.difficulty;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
@@ -15,6 +15,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.milne.mw.MultiverseWars;
 import com.milne.mw.maps.MapScreen;
+import com.milne.mw.screens.MainMenuScreen;
 
 public class DifficultySelectionScreen implements Screen {
 

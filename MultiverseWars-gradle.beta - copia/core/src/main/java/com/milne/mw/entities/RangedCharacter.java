@@ -22,9 +22,14 @@ public class RangedCharacter extends Character implements RangeListener {
 
     @Override
     public void attack() {
-        if (targetEnemy == null || !isInRange(targetEnemy)) return;
-        Projectile projectile = new Projectile(projectileTexture, image.getX() + image.getWidth(),
-            image.getY() + image.getHeight() / 2, entityManager, getType());
+        float x;
+        if (getType().equalsIgnoreCase("tower")) {
+            x = image.getX() + image.getWidth();
+        } else {
+            x = image.getX() - image.getWidth();
+        }
+        Projectile projectile = new Projectile(projectileTexture, x,
+            image.getY() + image.getHeight() / 2, entityManager, targetEnemy, getType());
         entityManager.addProjectile(projectile);
     }
 
@@ -36,13 +41,24 @@ public class RangedCharacter extends Character implements RangeListener {
                 onEnemyInRange(enemy);
             }
         }
+
+        if (targetEnemy != null && targetEnemy.getLives() <= 0) {
+            if (getSpeed() != 0) {
+                resumeMovement();
+            }
+            targetEnemy = null;
+        }
     }
 
     @Override
     public void onEnemyInRange(Character enemy) {
         if (enemy != this && isInSameRow(enemy) && isInRange(enemy)) {
             targetEnemy = enemy;
-            tryAttack();
+            if (this.getSpeed() != 0) {
+                stopMovementAndAttack();
+            } else {
+                tryAttack();
+            }
         }
     }
 
