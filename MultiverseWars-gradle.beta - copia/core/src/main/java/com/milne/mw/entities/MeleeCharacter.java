@@ -7,7 +7,7 @@ import com.badlogic.gdx.utils.Array;
 public class MeleeCharacter extends Character {
     private Character targetEnemy;
 
-    public MeleeCharacter(Texture texture, int hitboxWidth, int hitboxHeight,Texture attack1Texture, Texture attack2Texture, Texture walk1Texture, Texture walk2Texture, float x, float y, int lives, int speed, EntityManager entityManager, Stage stage, String type, float attackCooldown) {
+    public MeleeCharacter(Texture texture, int hitboxWidth, int hitboxHeight, Texture attack1Texture, Texture attack2Texture, Texture walk1Texture, Texture walk2Texture, float x, float y, int lives, int speed, EntityManager entityManager, Stage stage, String type, float attackCooldown) {
         super(texture, x, y, hitboxWidth, hitboxHeight, lives, entityManager, speed, walk1Texture, walk2Texture, attack1Texture, attack2Texture, stage,type, attackCooldown);
     }
 

@@ -84,20 +84,21 @@ public class RenderManager {
     }
 
     public void animateCharacterAttack(Character character, float cooldown) {
+        System.out.println("Atacando..");
         character.getImage().setDrawable(new TextureRegionDrawable(character.getAttack1Texture()));
         attackAnimationTime = 0;
         isAnimatingAttack = true;
     }
 
     private void updateAttackAnimation(float delta, EntityManager entityManager) {
-        if (!isAnimatingAttack) return;
-
-        attackAnimationTime += delta;
-        if (attackAnimationTime >= 0.5f) {
-            for (Character character : entityManager.getCharacters()) {
-                character.getImage().setDrawable(new TextureRegionDrawable(character.getAttack2Texture()));
+        if (isAnimatingAttack) {
+            attackAnimationTime += delta;
+            if (attackAnimationTime >= 0.5f) {
+                for (Character character : entityManager.getCharacters()) {
+                    character.getImage().setDrawable(new TextureRegionDrawable(character.getAttack2Texture()));
+                }
+                isAnimatingAttack = false;
             }
-            isAnimatingAttack = false;
         }
     }
 
