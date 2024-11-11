@@ -11,7 +11,6 @@
                             EntityManager entityManager, String type, float attackCooldown,
                             int damage, int energy, boolean canBeAttacked) {
             super(texture, x, y, hitboxWidth, hitboxHeight, lives, entityManager, speed, walkTexture, walkTexture, attackTexture, attackTexture, type, attackCooldown, damage, energy, canBeAttacked);
-            System.out.println(y);
         }
 
         public void bombAttack() {

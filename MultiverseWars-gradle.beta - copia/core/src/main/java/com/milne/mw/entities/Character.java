@@ -68,8 +68,6 @@ public abstract class Character {
         if (!isMoving) {
             moveAction = new MoveToAction();
             float distanceX = Math.abs(hitbox.x - targetX);
-            System.out.println("Hitbox: " +hitbox.x);
-            System.out.println("Image: " + image.getX());
             float duration = distanceX / speed;
             moveAction.setPosition(targetX, getHitbox().y);
             moveAction.setDuration(duration);
@@ -161,6 +159,9 @@ public abstract class Character {
 
     protected void setTargetX(float targetX) {
         this.targetX = targetX;
+    }
+    public void setSpeed(int speed) {
+        this.speed = speed;
     }
 
     public Vector2 getHitboxCenter() {

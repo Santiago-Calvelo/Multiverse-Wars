@@ -50,6 +50,7 @@ public class EntityManager {
         bombs = new Array<>();
         this.placementHitboxes = new ArrayList<>();
         initPlacementPoints();
+
         roundManager = new RoundManager();
     }
 

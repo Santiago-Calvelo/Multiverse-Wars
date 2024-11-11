@@ -77,7 +77,7 @@ public enum EntityType {
         }
     },
 
-    STORMTROOPER("characters/stormtrooper/storm01.png", "characters/stormtrooper/storm01.png", "characters/stormtrooper/storm02.png", "characters/stormtrooper/storm03.png", "characters/stormtrooper/storm02.png", "characters/projectile/laser.png",  35, "enemy", true, true, 50, 50, 100, 5, 1f, 5, 10) {
+    STORMTROOPER(null, "characters/stormtrooper/storm01.png", "characters/stormtrooper/storm02.png", "characters/stormtrooper/storm03.png", "characters/stormtrooper/storm02.png", "characters/projectile/laser.png",  35, "enemy", true, true, 50, 50, 100, 5, 1f, 5, 10) {
         @Override
         public Character getEntity(float x, float y, EntityManager entityManager) {
             return new RangedCharacter(
@@ -113,7 +113,7 @@ public enum EntityType {
         }
     },
 
-    PLANE(null, "characters/wingmonkey/wingmonkey.png", "characters/wingmonkey/wingmonkey1.png", 1, "enemy", false, false, 50, 50, 533, 0.233f, 0, 0) {
+    PLANE("characters/wingmonkey/wingmonkey.png", "characters/wingmonkey/wingmonkey.png", "characters/wingmonkey/wingmonkey1.png", 1, "enemy", false, false, 50, 50, 533, 0.233f, 0, 0) {
         @Override
         public Character getEntity(float x, float y, EntityManager entityManager) {
             return new FlyCharacter(

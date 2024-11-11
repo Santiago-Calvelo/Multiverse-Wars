@@ -15,6 +15,7 @@ import java.util.Random;
 
 public class BossCharacter extends Character {
     private float forceSmashAccumulator = 0f;
+    private float dashAttackAccumulator = 0f;
     private float moveForceAccumulator = 0f;
     private boolean isExecutingSpecial = false;
     private float switchLaneAccumulator = 0f;
@@ -34,6 +35,7 @@ public class BossCharacter extends Character {
         this.animator = animator;
         attackMap.put(BossAttacks.FORCE_SMASH, new ForceSmashAttack(forceSmash));
         attackMap.put(BossAttacks.MOVE_FORCE, new MoveForceAttack());
+        attackMap.put(BossAttacks.DASH_ATTACK, new DashAttack());
         this.RIGHT_LIMIT = x;
         this.LEFT_LIMIT = 1f;
     }
@@ -60,11 +62,14 @@ public class BossCharacter extends Character {
                 // Acumula tiempo para activar el siguiente ataque especial
                 forceSmashAccumulator += delta;
                 moveForceAccumulator += delta;
+                dashAttackAccumulator += delta;
 
                 if (forceSmashAccumulator >= 5f && lastAttack != BossAttacks.FORCE_SMASH) { // Cooldown de Force Smash
                     startSpecialAttack(BossAttacks.FORCE_SMASH);
                 } else if (moveForceAccumulator >= 5f && lastAttack != BossAttacks.MOVE_FORCE) { // Cooldown de Move Force
                     startSpecialAttack(BossAttacks.MOVE_FORCE);
+                } else if (dashAttackAccumulator >= 10f && lastAttack != BossAttacks.DASH_ATTACK) {
+                    startSpecialAttack(BossAttacks.DASH_ATTACK);
                 }
             }
 
@@ -82,14 +87,12 @@ public class BossCharacter extends Character {
         }
     }
 
-
     private void changeDirection() {
         pause();
         float targetX = movingRight ? RIGHT_LIMIT : LEFT_LIMIT; // Nuevo objetivo
         super.setTargetX(targetX); // Llama al método del padre para iniciar el movimiento
         resumeMovement();
     }
-
 
     private void startSpecialAttack(BossAttacks attack) {
         BossAttack bossAttack = attackMap.get(attack);
@@ -112,6 +115,9 @@ public class BossCharacter extends Character {
                 break;
             case MOVE_FORCE:
                 moveForceAccumulator = 0f;
+                break;
+            case DASH_ATTACK:
+                dashAttackAccumulator = 0f;
                 break;
         }
     }

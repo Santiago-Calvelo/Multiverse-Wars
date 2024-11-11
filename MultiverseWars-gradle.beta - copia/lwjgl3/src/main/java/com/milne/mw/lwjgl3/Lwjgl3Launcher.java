@@ -7,8 +7,7 @@ import com.milne.mw.MultiverseWars;
 /** Launches the desktop (LWJGL3) application. */
 public class Lwjgl3Launcher {
     public static void main(String[] args) {
-        if (StartupHelper.startNewJvmIfRequired()) return; // Esto  maneja el soporte para macOS y Windows.
-        createApplication();
+        if (!StartupHelper.startNewJvmIfRequired()) createApplication();
     }
 
     private static void createApplication() {
