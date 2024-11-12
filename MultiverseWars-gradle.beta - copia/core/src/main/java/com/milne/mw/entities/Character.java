@@ -21,7 +21,7 @@ public abstract class Character {
     private float attackCooldown, cooldownElapsed;
     private String type;
     private int damage, energy;
-    private float deathDelay = 0.5f;
+    private float deathDelay = 0.5f, cooldownElapsedDeath;
     private boolean isDying = false;
 
     public Character(Texture texture, float x, float y, int hitboxWidth, int hitboxHeight, int lives,
@@ -77,6 +77,14 @@ public abstract class Character {
             canAttack = true;
             cooldownElapsed = 0;
         }
+
+        if (isDying && cooldownElapsedDeath < deathDelay) {
+            cooldownElapsedDeath += delta;
+        } else if (isDying) {
+            removeCharacter();
+            cooldownElapsedDeath = 0;
+            isDying = false;
+        }
     }
 
     public void tryAttack() {
@@ -94,7 +102,7 @@ public abstract class Character {
     public void takeDamage(int damage) {
         this.lives -= damage;
         if (lives <= 0 && !isDying) {
-            RenderManager.getInstance().animateDead(this);
+            RenderManager.getInstance().animateDead(this, entityManager);
         }
     }
 

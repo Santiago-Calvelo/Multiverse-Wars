@@ -82,7 +82,7 @@ public class RenderManager {
         // Alterna la textura de caminata cada 0.5 segundos
         if (walkAnimationTime >= 0.5f) {
             for (Character character : entityManager.getCharacters()) {
-                if (character != dyingCharacter) {
+                if (character.getLives() > 0) {
                     TextureRegionDrawable currentDrawable = (TextureRegionDrawable) character.getImage().getDrawable();
                     TextureRegionDrawable nextDrawable = (currentDrawable.getRegion().getTexture() == character.getWalk1Texture())
                         ? new TextureRegionDrawable(character.getWalk2Texture())
@@ -114,7 +114,7 @@ public class RenderManager {
         }
     }
 
-    public void animateDead(Character character) {
+    public void animateDead(Character character, EntityManager entityManager) {
         if (isAnimatingAttack && attackingCharacter == character) {
             isAnimatingAttack = false;
             attackingCharacter = null;
