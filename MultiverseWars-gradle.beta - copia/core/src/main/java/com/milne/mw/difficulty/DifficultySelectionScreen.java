@@ -17,6 +17,8 @@ import com.milne.mw.MultiverseWars;
 import com.milne.mw.maps.MapScreen;
 import com.milne.mw.screens.MainMenuScreen;
 
+import static com.milne.mw.Global.loadTexture;
+
 public class DifficultySelectionScreen implements Screen {
 
     private Game game;
@@ -33,7 +35,7 @@ public class DifficultySelectionScreen implements Screen {
         Gdx.input.setInputProcessor(stage);
         this.skin = new Skin(Gdx.files.internal("uiskin.json"));
 
-        backgroundTexture = new Texture(Gdx.files.internal("DIFICULTAD UN JUGADOR.jpg"));
+        backgroundTexture = loadTexture("difficulty/DIFICULTAD UN JUGADOR.jpg");
         backgroundImage = new Image(backgroundTexture);
         backgroundImage.setSize(stage.getViewport().getWorldWidth(), stage.getViewport().getWorldHeight());
         stage.addActor(backgroundImage);

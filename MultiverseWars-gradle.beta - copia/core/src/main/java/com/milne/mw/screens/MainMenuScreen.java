@@ -13,6 +13,8 @@ import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 
+import static com.milne.mw.Global.loadTexture;
+
 public class MainMenuScreen implements Screen {
     private Game game;
     private Stage stage;
@@ -28,7 +30,7 @@ public class MainMenuScreen implements Screen {
 
     @Override
     public void show() {
-        menuImage = new Texture(Gdx.files.internal("menu.png"));
+        menuImage = loadTexture("multiverse-wars/menu.png");
         Image background = new Image(menuImage);
         background.setSize(stage.getViewport().getWorldWidth(), stage.getViewport().getWorldHeight());
         stage.addActor(background);

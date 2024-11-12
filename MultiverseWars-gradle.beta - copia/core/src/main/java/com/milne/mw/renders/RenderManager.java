@@ -19,7 +19,9 @@ public class RenderManager {
     private Image backgroundImage;
     private float walkAnimationTime;
     private float attackAnimationTime;
-    private boolean isAnimatingAttack;
+    private float dyingTime;
+    private boolean isAnimatingAttack, isDying;
+    private Character attackingCharacter, dyingCharacter; // Solo animar este personaje
 
     private RenderManager(Texture mapTexture, Stage stage) {
         this.stage = stage;
@@ -55,7 +57,6 @@ public class RenderManager {
             stage.act(delta);
             entityManager.update(delta);
             updateWalkAnimation(delta, entityManager);
-            updateAttackAnimation(delta, entityManager);
         }
         pauseButton.checkForEscapeKey();
         stage.draw();
@@ -63,6 +64,15 @@ public class RenderManager {
         if (!isPaused && Global.debugMode) {
             drawHitboxes(entityManager);
             drawPlacementZones(entityManager, pauseButton);
+        }
+
+        // Llama solo si hay una animación de ataque activa
+        if (isAnimatingAttack && !isDying) {
+            updateAttackAnimation(delta);
+        }
+
+        if (isDying) {
+            updateDeathAnimation(delta);
         }
     }
 
@@ -72,33 +82,53 @@ public class RenderManager {
         // Alterna la textura de caminata cada 0.5 segundos
         if (walkAnimationTime >= 0.5f) {
             for (Character character : entityManager.getCharacters()) {
-                TextureRegionDrawable currentDrawable = (TextureRegionDrawable) character.getImage().getDrawable();
-                TextureRegionDrawable nextDrawable = (currentDrawable.getRegion().getTexture() == character.getWalk1Texture())
-                    ? new TextureRegionDrawable(character.getWalk2Texture())
-                    : new TextureRegionDrawable(character.getWalk1Texture());
+                if (character != dyingCharacter) {
+                    TextureRegionDrawable currentDrawable = (TextureRegionDrawable) character.getImage().getDrawable();
+                    TextureRegionDrawable nextDrawable = (currentDrawable.getRegion().getTexture() == character.getWalk1Texture())
+                        ? new TextureRegionDrawable(character.getWalk2Texture())
+                        : new TextureRegionDrawable(character.getWalk1Texture());
 
-                character.getImage().setDrawable(nextDrawable);
+                    character.getImage().setDrawable(nextDrawable);
+                }
             }
             walkAnimationTime = 0;
         }
     }
 
-    public void animateCharacterAttack(Character character, float cooldown) {
-        System.out.println("Atacando..");
+   public void animateCharacterAttack(Character character, float cooldown) {
+        if (isDying && dyingCharacter == character) {
+            return;
+        }
         character.getImage().setDrawable(new TextureRegionDrawable(character.getAttack1Texture()));
         attackAnimationTime = 0;
         isAnimatingAttack = true;
+        attackingCharacter = character; // Establece el personaje que está atacando
     }
 
-    private void updateAttackAnimation(float delta, EntityManager entityManager) {
-        if (isAnimatingAttack) {
-            attackAnimationTime += delta;
-            if (attackAnimationTime >= 0.5f) {
-                for (Character character : entityManager.getCharacters()) {
-                    character.getImage().setDrawable(new TextureRegionDrawable(character.getAttack2Texture()));
-                }
-                isAnimatingAttack = false;
-            }
+    private void updateAttackAnimation(float delta) {
+        attackAnimationTime += delta;
+        if (attackAnimationTime >= 0.5f && attackingCharacter != null) {
+            attackingCharacter.getImage().setDrawable(new TextureRegionDrawable(attackingCharacter.getAttack2Texture()));
+            isAnimatingAttack = false;
+            attackingCharacter = null; // Resetea después de la animación
+        }
+    }
+
+    public void animateDead(Character character) {
+        if (isAnimatingAttack && attackingCharacter == character) {
+            isAnimatingAttack = false;
+            attackingCharacter = null;
+        }
+        isDying = true;
+        dyingTime = 0;
+        dyingCharacter = character;
+    }
+
+    private void updateDeathAnimation(float delta) {
+        dyingTime += delta;
+        if (dyingTime >= 0.5f && dyingCharacter != null) {
+            dyingCharacter.getImage().setDrawable(new TextureRegionDrawable(dyingCharacter.getDeathTexture()));
+            isDying = false;
         }
     }
 

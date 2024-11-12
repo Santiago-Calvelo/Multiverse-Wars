@@ -10,6 +10,8 @@ import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.utils.Timer;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 
+import static com.milne.mw.Global.loadTexture;
+
 public class SplashScreen implements Screen {
 
     private Game game;
@@ -23,7 +25,7 @@ public class SplashScreen implements Screen {
 
     @Override
     public void show() {
-        splashImage = new Texture(Gdx.files.internal("splash.png"));
+        splashImage = loadTexture("multiverse-wars/splash.png");
         Image splash = new Image(splashImage);
         splash.setSize(stage.getViewport().getWorldWidth(), stage.getViewport().getWorldHeight());
         stage.addActor(splash);

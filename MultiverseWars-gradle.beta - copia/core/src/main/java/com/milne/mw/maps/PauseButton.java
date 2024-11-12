@@ -17,6 +17,8 @@ import com.milne.mw.MusicManager;
 import com.milne.mw.entities.EntityManager;
 import com.milne.mw.screens.MainMenuScreen;
 
+import static com.milne.mw.Global.loadTexture;
+
 public class PauseButton {
     private TextButton resumeButton;
     private TextButton mainMenuButton;
@@ -41,7 +43,7 @@ public class PauseButton {
         textButtonStyle.font = new BitmapFont();
         textButtonStyle.fontColor = Color.WHITE;
 
-        pauseBackground = new Image(new Texture("escena-pausa.png"));
+        pauseBackground = new Image(loadTexture("pause/escena-pausa.png"));
         pauseBackground.setSize(stage.getViewport().getWorldWidth(), stage.getViewport().getWorldHeight());
 
         resumeButton = new TextButton("Reanudar", textButtonStyle);

@@ -77,7 +77,7 @@
             float adjustedX = x - (float) entityType.getHitboxWidth() / 2;
             float adjustedY = y - (float) entityType.getHitboxHeight() / 2;
 
-            Character entity = entityType.getEntity(adjustedX, adjustedY, stage, this);
+            Character entity = entityType.getEntity(adjustedX, adjustedY, this);
 
             entity.getImage().setPosition(adjustedX, adjustedY);
             stage.addActor(entity.getImage());

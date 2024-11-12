@@ -13,6 +13,8 @@ import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.milne.mw.difficulty.DifficultySelectionScreen;
 import com.milne.mw.screens.MainMenuScreen;
 
+import static com.milne.mw.Global.loadTexture;
+
 public class MapSelectionScreen implements Screen {
     private Game game;
     private Stage stage;
@@ -27,15 +29,15 @@ public class MapSelectionScreen implements Screen {
         this.stage = new Stage(new FitViewport(800, 600));
         Gdx.input.setInputProcessor(stage);
 
-        backgroundTexture = new Texture(Gdx.files.internal("menu de mapas.jpg"));
+        backgroundTexture = loadTexture("maps/menu de mapas.jpg");
         backgroundImage = new Image(backgroundTexture);
         backgroundImage.setSize(stage.getViewport().getWorldWidth(), stage.getViewport().getWorldHeight());
         stage.addActor(backgroundImage);
 
-        map1Texture = new Texture(Gdx.files.internal("mapa1.jpg"));
-        map2Texture = new Texture(Gdx.files.internal("mapa2.jpg"));
-        map3Texture = new Texture(Gdx.files.internal("mapa3.jpg"));
-        map4Texture = new Texture(Gdx.files.internal("mapa4.jpg"));
+        map1Texture = loadTexture("maps/mapa1.jpg");
+        map2Texture = loadTexture("maps/mapa2.jpg");
+        map3Texture = loadTexture("maps/mapa3.jpg");
+        map4Texture = loadTexture("maps/mapa4.jpg");
 
         map1Image = new Image(map1Texture);
         map2Image = new Image(map2Texture);
@@ -60,28 +62,28 @@ public class MapSelectionScreen implements Screen {
         map1Image.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                mapSelected(new Texture(Gdx.files.internal("mapa1.jpg")));
+                mapSelected(loadTexture("maps/mapa1.jpg"));
             }
         });
 
         map2Image.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                mapSelected(new Texture(Gdx.files.internal("mapa2.jpg")));
+                mapSelected(loadTexture("maps/mapa2.jpg"));
             }
         });
 
         map3Image.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                mapSelected(new Texture(Gdx.files.internal("mapa3.jpg")));
+                mapSelected(loadTexture("maps/mapa3.jpg"));
             }
         });
 
         map4Image.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                mapSelected(new Texture(Gdx.files.internal("mapa4.jpg")));
+                mapSelected(loadTexture("maps/mapa4.jpg"));
             }
         });
     }

@@ -14,6 +14,8 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.milne.mw.screens.MainMenuScreen;
 
+import static com.milne.mw.Global.loadTexture;
+
 public class IntroductionScreen implements Screen {
 
     private Game game;
@@ -42,7 +44,7 @@ public class IntroductionScreen implements Screen {
         skin = new Skin(Gdx.files.internal("uiskin.json"));
 
         // Cargar la textura de la imagen de fondo
-        backgroundTexture = new Texture(Gdx.files.internal("introduccion.jpg"));
+        backgroundTexture = loadTexture("introduction/introduccion.jpg");
         backgroundImage = new Image(backgroundTexture);
 
         // Configurar el tamaño de la imagen de fondo
@@ -64,7 +66,7 @@ public class IntroductionScreen implements Screen {
         stage.addActor(pageLabel);
 
         // Cargar y agregar las flechas para cambiar de página
-        Image leftArrow = new Image(new Texture(Gdx.files.internal("izqui.png")));
+        Image leftArrow = new Image(loadTexture("introduction/izqui.png"));
         leftArrow.setSize(50, 50); // Ajustar el tamaño de la flecha de la izquierda
         leftArrow.setPosition(50, stage.getViewport().getWorldHeight() / 2f - leftArrow.getHeight() / 2);
         leftArrow.addListener(new ClickListener() {
@@ -79,7 +81,7 @@ public class IntroductionScreen implements Screen {
         });
         stage.addActor(leftArrow);
 
-        Image rightArrow = new Image(new Texture(Gdx.files.internal("dere.png")));
+        Image rightArrow = new Image(loadTexture("introduction/dere.png"));
         rightArrow.setSize(50, 50); // Ajustar el tamaño de la flecha de la derecha
         rightArrow.setPosition(stage.getViewport().getWorldWidth() - 100,
             stage.getViewport().getWorldHeight() / 2f - rightArrow.getHeight() / 2);

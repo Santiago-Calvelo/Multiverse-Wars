@@ -1,7 +1,6 @@
 package com.milne.mw.entities;
 
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.Array;
 
 public class RangedCharacter extends Character implements RangeListener {
@@ -11,11 +10,11 @@ public class RangedCharacter extends Character implements RangeListener {
 
     public RangedCharacter(Texture texture, int hitboxWidth, int hitboxHeight, Texture walk1Texture,
                            Texture walk2Texture, Texture attack1Texture, Texture attack2Texture,
-                           Texture projectileTexture, float x, float y, int lives,
+                           Texture projectileTexture, Texture deadTexture, float x, float y, int lives,
                            int speed, EntityManager entityManager,
-                           Stage stage, String type, int range, float attackCooldown) {
+                           String type, int range, float attackCooldown, int damage, int energy) {
         super(texture, x, y, hitboxWidth, hitboxHeight, lives, entityManager, speed,
-            walk1Texture, walk2Texture, attack1Texture, attack2Texture, stage, type, attackCooldown);
+            walk1Texture, walk2Texture, attack1Texture, attack2Texture, deadTexture, type, attackCooldown, damage, energy);
         this.projectileTexture = projectileTexture;
         this.range = range;
     }
@@ -29,7 +28,7 @@ public class RangedCharacter extends Character implements RangeListener {
             x = image.getX() - image.getWidth();
         }
         Projectile projectile = new Projectile(projectileTexture, x,
-            image.getY() + image.getHeight() / 2, entityManager, targetEnemy, getType());
+            image.getY() + image.getHeight() / 2, entityManager, targetEnemy, getType(), getDamage());
         entityManager.addProjectile(projectile);
     }
 

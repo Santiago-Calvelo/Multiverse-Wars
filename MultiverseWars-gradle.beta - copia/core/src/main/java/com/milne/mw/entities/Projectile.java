@@ -8,12 +8,12 @@ import com.badlogic.gdx.scenes.scene2d.ui.Image;
 public class Projectile {
     private Image image;
     private Rectangle hitbox;
-    private int damage = 5;
+    private int damage;
     private Character targetEnemy;
     private EntityManager entityManager;
     private String type;
 
-    public Projectile(Texture texture, float x, float y, EntityManager entityManager, Character targetEnemy, String type) {
+    public Projectile(Texture texture, float x, float y, EntityManager entityManager, Character targetEnemy, String type, int damage) {
         this.image = new Image(texture);
         this.image.setSize(20, 20);
         this.image.setPosition(x, y);
@@ -21,6 +21,7 @@ public class Projectile {
         this.entityManager = entityManager;
         this.targetEnemy = targetEnemy;
         this.type = type;
+        this.damage = damage;
 
         moveAction();
     }

@@ -9,6 +9,8 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 
+import static com.milne.mw.Global.loadTexture;
+
 public class TwoPlayerModeScreen implements Screen {
 
     private Game game;
@@ -21,7 +23,7 @@ public class TwoPlayerModeScreen implements Screen {
         this.stage = new Stage(new FitViewport(800, 600));
         Gdx.input.setInputProcessor(stage);
 
-        backgroundTexture = new Texture(Gdx.files.internal("DIFICULTAD DOS JUGADORES.jpg"));
+        backgroundTexture = loadTexture("difficulty/DIFICULTAD DOS JUGADORES.jpg");
         backgroundImage = new Image(backgroundTexture);
         backgroundImage.setSize(stage.getViewport().getWorldWidth(), stage.getViewport().getWorldHeight());
         stage.addActor(backgroundImage);
