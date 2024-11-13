@@ -50,7 +50,11 @@ public class MeleeCharacter extends Character {
             if (this != character && this.getHitbox().overlaps(character.getHitbox()) && !character.getType().equalsIgnoreCase(this.getType())) {
                 collisionDetected = true;
                 targetEnemy = character;
-                stopMovementAndAttack();  // Detenemos y atacamos
+                if (this.getSpeed() != 0) {
+                    stopMovementAndAttack();
+                } else {
+                    tryAttack();
+                }
             }
             i++;
         } while (i < characters.size && !collisionDetected);

@@ -67,8 +67,7 @@ public class RenderManager {
             drawPlacementZones(entityManager, pauseButton);
         }
 
-        // Llama solo si hay una animación de ataque activa
-        updateAttackAnimation(delta);
+        updateAttackAnimations(delta);
     }
 
     private void updateWalkAnimation(float delta, EntityManager entityManager) {

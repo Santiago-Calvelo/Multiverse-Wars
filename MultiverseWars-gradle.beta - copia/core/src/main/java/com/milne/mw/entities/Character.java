@@ -67,28 +67,18 @@ public abstract class Character {
     }
 
     public void update(float delta) {
-        if (!canAttack) {
-            // Acumula el tiempo hasta completar el primer cooldown
-            cooldownElapsed += delta;
-            if (cooldownElapsed >= attackCooldown) {
-                canAttack = true;  // Habilita el ataque tras el primer cooldown
-                cooldownElapsed = 0;  // Reinicia el contador
-            }
-        } else {
-            // Para ataques regulares después del primer cooldown
-            if (cooldownElapsed < attackCooldown) {
-                cooldownElapsed += delta;
-            } else {
-                canAttack = true;  // Permite el ataque
-                cooldownElapsed = 0;  // Reinicia el contador
-            }
+        cooldownElapsed += delta;
+
+        if (!canAttack && cooldownElapsed >= attackCooldown) {
+            canAttack = true;
+            cooldownElapsed = 0; // Reinicia cooldown después de estar listo
         }
     }
 
     public void tryAttack() {
+        RenderManager.getInstance().animateCharacterAttack(this, attackCooldown);
         if (canAttack) {
             attack();
-            RenderManager.getInstance().animateCharacterAttack(this, attackCooldown);
             canAttack = false;
             cooldownElapsed = 0;
         }
