@@ -15,19 +15,17 @@ public abstract class Character {
     private EntityType entityType;
     protected EntityManager entityManager;
     private int speed;
-    private Texture walk1Texture, walk2Texture, attack1Texture, attack2Texture, deathTexture;
+    private Texture walk1Texture, walk2Texture, attack1Texture, attack2Texture;
     private MoveToAction moveAction;
     private boolean isMoving, canAttack;
     private float attackCooldown, cooldownElapsed;
     private String type;
     private int damage, energy;
-    private float deathDelay = 0.5f, cooldownElapsedDeath;
-    private boolean isDying = false;
 
     public Character(Texture texture, float x, float y, int hitboxWidth, int hitboxHeight, int lives,
                      EntityManager entityManager, int speed,
                      Texture walk1Texture, Texture walk2Texture, Texture attack1Texture,
-                     Texture attack2Texture, Texture deathTexture, String type,
+                     Texture attack2Texture, String type,
                      float attackCooldown, int damage, int energy) {
         this.image = new Image(texture);
         this.image.setPosition(x, y);
@@ -41,11 +39,10 @@ public abstract class Character {
         this.walk2Texture = walk2Texture;
         this.attack1Texture = attack1Texture;
         this.attack2Texture = attack2Texture;
-        this.deathTexture = deathTexture;
         this.isMoving = false;
         this.speed = speed;
         this.type = type;
-        this.canAttack = true;
+        this.canAttack = false;
         this.attackCooldown = attackCooldown;
         this.cooldownElapsed = 0;
         this.damage = damage;
@@ -70,20 +67,21 @@ public abstract class Character {
     }
 
     public void update(float delta) {
-        // Actualización del cooldown de ataque
-        if (cooldownElapsed < attackCooldown) {
+        if (!canAttack) {
+            // Acumula el tiempo hasta completar el primer cooldown
             cooldownElapsed += delta;
+            if (cooldownElapsed >= attackCooldown) {
+                canAttack = true;  // Habilita el ataque tras el primer cooldown
+                cooldownElapsed = 0;  // Reinicia el contador
+            }
         } else {
-            canAttack = true;
-            cooldownElapsed = 0;
-        }
-
-        if (isDying && cooldownElapsedDeath < deathDelay) {
-            cooldownElapsedDeath += delta;
-        } else if (isDying) {
-            removeCharacter();
-            cooldownElapsedDeath = 0;
-            isDying = false;
+            // Para ataques regulares después del primer cooldown
+            if (cooldownElapsed < attackCooldown) {
+                cooldownElapsed += delta;
+            } else {
+                canAttack = true;  // Permite el ataque
+                cooldownElapsed = 0;  // Reinicia el contador
+            }
         }
     }
 
@@ -101,8 +99,8 @@ public abstract class Character {
 
     public void takeDamage(int damage) {
         this.lives -= damage;
-        if (lives <= 0 && !isDying) {
-            RenderManager.getInstance().animateDead(this, entityManager);
+        if (lives <= 0) {
+            removeCharacter();
         }
     }
 
@@ -133,23 +131,12 @@ public abstract class Character {
         tryAttack();
     }
 
-    public Image getImage() {
-        return image;
-    }
-    public String getType() {
-        return type;
-    }
-    public Texture getWalk1Texture() {
-        return walk1Texture;
-    }
-    public Texture getWalk2Texture() {
-        return walk2Texture;
-    }
-    public Texture getAttack1Texture() {
-        return attack1Texture;
-    }
+    public Image getImage() { return image; }
+    public String getType() { return type; }
+    public Texture getWalk1Texture() { return walk1Texture; }
+    public Texture getWalk2Texture() { return walk2Texture; }
+    public Texture getAttack1Texture() { return attack1Texture; }
     public Texture getAttack2Texture() { return attack2Texture; }
-    public Texture getDeathTexture() { return deathTexture; }
 
     public Rectangle getHitbox() {
         hitbox.setPosition(image.getX(), image.getY());
@@ -158,15 +145,9 @@ public abstract class Character {
 
     public int getDamage() { return damage; }
     public int getEnergy() { return energy; }
-    public int getSpeed() {
-        return speed;
-    }
-    public int getLives() {
-        return lives;
-    }
-    public float getX() {
-        return x;
-    }
+    public int getSpeed() { return speed; }
+    public int getLives() { return lives; }
+    public float getX() { return x; }
 
     public void dispose() {
         image.clearActions();

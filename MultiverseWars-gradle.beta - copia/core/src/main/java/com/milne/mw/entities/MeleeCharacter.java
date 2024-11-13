@@ -8,11 +8,11 @@ public class MeleeCharacter extends Character {
     private int damage = 0;
 
     public MeleeCharacter(Texture texture, int hitboxWidth, int hitboxHeight, Texture attack1Texture,
-                          Texture attack2Texture, Texture walk1Texture, Texture walk2Texture, Texture deathTexture,
+                          Texture attack2Texture, Texture walk1Texture, Texture walk2Texture,
                           float x, float y, int lives, int speed, EntityManager entityManager,
                           String type, float attackCooldown, int damage, int energy) {
         super(texture, x, y, hitboxWidth, hitboxHeight, lives, entityManager, speed, walk1Texture,
-            walk2Texture, attack1Texture, attack2Texture, deathTexture, type, attackCooldown, damage, energy);
+            walk2Texture, attack1Texture, attack2Texture, type, attackCooldown, damage, energy);
     }
 
     // Implementación del ataque cuerpo a cuerpo

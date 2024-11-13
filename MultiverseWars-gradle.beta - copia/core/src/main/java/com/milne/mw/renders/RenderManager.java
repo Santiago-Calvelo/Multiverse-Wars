@@ -12,16 +12,16 @@ import com.milne.mw.entities.EntityManager;
 import com.milne.mw.Global;
 import com.milne.mw.maps.PauseButton;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+
 public class RenderManager {
     private static RenderManager instance;
     private ShapeRenderer shapeRenderer;
     private Stage stage;
     private Image backgroundImage;
     private float walkAnimationTime;
-    private float attackAnimationTime;
-    private float dyingTime;
-    private boolean isAnimatingAttack, isDying;
-    private Character attackingCharacter, dyingCharacter; // Solo animar este personaje
+    private ArrayList<AttackAnimation> attackAnimations;
 
     private RenderManager(Texture mapTexture, Stage stage) {
         this.stage = stage;
@@ -29,6 +29,7 @@ public class RenderManager {
         this.backgroundImage = new Image(mapTexture);
         backgroundImage.setSize(stage.getWidth(), stage.getHeight());
         stage.addActor(backgroundImage);
+        this.attackAnimations = new ArrayList<>();
     }
 
     public static RenderManager getInstance(Texture mapTexture, Stage stage) {
@@ -67,13 +68,7 @@ public class RenderManager {
         }
 
         // Llama solo si hay una animación de ataque activa
-        if (isAnimatingAttack && !isDying) {
-            updateAttackAnimation(delta);
-        }
-
-        if (isDying) {
-            updateDeathAnimation(delta);
-        }
+        updateAttackAnimation(delta);
     }
 
     private void updateWalkAnimation(float delta, EntityManager entityManager) {
@@ -95,40 +90,20 @@ public class RenderManager {
         }
     }
 
-   public void animateCharacterAttack(Character character, float cooldown) {
-        if (isDying && dyingCharacter == character) {
-            return;
-        }
-        character.getImage().setDrawable(new TextureRegionDrawable(character.getAttack1Texture()));
-        attackAnimationTime = 0;
-        isAnimatingAttack = true;
-        attackingCharacter = character; // Establece el personaje que está atacando
+    // Método para iniciar la animación del ataque
+    public void animateCharacterAttack(Character character, float cooldown) {
+        // Crea una nueva animación de ataque y la añade a la lista
+        attackAnimations.add(new AttackAnimation(character, cooldown));
     }
 
-    private void updateAttackAnimation(float delta) {
-        attackAnimationTime += delta;
-        if (attackAnimationTime >= 0.5f && attackingCharacter != null) {
-            attackingCharacter.getImage().setDrawable(new TextureRegionDrawable(attackingCharacter.getAttack2Texture()));
-            isAnimatingAttack = false;
-            attackingCharacter = null; // Resetea después de la animación
-        }
-    }
-
-    public void animateDead(Character character, EntityManager entityManager) {
-        if (isAnimatingAttack && attackingCharacter == character) {
-            isAnimatingAttack = false;
-            attackingCharacter = null;
-        }
-        isDying = true;
-        dyingTime = 0;
-        dyingCharacter = character;
-    }
-
-    private void updateDeathAnimation(float delta) {
-        dyingTime += delta;
-        if (dyingTime >= 0.5f && dyingCharacter != null) {
-            dyingCharacter.getImage().setDrawable(new TextureRegionDrawable(dyingCharacter.getDeathTexture()));
-            isDying = false;
+    private void updateAttackAnimations(float delta) {
+        // Usa un iterador para actualizar y eliminar animaciones finalizadas
+        Iterator<AttackAnimation> iterator = attackAnimations.iterator();
+        while (iterator.hasNext()) {
+            AttackAnimation animation = iterator.next();
+            if (animation.update(delta)) {
+                iterator.remove(); // Elimina la animación si ha terminado
+            }
         }
     }
 
