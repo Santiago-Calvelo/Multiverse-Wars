@@ -24,7 +24,6 @@ public class AttackAnimation {
         // Cambia a la segunda textura de ataque en la mitad de la duración del ataque
         if (animationTime >= (duration / 2) - 0.05f && animationTime < duration) {
             character.getImage().setDrawable(new TextureRegionDrawable(character.getAttack2Texture()));
-            System.out.println(character.getAttack2Texture());
         }
 
         // Devuelve true si la animación ha terminado

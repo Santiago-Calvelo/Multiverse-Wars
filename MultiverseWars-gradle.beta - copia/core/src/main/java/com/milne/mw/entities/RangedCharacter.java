@@ -4,9 +4,9 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.utils.Array;
 
 public class RangedCharacter extends Character implements RangeListener {
-    private Texture projectileTexture;
+    private final Texture projectileTexture;
     private Character targetEnemy;
-    private int range;
+    private final int range;
 
     public RangedCharacter(Texture texture, int hitboxWidth, int hitboxHeight, Texture walk1Texture,
                            Texture walk2Texture, Texture attack1Texture, Texture attack2Texture,

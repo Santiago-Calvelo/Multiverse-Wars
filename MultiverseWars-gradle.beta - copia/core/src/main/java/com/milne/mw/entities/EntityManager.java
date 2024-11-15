@@ -22,11 +22,13 @@
         private float spawnAccumulator;
         private boolean isPaused = false;
         private Array<Projectile> projectiles;
+        private Array<Bomb> bombs;
 
         public EntityManager(Stage stage) {
             this.stage = stage;
             characters = new Array<>();
             projectiles = new Array<>();
+            bombs = new Array<>();
             this.placementHitboxes = new ArrayList<>();
             initPlacementPoints();
         }
@@ -91,6 +93,17 @@
             stage.addActor(projectile.getImage());
         }
 
+        public void addBomb(Bomb bomb) {
+            bombs.add(bomb);
+            stage.addActor(bomb.getImage()); // Añadir la imagen de la bomba al escenario
+        }
+
+        public void removeBomb(Bomb bomb) {
+            bombs.removeValue(bomb, true);
+            stage.getActors().removeValue(bomb.getImage(), true);
+            bomb.dispose();
+        }
+
         public void removeProjectile(Projectile projectile) {
             projectiles.removeValue(projectile, true);
             stage.getActors().removeValue(projectile.getImage(), true);
@@ -130,6 +143,15 @@
 
                 for (Projectile projectile : projectiles) {
                     projectile.update(delta);
+                }
+
+                Iterator<Bomb> bombIterator = bombs.iterator();
+                while (bombIterator.hasNext()) {
+                    Bomb bomb = bombIterator.next();
+                    bomb.update(delta);
+                    if (bomb.isDetonated()) {  // Verifica si la bomba ha explotado
+                        bombIterator.remove(); // Elimina la bomba de la lista
+                    }
                 }
             }
         }

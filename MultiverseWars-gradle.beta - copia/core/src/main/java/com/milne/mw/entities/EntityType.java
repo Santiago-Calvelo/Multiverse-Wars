@@ -54,6 +54,18 @@ public enum EntityType {
         }
     },
 
+    BLOON("characters/bloon/CARTA-GLOBO.jpg", "characters/bloon/globo0.png", "characters/bloon/globo1.png", "characters/bloon/globo2.png", "characters/bloon/globo0.png", "characters/projectile/bomba.png", 10, "tower", 50, 50, 0, 100, 1f, 10, 125) {
+        @Override
+        public Character getEntity(float x, float y, EntityManager entityManager) {
+            return new FlyCharacter(
+                loadTexture(getTexturePath()), getHitboxWidth(), getHitboxHeight(), loadTexture(getWalk1Path()),
+                loadTexture(getWalk2Path()), loadTexture(getAttack1Path()), loadTexture(getAttack2Path()),
+                loadTexture(getProjectilePath()), x, y, getLives(), getSpeed(), entityManager, getType(),
+                getRange(), getAttackCooldown(), getDamage(), getEnergy()
+            );
+        }
+    },
+
     SKELETON(null, "characters/skeleton/skeleton.png", "characters/skeleton/skeleton paso.png", "characters/skeleton/skeleton2.png", "characters/skeleton/skeleton3.png",  25, "enemy", 50, 50, 100, 1f, 10, 5) {
         @Override
         public Character getEntity(float x, float y, EntityManager entityManager) {
@@ -66,7 +78,7 @@ public enum EntityType {
         }
     },
 
-    STORMTROOPER("characters/stormtrooper/storm01.png", "characters/stormtrooper/storm01.png", "characters/stormtrooper/storm02.png", "characters/stormtrooper/storm03.png", "characters/stormtrooper/storm02.png", "characters/projectile/laser.png",  35, "enemy", 50, 50, 100, 5, 1f, 5, 10) {
+    STORMTROOPER(null, "characters/stormtrooper/storm01.png", "characters/stormtrooper/storm02.png", "characters/stormtrooper/storm03.png", "characters/stormtrooper/storm02.png", "characters/projectile/laser.png",  35, "enemy", 50, 50, 100, 5, 1f, 5, 10) {
         @Override
         public Character getEntity(float x, float y, EntityManager entityManager) {
             return new RangedCharacter(

@@ -9,18 +9,19 @@ import com.milne.mw.renders.RenderManager;
 
 public abstract class Character {
     protected Image image;
-    private Rectangle hitbox;
+    private final Rectangle hitbox;
     private int lives;
     private float x, y;
     private EntityType entityType;
     protected EntityManager entityManager;
     private int speed;
-    private Texture walk1Texture, walk2Texture, attack1Texture, attack2Texture;
+    private final Texture walk1Texture, walk2Texture, attack1Texture, attack2Texture;
     private MoveToAction moveAction;
     private boolean isMoving, canAttack;
-    private float attackCooldown, cooldownElapsed;
-    private String type;
-    private int damage, energy;
+    private final float attackCooldown;
+    private float cooldownElapsed;
+    private final String type;
+    private final int damage, energy;
 
     public Character(Texture texture, float x, float y, int hitboxWidth, int hitboxHeight, int lives,
                      EntityManager entityManager, int speed,
@@ -29,7 +30,9 @@ public abstract class Character {
                      float attackCooldown, int damage, int energy) {
         this.image = new Image(texture);
         this.image.setPosition(x, y);
-        this.image.setSize(50, 50);
+        if (!(this instanceof FlyCharacter)) {
+            this.image.setSize(hitboxWidth, hitboxHeight);
+        }
         this.hitbox = new Rectangle(x, y, hitboxWidth, hitboxHeight);
         this.lives = lives;
         this.x = x;
