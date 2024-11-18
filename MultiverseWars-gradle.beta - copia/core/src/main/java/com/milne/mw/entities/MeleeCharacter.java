@@ -23,7 +23,7 @@ public class MeleeCharacter extends Character {
             if (getDamage() == 0) {
                 this.damage = targetEnemy.getLives();
                 toRemove = true;
-            } else {
+            } else if (targetEnemy.getDamage() != 0){
                 this.damage = getDamage();
             }
             targetEnemy.takeDamage(this.damage);  // Aplica daño solo si `targetEnemy` está asignado

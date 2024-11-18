@@ -8,7 +8,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.utils.viewport.FitViewport;
-import com.milne.mw.MultiverseWars;
+import com.milne.mw.difficulty.Difficulty;
 import com.milne.mw.renders.RenderManager;
 import com.milne.mw.entities.EntityManager;
 import com.milne.mw.entities.EntityType;
@@ -21,18 +21,22 @@ public class MapScreen implements Screen {
     private Stage stage;
     private RenderManager renderManager;
     private EntityManager entityManager;
-    private PauseButton pauseButton;
+    private PauseMenu pauseMenu;
+    private VictoryMenu victoryMenu;
 
-    public MapScreen(Game game, Texture map) {
+    public MapScreen(Game game, Texture map, Difficulty difficultyLevel) {
         this.game = game;
         this.stage = new Stage(new FitViewport(800, 600));
         Gdx.input.setInputProcessor(stage);
         renderManager = RenderManager.getInstance(map, stage);
-        entityManager = new EntityManager(stage);
-        pauseButton = new PauseButton(stage, game, entityManager);
+
+        entityManager = new EntityManager(stage, difficultyLevel);
+        pauseMenu = new PauseMenu(stage, game, entityManager);
+        victoryMenu = new VictoryMenu(stage, game, pauseMenu);
 
         addEntityCardsToPanel();
-        entityManager.startEnemySpawner(5f);
+        entityManager.startEnemySpawner();
+        entityManager.setVictoryMenu(victoryMenu);
     }
 
     private void addEntityCardsToPanel() {
@@ -92,10 +96,9 @@ public class MapScreen implements Screen {
             float touchX = Gdx.input.getX();
             float touchY = Gdx.input.getY();
             Vector2 worldTouch = stage.getViewport().unproject(new Vector2(touchX, touchY));
-            pauseButton.handleInput(worldTouch.x, worldTouch.y);
+            pauseMenu.handleInput(worldTouch.x, worldTouch.y);
         }
-        renderManager.render(pauseButton.getIsPaused(), entityManager, delta, pauseButton);
-        entityManager.removeOffScreenCharacters();
+        renderManager.render(pauseMenu.getIsPaused(), entityManager, delta, pauseMenu);
     }
 
     @Override
@@ -126,6 +129,4 @@ public class MapScreen implements Screen {
         stage.clear();
         stage.dispose();
     }
-
-    public void setDifficulty(int difficultyLevel) {}
 }

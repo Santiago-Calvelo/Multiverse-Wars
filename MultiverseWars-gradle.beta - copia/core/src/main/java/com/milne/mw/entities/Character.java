@@ -5,6 +5,7 @@ import com.badlogic.gdx.scenes.scene2d.actions.MoveToAction;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Array;
+import com.milne.mw.difficulty.Difficulty;
 import com.milne.mw.renders.RenderManager;
 
 public abstract class Character {
@@ -21,7 +22,9 @@ public abstract class Character {
     private final float attackCooldown;
     private float cooldownElapsed;
     private final String type;
-    private final int damage, energy;
+    private int damage, energy;
+    private final int BASE_LIVES, BASE_SPEED, BASE_DAMAGE;
+    private int lastScaledRound = -1;
 
     public Character(Texture texture, float x, float y, int hitboxWidth, int hitboxHeight, int lives,
                      EntityManager entityManager, int speed,
@@ -35,6 +38,7 @@ public abstract class Character {
         }
         this.hitbox = new Rectangle(x, y, hitboxWidth, hitboxHeight);
         this.lives = lives;
+        this.BASE_LIVES = lives;
         this.x = x;
         this.y = y;
         this.entityManager = entityManager;
@@ -44,11 +48,13 @@ public abstract class Character {
         this.attack2Texture = attack2Texture;
         this.isMoving = false;
         this.speed = speed;
+        this.BASE_SPEED = speed;
         this.type = type;
         this.canAttack = false;
         this.attackCooldown = attackCooldown;
         this.cooldownElapsed = 0;
         this.damage = damage;
+        this.BASE_DAMAGE = damage;
         this.energy = energy;
 
         if (speed != 0) {
@@ -78,6 +84,19 @@ public abstract class Character {
         }
     }
 
+    public void scaleStats(Difficulty difficulty, int roundNumber) {
+        if (lastScaledRound != roundNumber) {
+            lastScaledRound = roundNumber;
+
+            float multiplier = 1.0f + (roundNumber * difficulty.getScalingFactor());
+            this.lives = Math.round(BASE_LIVES * multiplier);
+            this.damage = Math.round(BASE_DAMAGE * multiplier);
+            this.speed = Math.round(BASE_SPEED * Math.min(multiplier, 1.05f));
+        }
+    }
+
+
+
     public void tryAttack() {
         RenderManager.getInstance().animateCharacterAttack(this, attackCooldown);
         if (canAttack) {
@@ -93,14 +112,8 @@ public abstract class Character {
     public void takeDamage(int damage) {
         this.lives -= damage;
         if (lives <= 0) {
-            removeCharacter();
+            entityManager.removeCharacter(this);
         }
-    }
-
-    public void removeCharacter() {
-        dispose();
-        entityManager.releasePosition(this);
-        entityManager.getCharacters().removeValue(this, true);
     }
 
     public void pause() {

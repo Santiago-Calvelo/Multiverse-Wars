@@ -6,11 +6,11 @@ import com.badlogic.gdx.utils.Array;
 public class FlyCharacter extends Character {
     private int enemiesSpawned = 0;
 
-    public FlyCharacter(Texture texture, int hitboxWidth, int hitboxHeight, Texture walk1Texture,
-                        Texture walk2Texture, Texture attack1Texture, Texture attack2Texture,
-                        float x, float y, int lives, int speed, EntityManager entityManager,
-                        String type, float attackCooldown, int damage, int energy) {
-        super(texture, x, y, hitboxWidth, hitboxHeight, lives, entityManager, speed, walk1Texture, walk2Texture, attack1Texture, attack2Texture, type, attackCooldown, damage, energy);
+    public FlyCharacter(Texture texture, int hitboxWidth, int hitboxHeight, Texture walkTexture,
+                        Texture attackTexture, float x, float y, int lives, int speed,
+                        EntityManager entityManager, String type, float attackCooldown,
+                        int damage, int energy) {
+        super(texture, x, y, hitboxWidth, hitboxHeight, lives, entityManager, speed, walkTexture, walkTexture, attackTexture, attackTexture, type, attackCooldown, damage, energy);
         System.out.println(y);
     }
 
@@ -23,7 +23,7 @@ public class FlyCharacter extends Character {
     }
 
     public void callEnemies() {
-        final float MIDDLE_X = entityManager.getCellWidth() * 2;
+        final float MIDDLE_X = entityManager.getCellWidth() * 3;
         final int maxEnemies = 3;
 
         if (image.getX() >= MIDDLE_X && enemiesSpawned < maxEnemies) {
@@ -44,6 +44,7 @@ public class FlyCharacter extends Character {
                 float spawnX = image.getX() + (float) randomEnemy.getHitboxWidth() / 2;
                 float spawnY = image.getY() + (float) randomEnemy.getHitboxHeight() / 2;
                 entityManager.spawnEntity(randomEnemy, spawnX, spawnY);
+                entityManager.setEnemiesInGame(1);
                 enemiesSpawned++;
             }
         }

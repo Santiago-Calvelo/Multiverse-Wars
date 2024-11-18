@@ -4,7 +4,6 @@ import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.math.Circle;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
@@ -12,14 +11,13 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
-import com.milne.mw.MultiverseWars;
 import com.milne.mw.MusicManager;
 import com.milne.mw.entities.EntityManager;
 import com.milne.mw.screens.MainMenuScreen;
 
 import static com.milne.mw.Global.loadTexture;
 
-public class PauseButton {
+public class PauseMenu {
     private TextButton resumeButton;
     private TextButton mainMenuButton;
     private boolean isPaused = false;
@@ -28,8 +26,9 @@ public class PauseButton {
     private Image pauseBackground;
     public Circle pauseButtonHitbox;
     private Stage stage;
+    private boolean enable = true;
 
-    public PauseButton(Stage stage, Game game, EntityManager entityManager) {
+    public PauseMenu(Stage stage, Game game, EntityManager entityManager) {
         this.stage = stage;
         this.game = game;
         this.entityManager = entityManager;
@@ -67,13 +66,13 @@ public class PauseButton {
     }
 
     public void handleInput(float touchX, float touchY) {
-        if (pauseButtonHitbox.contains(touchX, touchY)) {
+        if (enable && pauseButtonHitbox.contains(touchX, touchY)) {
             togglePause();
         }
     }
 
     public void checkForEscapeKey() {
-        if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
+        if (enable && Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
             togglePause();
         }
     }
@@ -102,6 +101,10 @@ public class PauseButton {
         pauseBackground.remove();
         resumeButton.remove();
         mainMenuButton.remove();
+    }
+
+    public void setEnable(boolean enable) {
+        this.enable = enable;
     }
 
     public boolean getIsPaused() {

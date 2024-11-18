@@ -10,7 +10,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.milne.mw.entities.Character;
 import com.milne.mw.entities.EntityManager;
 import com.milne.mw.Global;
-import com.milne.mw.maps.PauseButton;
+import com.milne.mw.maps.PauseMenu;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -53,18 +53,18 @@ public class RenderManager {
         return instance;
     }
 
-    public void render(boolean isPaused, EntityManager entityManager, float delta, PauseButton pauseButton) {
+    public void render(boolean isPaused, EntityManager entityManager, float delta, PauseMenu pauseMenu) {
         if (!isPaused) {
             stage.act(delta);
             entityManager.update(delta);
             updateWalkAnimation(delta, entityManager);
         }
-        pauseButton.checkForEscapeKey();
+        pauseMenu.checkForEscapeKey();
         stage.draw();
 
         if (!isPaused && Global.debugMode) {
             drawHitboxes(entityManager);
-            drawPlacementZones(entityManager, pauseButton);
+            drawPlacementZones(entityManager, pauseMenu);
         }
 
         updateAttackAnimations(delta);
@@ -106,12 +106,12 @@ public class RenderManager {
         }
     }
 
-    private void drawPlacementZones(EntityManager entityManager, PauseButton pauseButton) {
+    private void drawPlacementZones(EntityManager entityManager, PauseMenu pauseMenu) {
         shapeRenderer.setProjectionMatrix(stage.getViewport().getCamera().combined);
         shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
         shapeRenderer.setColor(Color.GREEN);
 
-        shapeRenderer.circle(pauseButton.pauseButtonHitbox.x, pauseButton.pauseButtonHitbox.y, pauseButton.pauseButtonHitbox.radius);
+        shapeRenderer.circle(pauseMenu.pauseButtonHitbox.x, pauseMenu.pauseButtonHitbox.y, pauseMenu.pauseButtonHitbox.radius);
         for (Rectangle hitbox : entityManager.getPlacementHitboxes()) {
             shapeRenderer.rect(hitbox.x, hitbox.y, hitbox.width, hitbox.height);
         }

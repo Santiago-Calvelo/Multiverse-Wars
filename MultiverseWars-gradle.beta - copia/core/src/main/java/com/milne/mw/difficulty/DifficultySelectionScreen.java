@@ -56,7 +56,7 @@ public class DifficultySelectionScreen implements Screen {
         easyButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                startGameWithDifficulty(1);
+                startGameWithDifficulty(Difficulty.EASY);
             }
         });
 
@@ -65,7 +65,7 @@ public class DifficultySelectionScreen implements Screen {
         mediumButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                startGameWithDifficulty(2);
+                startGameWithDifficulty(Difficulty.MEDIUM);
             }
         });
 
@@ -74,7 +74,7 @@ public class DifficultySelectionScreen implements Screen {
         hardButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                startGameWithDifficulty(3);
+                startGameWithDifficulty(Difficulty.HARD);
             }
         });
 
@@ -83,9 +83,8 @@ public class DifficultySelectionScreen implements Screen {
         stage.addActor(hardButton);
     }
 
-    private void startGameWithDifficulty(int difficultyLevel) {
-        MapScreen mapScreen = new MapScreen((MultiverseWars) game, map);
-        mapScreen.setDifficulty(difficultyLevel);
+    private void startGameWithDifficulty(Difficulty difficultyLevel) {
+        MapScreen mapScreen = new MapScreen((MultiverseWars) game, map, difficultyLevel);
         game.setScreen(mapScreen);
     }
 
