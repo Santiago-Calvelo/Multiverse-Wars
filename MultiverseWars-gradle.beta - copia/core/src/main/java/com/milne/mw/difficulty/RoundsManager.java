@@ -16,12 +16,12 @@ public class RoundsManager {
         Round round1 = new Round(EntityType.SKELETON, EntityType.SKELETON, EntityType.SKELETON, EntityType.SKELETON);
         Round round2 = new Round(EntityType.SKELETON, EntityType.SKELETON, EntityType.STORMTROOPER, EntityType.SKELETON, EntityType.STORMTROOPER);
         Round round3 = new Round(EntityType.STORMTROOPER, EntityType.SKELETON, EntityType.SKELETON, EntityType.STORMTROOPER, EntityType.STORMTROOPER);
-        Round round4 = new Round(EntityType.SOLDIER);
+        Round round4 = new Round(EntityType.SOLDIER, EntityType.BARBARIAN, EntityType.BARBARIAN, EntityType.SOLDIER, EntityType.SKELETON);
 
         rounds.add(round1);
         rounds.add(round2);
         rounds.add(round3);
-
+        rounds.add(round4);
     }
 
     public Round getRound(int index) {

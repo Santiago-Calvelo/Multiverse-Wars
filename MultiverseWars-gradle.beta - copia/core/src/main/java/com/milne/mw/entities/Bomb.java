@@ -19,8 +19,8 @@ public class Bomb {
     private float explosionDisplayTime = 0.5f; // Tiempo para mostrar la explosión (en segundos)
     private float explosionTimer = 0;
 
-    public Bomb(Texture texture, float x, float y, int damage, EntityManager entityManager, float targetY) {
-        this.image = new Image(texture);
+    public Bomb(float x, float y, int damage, EntityManager entityManager, float targetY) {
+        this.image = new Image(loadTexture("characters/projectile/bomba.png"));
         this.image.setSize(30, 30); // Tamaño inicial de la bomba
         this.image.setPosition(x, y);
         this.damage = damage;
