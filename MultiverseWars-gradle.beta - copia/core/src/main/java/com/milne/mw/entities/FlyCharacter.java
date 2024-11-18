@@ -19,11 +19,11 @@ public class FlyCharacter extends Character{
     }
 
     public void bombAttack() {
-        System.out.println("hola");
-        float bombX = image.getX() + image.getWidth() / 2;
-        float bombY = image.getY();
-
-        Bomb bomb = new Bomb(projectileTexture, bombX, bombY, range, getDamage(), 2f, entityManager);
+        float bombX = image.getX() + image.getWidth() / 2 + entityManager.getCellWidth();
+        float bombY = image.getY() + image.getHeight();
+        float targetY = image.getY();
+        Bomb bomb = new Bomb(projectileTexture, bombX, bombY, getDamage(), entityManager, targetY);
+        entityManager.addBomb(bomb);
     }
 
     public void callEnemies() {

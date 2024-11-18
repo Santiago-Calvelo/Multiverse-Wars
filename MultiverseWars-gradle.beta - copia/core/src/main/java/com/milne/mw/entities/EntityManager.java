@@ -149,7 +149,7 @@
                 while (bombIterator.hasNext()) {
                     Bomb bomb = bombIterator.next();
                     bomb.update(delta);
-                    if (bomb.isDetonated()) {  // Verifica si la bomba ha explotado
+                    if (bomb.getIsToRemove()) {  // Verifica si la bomba ha explotado
                         bombIterator.remove(); // Elimina la bomba de la lista
                     }
                 }
@@ -206,6 +206,8 @@
         public float getCellWidth() {
             return CELL_WIDTH;
         }
+
+        public float getCellHeight() { return CELL_HEIGHT; }
 
         public void removeCharacter(Character character) {
             character.getImage().remove();

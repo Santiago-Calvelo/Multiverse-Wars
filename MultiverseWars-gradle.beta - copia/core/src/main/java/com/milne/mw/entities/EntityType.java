@@ -54,7 +54,7 @@ public enum EntityType {
         }
     },
 
-    BLOON("characters/bloon/CARTA-GLOBO.jpg", "characters/bloon/globo0.png", "characters/bloon/globo1.png", "characters/bloon/globo2.png", "characters/bloon/globo0.png", "characters/projectile/bomba.png", 10, "tower", 50, 50, 0, 100, 1f, 10, 125) {
+    BLOON("characters/bloon/CARTA-GLOBO.jpg", "characters/bloon/globo0.png", "characters/bloon/globo1.png", "characters/bloon/globo0.png", "characters/bloon/globo2.png", "characters/projectile/bomba.png", 10, "tower", 50, 50, 0, 100, 1f, 25, 125) {
         @Override
         public Character getEntity(float x, float y, EntityManager entityManager) {
             return new FlyCharacter(
@@ -66,7 +66,7 @@ public enum EntityType {
         }
     },
 
-    SKELETON(null, "characters/skeleton/skeleton.png", "characters/skeleton/skeleton paso.png", "characters/skeleton/skeleton2.png", "characters/skeleton/skeleton3.png",  25, "enemy", 50, 50, 100, 1f, 10, 5) {
+    SKELETON("characters/skeleton/skeleton.png", "characters/skeleton/skeleton.png", "characters/skeleton/skeleton paso.png", "characters/skeleton/skeleton2.png", "characters/skeleton/skeleton3.png",  25, "enemy", 50, 50, 100, 1f, 10, 5) {
         @Override
         public Character getEntity(float x, float y, EntityManager entityManager) {
             return new MeleeCharacter(
