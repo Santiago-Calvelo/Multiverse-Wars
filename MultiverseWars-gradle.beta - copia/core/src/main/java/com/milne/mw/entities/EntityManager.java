@@ -6,12 +6,15 @@ import com.badlogic.gdx.utils.Array;
 import com.milne.mw.difficulty.Difficulty;
 import com.milne.mw.difficulty.Round;
 import com.milne.mw.difficulty.RoundManager;
-import com.milne.mw.maps.VictoryMenu;
+import com.milne.mw.menu.VictoryMenu;
+import com.milne.mw.player.Player;
 
 import java.util.*;
 
 public class EntityManager {
     private Stage stage;
+    private Difficulty difficultyLevel;
+    private Player player;
     private Array<Character> characters;
     private ArrayList<Rectangle> placementHitboxes;
     private HashMap<Integer, Character> positionMap;
@@ -27,15 +30,15 @@ public class EntityManager {
     private boolean isPaused = false;
     private Array<Projectile> projectiles;
     private Array<Bomb> bombs;
-    private Difficulty difficultyLevel;
     private RoundManager roundManager;
     private int enemiesInGame = 0;
     private int currentRoundIndex = 0;
     private VictoryMenu victoryMenu;
 
-    public EntityManager(Stage stage, Difficulty difficultyLevel) {
+    public EntityManager(Stage stage, Difficulty difficultyLevel, Player player) {
         this.stage = stage;
         this.difficultyLevel = difficultyLevel;
+        this.player = player;
         characters = new Array<>();
         projectiles = new Array<>();
         bombs = new Array<>();
@@ -68,17 +71,20 @@ public class EntityManager {
         int i = 0;
         Rectangle cardArea = new Rectangle(x, y, cardWidth, cardHeight);
 
-        do {
-            Rectangle hitbox = placementHitboxes.get(i);
-            if (!positionMap.containsKey(i) && hitbox.overlaps(cardArea)) {
-                float centerX = hitbox.x + hitbox.width / 2;
-                float centerY = hitbox.y + hitbox.height / 2;
-                Character entity = spawnEntity(entityType, centerX, centerY);
+        if (entityType.getEnergy() <= player.getEnergy()) {
+            do {
+                Rectangle hitbox = placementHitboxes.get(i);
+                if (!positionMap.containsKey(i) && hitbox.overlaps(cardArea)) {
+                    float centerX = hitbox.x + hitbox.width / 2;
+                    float centerY = hitbox.y + hitbox.height / 2;
+                    Character entity = spawnEntity(entityType, centerX, centerY);
                     positionMap.put(i, entity);
                     placed = true;
-            }
-            i++;
-        } while (!placed && i < placementHitboxes.size());
+                }
+                i++;
+            } while (!placed && i < placementHitboxes.size());
+            player.modifyEnergy(-entityType.getEnergy());
+        }
     }
 
     public Character spawnEntity(EntityType entityType, float x, float y) {
@@ -92,7 +98,6 @@ public class EntityManager {
         stage.addActor(entity.getImage());
         characters.add(entity);
 
-        System.out.println(y);
         return entity;
     }
 
@@ -130,18 +135,15 @@ public class EntityManager {
     private void spawnRoundEnemy() {
         Round currentRound = roundManager.getRound(currentRoundIndex);
 
-        System.out.println(currentRound.getRoundNumber());
-        int i = 0;
         if (!currentRound.getEnemies().isEmpty()) {
-            EntityType enemyType = currentRound.getEnemy(i);
-            currentRound.getEnemies().remove(i);
-            float y = currentRound.getyPosition(i);
-            currentRound.getyPositions().remove(i);
+            EntityType enemyType = currentRound.getEnemy(0);
+            currentRound.getEnemies().remove(0);
+            float y = currentRound.getyPosition(0);
+            currentRound.getyPositions().remove(0);
             float x = stage.getViewport().getWorldWidth();
             spawnEntity(enemyType, x, y);
             spawnAccumulator = 0;
             enemiesInGame++;
-            i++;
         } else if (enemiesInGame == 0) {
             currentRoundIndex++;
             scaleStatsAllPlacedCharacters();
@@ -160,6 +162,8 @@ public class EntityManager {
 
     public void update(float delta) {
         if (!isPaused) {
+            player.update(delta);
+
             removeOffScreenCharacters();
 
             spawnAccumulator += delta;
@@ -193,13 +197,16 @@ public class EntityManager {
 
         for (Character character : characters) {
             if (character.getImage().getX() < 0) {
-                System.out.println("Personaje fuera de la pantalla. Marcando para eliminar...");
                 charactersToRemove.add(character);
             }
         }
 
         for (Character character : charactersToRemove) {
             removeCharacter(character);
+            player.loseLife();
+            if (!player.isAlive()) {
+                victoryMenu.createVictoryMenu();
+            }
         }
     }
 
@@ -239,6 +246,10 @@ public class EntityManager {
         enemiesInGame += num;
     }
 
+    public int getRound() {
+        return roundManager.getRound(currentRoundIndex).getRoundNumber();
+    }
+
     public Array<Character> getCharacters() {
         return characters;
     }
@@ -253,6 +264,7 @@ public class EntityManager {
 
     public void removeCharacter(Character character) {
         if (character.getType().equalsIgnoreCase("enemy")) {
+            player.modifyEnergy(character.getEnergy());
             enemiesInGame--;
         }
         character.getImage().remove();

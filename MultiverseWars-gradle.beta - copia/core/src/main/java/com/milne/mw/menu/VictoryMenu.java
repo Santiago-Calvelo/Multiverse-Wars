@@ -1,4 +1,4 @@
-package com.milne.mw.maps;
+package com.milne.mw.menu;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
@@ -36,7 +36,7 @@ public class VictoryMenu {
         textButtonStyle.font = new BitmapFont();
         textButtonStyle.fontColor = Color.WHITE;
 
-        pauseBackground = new Image(loadTexture("pause/escena-pausa.png"));
+        pauseBackground = new Image(loadTexture("multiverse-wars/win.jpg"));
         pauseBackground.setSize(stage.getViewport().getWorldWidth(), stage.getViewport().getWorldHeight());
 
 

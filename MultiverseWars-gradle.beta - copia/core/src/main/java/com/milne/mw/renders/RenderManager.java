@@ -1,16 +1,21 @@
 package com.milne.mw.renders;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.milne.mw.entities.Character;
 import com.milne.mw.entities.EntityManager;
 import com.milne.mw.Global;
-import com.milne.mw.maps.PauseMenu;
+import com.milne.mw.menu.PauseMenu;
+import com.milne.mw.player.Player;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -22,6 +27,12 @@ public class RenderManager {
     private Image backgroundImage;
     private float walkAnimationTime;
     private ArrayList<AttackAnimation> attackAnimations;
+    private int maxRound, currentRound;
+    private Skin skin;
+    private Label roundLabel;
+    private Label livesLabel;
+    private Label energyLabel;
+    private Player player;
 
     private RenderManager(Texture mapTexture, Stage stage) {
         this.stage = stage;
@@ -58,6 +69,7 @@ public class RenderManager {
             stage.act(delta);
             entityManager.update(delta);
             updateWalkAnimation(delta, entityManager);
+            updateLabels(entityManager.getRound());
         }
         pauseMenu.checkForEscapeKey();
         stage.draw();
@@ -106,6 +118,49 @@ public class RenderManager {
         }
     }
 
+    private void updateLabels(int currentRound) {
+        if (this.currentRound != currentRound) {
+            this.currentRound = currentRound;
+        }
+        roundLabel.setText(currentRound + "/" + maxRound);
+        livesLabel.setText("Vidas: " + player.getLives());
+        energyLabel.setText("Energía: " + player.getEnergy());
+    }
+
+    public void initializeLabels(int currentRound) {
+
+        skin = new Skin(Gdx.files.internal("uiskin.json"));
+        roundLabel = new Label("", skin);
+        roundLabel.setFontScale(2f);
+        roundLabel.setColor(Color.WHITE);
+
+        Table rounds = new Table();
+        rounds.top().right();
+        rounds.setFillParent(true);
+        rounds.add(roundLabel).padTop(20).padRight(20);
+        stage.addActor(rounds);
+
+        livesLabel = new Label("Vidas: " + player.getLives(), skin);
+        livesLabel.setFontScale(1.5f);
+        livesLabel.setColor(Color.RED);
+        stage.addActor(livesLabel);
+
+        energyLabel = new Label("Energía: " + player.getEnergy(), skin);
+        energyLabel.setFontScale(1.5f);
+        energyLabel.setColor(Color.BLUE);
+        stage.addActor(energyLabel);
+
+        // Posición
+        Table energyAndLives = new Table();
+        energyAndLives.top().left();
+        energyAndLives.setFillParent(true);
+        energyAndLives.add(livesLabel).padLeft(20).padTop(20).row();
+        energyAndLives.add(energyLabel).padLeft(20);
+        stage.addActor(energyAndLives);
+
+        updateLabels(currentRound);
+    }
+
     private void drawPlacementZones(EntityManager entityManager, PauseMenu pauseMenu) {
         shapeRenderer.setProjectionMatrix(stage.getViewport().getCamera().combined);
         shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
@@ -132,8 +187,18 @@ public class RenderManager {
         shapeRenderer.end();
     }
 
+    public void setMaxRound(int maxRound) {
+        this.maxRound = maxRound;
+    }
+
+    public void setPlayer(Player player) {
+        this.player = player;
+    }
+
     public void dispose() {
         shapeRenderer.dispose();
         backgroundImage.remove();
+        roundLabel.remove();
+        skin.dispose();
     }
 }

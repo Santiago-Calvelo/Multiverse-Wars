@@ -9,6 +9,9 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.milne.mw.difficulty.Difficulty;
+import com.milne.mw.menu.PauseMenu;
+import com.milne.mw.menu.VictoryMenu;
+import com.milne.mw.player.Player;
 import com.milne.mw.renders.RenderManager;
 import com.milne.mw.entities.EntityManager;
 import com.milne.mw.entities.EntityType;
@@ -21,6 +24,7 @@ public class MapScreen implements Screen {
     private Stage stage;
     private RenderManager renderManager;
     private EntityManager entityManager;
+    private Player player;
     private PauseMenu pauseMenu;
     private VictoryMenu victoryMenu;
 
@@ -29,14 +33,18 @@ public class MapScreen implements Screen {
         this.stage = new Stage(new FitViewport(800, 600));
         Gdx.input.setInputProcessor(stage);
         renderManager = RenderManager.getInstance(map, stage);
-
-        entityManager = new EntityManager(stage, difficultyLevel);
+        player = new Player(difficultyLevel.getInitalLives(), difficultyLevel.getInitialEnergy(), difficultyLevel.getEnergyGenerationRate());
+        entityManager = new EntityManager(stage, difficultyLevel, player);
         pauseMenu = new PauseMenu(stage, game, entityManager);
         victoryMenu = new VictoryMenu(stage, game, pauseMenu);
 
         addEntityCardsToPanel();
         entityManager.startEnemySpawner();
         entityManager.setVictoryMenu(victoryMenu);
+
+        renderManager.setPlayer(player);
+        renderManager.setMaxRound(difficultyLevel.getMaxRound());
+        renderManager.initializeLabels(entityManager.getRound());
     }
 
     private void addEntityCardsToPanel() {

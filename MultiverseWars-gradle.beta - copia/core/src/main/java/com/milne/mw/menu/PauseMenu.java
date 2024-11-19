@@ -1,4 +1,4 @@
-package com.milne.mw.maps;
+package com.milne.mw.menu;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
