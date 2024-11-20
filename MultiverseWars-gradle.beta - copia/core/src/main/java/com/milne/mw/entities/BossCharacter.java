@@ -18,6 +18,7 @@ public class BossCharacter extends Character {
     private float specialDuration = 0f;
     private final float forceSmashDuration = 3f;
     private final float moveForceDuration = 1f;
+    private BossAttacks lastAttack;
 
     private BossAttacks currentSpecialAttack = null;
 
@@ -43,9 +44,9 @@ public class BossCharacter extends Character {
                 forceSmashAccumulator += delta;
                 moveForceAccumulator += delta;
 
-                if (forceSmashAccumulator >= 10f) { // Cooldown de Force Smash
+                if (forceSmashAccumulator >= 5f && lastAttack != BossAttacks.FORCE_SMASH) { // Cooldown de Force Smash
                     startSpecialAttack(BossAttacks.FORCE_SMASH);
-                } else if (moveForceAccumulator >= 1f) { // Cooldown de Move Force
+                } else if (moveForceAccumulator >= 5f && lastAttack != BossAttacks.MOVE_FORCE) { // Cooldown de Move Force
                     startSpecialAttack(BossAttacks.MOVE_FORCE);
                 }
             }
@@ -60,10 +61,12 @@ public class BossCharacter extends Character {
         switch (attack) {
             case FORCE_SMASH:
                 startForceSmash();
+                lastAttack = attack;
                 forceSmashAccumulator = 0f; // Reinicia el acumulador
                 break;
             case MOVE_FORCE:
                 startMoveForce();
+                lastAttack = attack;
                 moveForceAccumulator = 0f; // Reinicia el acumulador
                 break;
         }
