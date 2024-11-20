@@ -6,10 +6,14 @@ import com.badlogic.gdx.utils.Array;
 import com.milne.mw.difficulty.Difficulty;
 import com.milne.mw.difficulty.Round;
 import com.milne.mw.difficulty.RoundManager;
+import com.milne.mw.entities.boss.BossCharacter;
 import com.milne.mw.menu.VictoryMenu;
 import com.milne.mw.player.Player;
+import com.milne.mw.renders.BossAnimator;
 
 import java.util.*;
+
+import static com.milne.mw.Global.loadTexture;
 
 public class EntityManager {
     private Stage stage;
@@ -34,6 +38,8 @@ public class EntityManager {
     private int enemiesInGame = 0;
     private int currentRoundIndex = 0;
     private VictoryMenu victoryMenu;
+    private boolean bossIsAlive = false;
+    private Character bossFinal;
 
     public EntityManager(Stage stage, Difficulty difficultyLevel, Player player) {
         this.stage = stage;
@@ -92,13 +98,18 @@ public class EntityManager {
         float adjustedY = y - (float) entityType.getHitboxHeight() / 2;
 
         Character entity = entityType.getEntity(adjustedX, adjustedY, this);
-
         entity.scaleStats(difficultyLevel, currentRoundIndex);
         entity.getImage().setPosition(adjustedX, adjustedY);
         stage.addActor(entity.getImage());
         characters.add(entity);
 
         return entity;
+    }
+
+    public void spawnBossFinal(Character bossFinal, float x, float y) {
+        bossFinal.getImage().setPosition(x, y);
+        stage.addActor(bossFinal.getImage());
+        characters.add(bossFinal);
     }
 
     public void addProjectile(Projectile projectile) {
@@ -144,12 +155,33 @@ public class EntityManager {
             spawnEntity(enemyType, x, y);
             spawnAccumulator = 0;
             enemiesInGame++;
-        } else if (enemiesInGame == 0) {
+        } else if (enemiesInGame == 0 && !bossIsAlive) {
             currentRoundIndex++;
             scaleStatsAllPlacedCharacters();
         }
 
-        if (currentRoundIndex == difficultyLevel.getMaxRound()) {
+        if (currentRoundIndex == difficultyLevel.getMaxRound() && !bossIsAlive) {
+            bossIsAlive = true;
+            BossAnimator animator = new BossAnimator(stage);
+            int hitboxWidth = 50;
+            int hitboxHeight = 50;
+            float adjustedX = stage.getViewport().getWorldWidth() - (float) hitboxWidth / 2;
+            float adjustedY = 200.0f - (float) hitboxHeight / 2;
+            bossFinal = new BossCharacter(
+                loadTexture("characters/boss/boss.png"),
+                adjustedX,
+                adjustedY,
+                hitboxWidth, hitboxHeight,
+                3000,
+                this,
+                25,
+                loadTexture("characters/boss/boss.png"),
+                loadTexture("characters/boss/boss.png"),
+                loadTexture("characters/boss/force-aura.png"),
+                "enemy", 1f, 30, 0, animator
+            );
+            spawnBossFinal(bossFinal, adjustedX, adjustedY);
+        } else if(currentRoundIndex > difficultyLevel.getMaxRound()) {
             victoryMenu.createVictoryMenu();
         }
     }
@@ -162,6 +194,14 @@ public class EntityManager {
 
     public void update(float delta) {
         if (!isPaused) {
+            if (bossIsAlive) {
+                if (bossFinal.getLives() <= 0) {
+                    bossIsAlive = false;
+                    bossFinal = null;
+                    currentRoundIndex++;
+                }
+            }
+
             player.update(delta);
 
             removeOffScreenCharacters();
@@ -181,14 +221,10 @@ public class EntityManager {
                 projectile.update(delta);
             }
 
-            Iterator<Bomb> bombIterator = bombs.iterator();
-            while (bombIterator.hasNext()) {
-                Bomb bomb = bombIterator.next();
+            for (Bomb bomb : bombs) {
                 bomb.update(delta);
-                if (bomb.getIsToRemove()) {  // Verifica si la bomba ha explotado
-                    bombIterator.remove(); // Elimina la bomba de la lista
-                }
             }
+
         }
     }
 
@@ -212,19 +248,12 @@ public class EntityManager {
     }
 
     public void removeOffScreenCharacters() {
-        Array<Character> charactersToRemove = new Array<>();
+        for (int i = 0; i < characters.size; i++) {
+            Character character = characters.get(i);
 
-        for (Character character : characters) {
             if (character.getImage().getX() < 0) {
-                charactersToRemove.add(character);
-            }
-        }
-
-        for (Character character : charactersToRemove) {
-            removeCharacter(character);
-            player.loseLife();
-            if (!player.isAlive()) {
-                victoryMenu.createVictoryMenu();
+                character.takeDamage(character.getLives());
+                System.out.println(character.getLives());
             }
         }
     }
@@ -290,6 +319,7 @@ public class EntityManager {
             player.modifyEnergy(character.getEnergy());
             enemiesInGame--;
         }
+        releasePosition(character);
         character.getImage().remove();
         stage.getActors().removeValue(character.getImage(), true);
         characters.removeValue(character, true);

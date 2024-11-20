@@ -38,9 +38,6 @@ public class MeleeCharacter extends Character {
 
     @Override
     public void checkForAttack(Array<Character> characters) {
-        if (characters.size == 0) {
-            return; // Sale del método si no hay personajes que verificar
-        }
         int i = 0;
         boolean collisionDetected = false;
 

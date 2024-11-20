@@ -122,17 +122,6 @@ public enum EntityType {
                 entityManager, getType(), getAttackCooldown(), getDamage(), getEnergy()
             );
         }
-    },
-
-    BOSS("characters/boss/boss.png", "characters/boss/boss.png", "characters/boss/boss.png", "characters/boss/boss.png", "characters/boss/boss.png", "characters/boss/force-aura.png",  500, "enemy", false, 50, 50, 25, 0, 1f, 5, 10) {
-        @Override
-        public Character getEntity(float x, float y, EntityManager entityManager) {
-            return new BossCharacter(
-                loadTexture(getTexturePath()), x, y, getHitboxWidth(), getHitboxHeight(), getLives(),
-                entityManager, getSpeed(), loadTexture(getWalk1Path()),
-                loadTexture(getAttack1Path()), loadTexture(getProjectilePath()), getType(), getAttackCooldown(), getDamage(), getEnergy()
-            );
-        }
     };
 
     // Atributos

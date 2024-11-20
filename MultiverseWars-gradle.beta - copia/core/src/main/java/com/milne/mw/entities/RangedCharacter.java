@@ -50,7 +50,7 @@ public class RangedCharacter extends Character {
     }
 
     public void onEnemyInRange(Character enemy) {
-        if (enemy != this && isInSameRow(enemy) && isInRange(enemy)) {
+        if (enemy != this && isInSameRow(enemy) && isInRange(enemy) && isInFront(enemy)) {
             targetEnemy = enemy;
             if (this.getSpeed() != 0) {
                 stopMovementAndAttack();
@@ -58,6 +58,21 @@ public class RangedCharacter extends Character {
                 tryAttack();
             }
         }
+    }
+
+   private boolean isInFront(Character enemy) {
+        boolean isInFront = false;
+        if (enemy.getType().equalsIgnoreCase("enemy")) {
+            if (this.getImage().getX() < enemy.getImage().getX()) {
+                isInFront = true;
+            }
+        } else {
+            if (this.getImage().getX() > enemy.getImage().getX()) {
+                isInFront = true;
+            }
+        }
+
+        return isInFront;
     }
 
     private boolean isInSameRow(Character enemy) {

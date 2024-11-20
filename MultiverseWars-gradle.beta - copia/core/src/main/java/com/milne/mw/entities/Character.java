@@ -151,7 +151,6 @@ public abstract class Character {
     public int getEnergy() { return energy; }
     public int getSpeed() { return speed; }
     public int getLives() { return lives; }
-    public float getX() { return x; }
 
     public void dispose() {
         image.clearActions();

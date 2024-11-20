@@ -11,7 +11,6 @@ import static com.milne.mw.Global.loadTexture;
 public class Bomb {
     private Image image;
     private boolean isDetonated = false;
-    private boolean toRemove = false;
     private Circle explosionRange;
     private int damage;
     private EntityManager entityManager;
@@ -55,7 +54,7 @@ public class Bomb {
         } else {
             explosionTimer += delta;
             if (explosionTimer >= explosionDisplayTime) {
-                toRemove = true;
+                entityManager.removeBomb(this);
                 dispose();
             }
         }
@@ -97,8 +96,5 @@ public class Bomb {
         return image;
     }
 
-    public boolean getIsToRemove() {
-        return toRemove;
-    }
 }
 
