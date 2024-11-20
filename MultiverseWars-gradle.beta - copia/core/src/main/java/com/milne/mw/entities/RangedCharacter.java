@@ -3,7 +3,7 @@ package com.milne.mw.entities;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.utils.Array;
 
-public class RangedCharacter extends Character implements RangeListener {
+public class RangedCharacter extends Character {
     private final Texture projectileTexture;
     private Character targetEnemy;
     private final int range;
@@ -49,7 +49,6 @@ public class RangedCharacter extends Character implements RangeListener {
         }
     }
 
-    @Override
     public void onEnemyInRange(Character enemy) {
         if (enemy != this && isInSameRow(enemy) && isInRange(enemy)) {
             targetEnemy = enemy;

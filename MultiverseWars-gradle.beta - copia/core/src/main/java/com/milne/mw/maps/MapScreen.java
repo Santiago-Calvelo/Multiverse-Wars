@@ -9,6 +9,7 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.milne.mw.difficulty.Difficulty;
+import com.milne.mw.entities.SellTowerListener;
 import com.milne.mw.menu.PauseMenu;
 import com.milne.mw.menu.VictoryMenu;
 import com.milne.mw.player.Player;
@@ -16,8 +17,6 @@ import com.milne.mw.renders.RenderManager;
 import com.milne.mw.entities.EntityManager;
 import com.milne.mw.entities.EntityType;
 import com.milne.mw.MusicManager;
-import com.badlogic.gdx.scenes.scene2d.InputEvent;
-import com.badlogic.gdx.scenes.scene2d.InputListener;
 
 public class MapScreen implements Screen {
     private Game game;
@@ -41,6 +40,7 @@ public class MapScreen implements Screen {
         addEntityCardsToPanel();
         entityManager.startEnemySpawner();
         entityManager.setVictoryMenu(victoryMenu);
+        stage.addListener(new SellTowerListener(entityManager));
 
         renderManager.setPlayer(player);
         renderManager.setMaxRound(difficultyLevel.getMaxRound());
@@ -57,41 +57,18 @@ public class MapScreen implements Screen {
                 cardImage.setSize(60, 80);
                 cardImage.setPosition(xPos, yPos);
 
-                cardImage.addListener(new InputListener() {
-                    boolean playerSelected = false;
-                    final float originalX = cardImage.getX();
-                    final float originalY = cardImage.getY();
+                CardDragListener listener = new CardDragListener(entityManager, entityType, cardImage);
+                cardImage.addListener(listener);
 
-                    @Override
-                    public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
-                        playerSelected = true;
-                        return true;
-                    }
+                if (cardImage.getParent() == null) {
+                    stage.addActor(cardImage);
+                }
 
-                    @Override
-                    public void touchDragged(InputEvent event, float x, float y, int pointer) {
-                        if (playerSelected) {
-                            cardImage.moveBy(x - cardImage.getWidth() / 2, y - cardImage.getHeight() / 2);
-                        }
-                    }
-
-                    @Override
-                    public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
-                        if (playerSelected) {
-                            float cardX = cardImage.getX();
-                            float cardY = cardImage.getY();
-                            entityManager.handleEntityPlacement(entityType, cardX, cardY, cardImage.getWidth(), cardImage.getHeight());
-                            cardImage.setPosition(originalX, originalY);
-                            playerSelected = false;
-                        }
-                    }
-                });
-
-                stage.addActor(cardImage);
-                xPos += 70;
+                xPos += 70; // Incrementamos la posición para la siguiente carta
             }
         }
     }
+
 
     @Override
     public void show() {

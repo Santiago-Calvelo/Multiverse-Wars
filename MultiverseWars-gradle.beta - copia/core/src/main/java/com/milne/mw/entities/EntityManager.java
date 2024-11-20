@@ -192,6 +192,25 @@ public class EntityManager {
         }
     }
 
+    public void handleRightClick(float clickX, float clickY) {
+        boolean sold = false;
+        int i = 0;
+        do {
+            Rectangle hitbox = placementHitboxes.get(i);
+            if (hitbox.contains(clickX, clickY) && positionMap.containsKey(i)) {
+                Character character = positionMap.get(i);
+
+                if (character.getType().equalsIgnoreCase("tower")) {
+                    player.modifyEnergy(Math.round(character.getEnergy() * 0.6f));
+                    positionMap.remove(i);
+                    removeCharacter(character);
+                    sold = true;
+                }
+            }
+            i++;
+        } while(i < placementHitboxes.size() && !sold);
+    }
+
     public void removeOffScreenCharacters() {
         Array<Character> charactersToRemove = new Array<>();
 
@@ -242,6 +261,10 @@ public class EntityManager {
         this.victoryMenu = victoryMenu;
     }
 
+    public Difficulty getDifficultyLevel() {
+        return difficultyLevel;
+    }
+
     public void setEnemiesInGame(int num) {
         enemiesInGame += num;
     }
@@ -278,5 +301,13 @@ public class EntityManager {
             removeCharacter(character);
         }
         characters.clear();
+    }
+
+    public Array<Bomb> getBombs() {
+        return bombs;
+    }
+
+    public HashMap<Integer, Character> getPositionMap() {
+        return positionMap;
     }
 }

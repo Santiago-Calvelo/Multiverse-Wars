@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.math.Circle;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
@@ -11,6 +12,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
+import com.milne.mw.entities.Bomb;
 import com.milne.mw.entities.Character;
 import com.milne.mw.entities.EntityManager;
 import com.milne.mw.Global;
@@ -77,6 +79,7 @@ public class RenderManager {
         if (!isPaused && Global.debugMode) {
             drawHitboxes(entityManager);
             drawPlacementZones(entityManager, pauseMenu);
+            drawBombRanges(entityManager);
         }
 
         updateAttackAnimations(delta);
@@ -186,6 +189,20 @@ public class RenderManager {
 
         shapeRenderer.end();
     }
+
+    private void drawBombRanges(EntityManager entityManager) {
+        shapeRenderer.setProjectionMatrix(stage.getViewport().getCamera().combined);
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
+        shapeRenderer.setColor(Color.YELLOW);
+
+        for (Bomb bomb : entityManager.getBombs()) { // Asegúrate de que `EntityManager` exponga las bombas.
+            Circle explosionRange = bomb.getExplosionRange();
+            shapeRenderer.circle(explosionRange.x, explosionRange.y, explosionRange.radius);
+        }
+
+        shapeRenderer.end();
+    }
+
 
     public void setMaxRound(int maxRound) {
         this.maxRound = maxRound;

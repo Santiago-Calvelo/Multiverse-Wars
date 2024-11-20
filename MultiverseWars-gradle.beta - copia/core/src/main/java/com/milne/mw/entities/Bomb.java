@@ -27,60 +27,46 @@ public class Bomb {
         this.entityManager = entityManager;
         this.targetY = targetY;
 
-        // Configurar el rango de explosión (3x3 casillas)
         float explosionRadius = (float) Math.sqrt(entityManager.getCellWidth() * entityManager.getCellWidth() +
             entityManager.getCellHeight() * entityManager.getCellHeight());
         this.explosionRange = new Circle(x + image.getWidth() / 2, y + image.getHeight() / 2, explosionRadius);
 
-        // Inicia el movimiento hacia abajo
         moveDownward(targetY);
-        entityManager.addBomb(this); // Registra la bomba en el EntityManager
+        entityManager.addBomb(this);
     }
 
     private void moveDownward(float targetY) {
         MoveToAction moveAction = new MoveToAction();
-
-        // Configura el movimiento hacia la posición más baja de la casilla
         moveAction.setPosition(image.getX(), targetY);
-        moveAction.setDuration(0.5f); // Ajusta la velocidad (0.5 segundos para llegar al suelo)
+        moveAction.setDuration(0.5f);
         image.addAction(moveAction);
     }
 
     private void updateExplosionRange() {
-        // Actualiza el rango dinámicamente basado en el centro de la bomba
         explosionRange.setPosition(image.getX() + image.getWidth() / 2, image.getY() + image.getHeight() / 2);
     }
 
     public void update(float delta) {
         if (!isDetonated) {
-            // Actualiza el rango dinámicamente
             updateExplosionRange();
-
-            // Detecta si la bomba ha alcanzado su destino y detona
-            if (Math.abs(image.getY() - targetY) < 1) { // Tolerancia para precisión
+            if (Math.abs(image.getY() - targetY) < 1) {
                 detonate();
             }
         } else {
-            // Incrementa el temporizador para eliminar la bomba tras mostrar la explosión
             explosionTimer += delta;
             if (explosionTimer >= explosionDisplayTime) {
                 toRemove = true;
-                dispose(); // Limpia la bomba después del tiempo de explosión
+                dispose();
             }
         }
     }
 
     private void detonate() {
-        // Asegura que el rango esté correctamente actualizado antes de la explosión
         updateExplosionRange();
+        image.clearActions();
 
-        // Cambia la textura a la imagen de explosión
         image.setDrawable(new TextureRegionDrawable(loadTexture("characters/projectile/explosion.png")));
-
-        // Ajusta el tamaño de la textura de explosión para cubrir el rango de explosión
         image.setSize(explosionRange.radius * 2, explosionRange.radius * 2);
-
-        // Asegura que la posición de la textura de explosión esté centrada en el rango
         image.setPosition(explosionRange.x - explosionRange.radius, explosionRange.y - explosionRange.radius);
 
         // Aplica daño a los enemigos dentro del rango
@@ -93,13 +79,18 @@ public class Bomb {
             }
         }
 
-        isDetonated = true; // Marca la bomba como detonada
+        isDetonated = true;
     }
+
 
 
     public void dispose() {
         image.clearActions();
         image.remove();
+    }
+
+    public Circle getExplosionRange() {
+        return explosionRange;
     }
 
     public Image getImage() {

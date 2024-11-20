@@ -113,13 +113,24 @@ public enum EntityType {
         }
     },
 
-    PLANE("characters/wingmonkey/wingmonkey.png", "characters/wingmonkey/wingmonkey.png", "characters/wingmonkey/wingmonkey1.png", 1, "enemy", false, 50, 50, 533, 0.233f, 0, 0) {
+    PLANE(null, "characters/wingmonkey/wingmonkey.png", "characters/wingmonkey/wingmonkey1.png", 1, "enemy", false, 50, 50, 533, 0.233f, 0, 0) {
         @Override
         public Character getEntity(float x, float y, EntityManager entityManager) {
             return new FlyCharacter(
                 loadTexture(getTexturePath()), getHitboxWidth(), getHitboxHeight(), loadTexture(getWalk1Path()),
                 loadTexture(getAttack1Path()), x, y, getLives(), getSpeed(),
                 entityManager, getType(), getAttackCooldown(), getDamage(), getEnergy()
+            );
+        }
+    },
+
+    BOSS("characters/boss/boss.png", "characters/boss/boss.png", "characters/boss/boss.png", "characters/boss/boss.png", "characters/boss/boss.png", "characters/boss/force-aura.png",  500, "enemy", false, 50, 50, 25, 0, 1f, 5, 10) {
+        @Override
+        public Character getEntity(float x, float y, EntityManager entityManager) {
+            return new BossCharacter(
+                loadTexture(getTexturePath()), x, y, getHitboxWidth(), getHitboxHeight(), getLives(),
+                entityManager, getSpeed(), loadTexture(getWalk1Path()),
+                loadTexture(getAttack1Path()), loadTexture(getProjectilePath()), getType(), getAttackCooldown(), getDamage(), getEnergy()
             );
         }
     };

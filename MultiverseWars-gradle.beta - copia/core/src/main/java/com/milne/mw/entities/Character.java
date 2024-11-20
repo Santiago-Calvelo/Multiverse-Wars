@@ -95,8 +95,6 @@ public abstract class Character {
         }
     }
 
-
-
     public void tryAttack() {
         RenderManager.getInstance().animateCharacterAttack(this, attackCooldown);
         if (canAttack) {
