@@ -8,19 +8,16 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Dialog;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.utils.viewport.FitViewport;
-import com.badlogic.gdx.utils.viewport.Viewport;
 
 public class ExitConfirmationScreen implements Screen {
 
     private Game game;
     private Stage stage;
     private Skin skin;
-    private Viewport viewport;
 
     public ExitConfirmationScreen(Game game) {
         this.game = game;
-        this.viewport = new FitViewport(800, 600); // Tamaño base, se ajustará
-        stage = new Stage(viewport);
+        this.stage = new Stage(new FitViewport(800, 600));
         Gdx.input.setInputProcessor(stage);
         skin = new Skin(Gdx.files.internal("uiskin.json"));
     }
@@ -56,7 +53,6 @@ public class ExitConfirmationScreen implements Screen {
 
     @Override
     public void resize(int width, int height) {
-        viewport.update(width, height, true);
         stage.getViewport().update(width, height, true);
     }
 

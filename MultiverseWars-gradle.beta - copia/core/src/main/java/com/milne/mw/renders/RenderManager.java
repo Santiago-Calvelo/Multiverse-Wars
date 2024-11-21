@@ -1,17 +1,26 @@
 package com.milne.mw.renders;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.math.Circle;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
-import com.badlogic.gdx.utils.viewport.Viewport;
+import com.milne.mw.entities.Bomb;
 import com.milne.mw.entities.Character;
 import com.milne.mw.entities.EntityManager;
 import com.milne.mw.Global;
-import com.milne.mw.maps.PauseButton;
+import com.milne.mw.menu.PauseMenu;
+import com.milne.mw.player.Player;
+
+import java.util.ArrayList;
+import java.util.Iterator;
 
 public class RenderManager {
     private static RenderManager instance;
@@ -19,8 +28,13 @@ public class RenderManager {
     private Stage stage;
     private Image backgroundImage;
     private float walkAnimationTime;
-    private float attackAnimationTime;
-    private boolean isAnimatingAttack;
+    private ArrayList<AttackAnimation> attackAnimations;
+    private int maxRound, currentRound;
+    private Skin skin;
+    private Label roundLabel;
+    private Label livesLabel;
+    private Label energyLabel;
+    private Player player;
 
     private RenderManager(Texture mapTexture, Stage stage) {
         this.stage = stage;
@@ -28,6 +42,7 @@ public class RenderManager {
         this.backgroundImage = new Image(mapTexture);
         backgroundImage.setSize(stage.getWidth(), stage.getHeight());
         stage.addActor(backgroundImage);
+        this.attackAnimations = new ArrayList<>();
     }
 
     public static RenderManager getInstance(Texture mapTexture, Stage stage) {
@@ -51,20 +66,23 @@ public class RenderManager {
         return instance;
     }
 
-    public void render(Viewport viewport, boolean isPaused, EntityManager entityManager, float delta, PauseButton pauseButton) {
+    public void render(boolean isPaused, EntityManager entityManager, float delta, PauseMenu pauseMenu) {
         if (!isPaused) {
             stage.act(delta);
             entityManager.update(delta);
             updateWalkAnimation(delta, entityManager);
-            updateAttackAnimation(delta, entityManager);
+            updateLabels(entityManager.getRound());
         }
-        pauseButton.checkForEscapeKey();
+        pauseMenu.checkForEscapeKey();
         stage.draw();
 
         if (!isPaused && Global.debugMode) {
-            drawHitboxes(entityManager, viewport);
-            drawPlacementZones(viewport, entityManager, pauseButton);
+            drawHitboxes(entityManager);
+            drawPlacementZones(entityManager, pauseMenu);
+            drawBombRanges(entityManager);
         }
+
+        updateAttackAnimations(delta);
     }
 
     private void updateWalkAnimation(float delta, EntityManager entityManager) {
@@ -73,41 +91,85 @@ public class RenderManager {
         // Alterna la textura de caminata cada 0.5 segundos
         if (walkAnimationTime >= 0.5f) {
             for (Character character : entityManager.getCharacters()) {
-                TextureRegionDrawable currentDrawable = (TextureRegionDrawable) character.getImage().getDrawable();
-                TextureRegionDrawable nextDrawable = (currentDrawable.getRegion().getTexture() == character.getWalk1Texture())
-                    ? new TextureRegionDrawable(character.getWalk2Texture())
-                    : new TextureRegionDrawable(character.getWalk1Texture());
+                if (character.getLives() > 0) {
+                    TextureRegionDrawable currentDrawable = (TextureRegionDrawable) character.getImage().getDrawable();
+                    TextureRegionDrawable nextDrawable = (currentDrawable.getRegion().getTexture() == character.getWalk1Texture())
+                        ? new TextureRegionDrawable(character.getWalk2Texture())
+                        : new TextureRegionDrawable(character.getWalk1Texture());
 
-                character.getImage().setDrawable(nextDrawable);
+                    character.getImage().setDrawable(nextDrawable);
+                }
             }
             walkAnimationTime = 0;
         }
     }
 
+    // Método para iniciar la animación del ataque
     public void animateCharacterAttack(Character character, float cooldown) {
-        character.getImage().setDrawable(new TextureRegionDrawable(character.getAttack1Texture()));
-        attackAnimationTime = 0;
-        isAnimatingAttack = true;
+        // Crea una nueva animación de ataque y la añade a la lista
+        attackAnimations.add(new AttackAnimation(character, cooldown));
     }
 
-    private void updateAttackAnimation(float delta, EntityManager entityManager) {
-        if (!isAnimatingAttack) return;
-
-        attackAnimationTime += delta;
-        if (attackAnimationTime >= 0.5f) {
-            for (Character character : entityManager.getCharacters()) {
-                character.getImage().setDrawable(new TextureRegionDrawable(character.getAttack2Texture()));
+    private void updateAttackAnimations(float delta) {
+        // Usa un iterador para actualizar y eliminar animaciones finalizadas
+        Iterator<AttackAnimation> iterator = attackAnimations.iterator();
+        while (iterator.hasNext()) {
+            AttackAnimation animation = iterator.next();
+            if (animation.update(delta)) {
+                iterator.remove(); // Elimina la animación si ha terminado
             }
-            isAnimatingAttack = false;
         }
     }
 
-    private void drawPlacementZones(Viewport viewport, EntityManager entityManager, PauseButton pauseButton) {
-        shapeRenderer.setProjectionMatrix(viewport.getCamera().combined);
+    private void updateLabels(int currentRound) {
+        if (this.currentRound != currentRound) {
+            this.currentRound = currentRound;
+        }
+        roundLabel.setText(currentRound + "/" + maxRound);
+        livesLabel.setText("Vidas: " + player.getLives());
+        energyLabel.setText("Energía: " + player.getEnergy());
+    }
+
+    public void initializeLabels(int currentRound) {
+
+        skin = new Skin(Gdx.files.internal("uiskin.json"));
+        roundLabel = new Label("", skin);
+        roundLabel.setFontScale(2f);
+        roundLabel.setColor(Color.WHITE);
+
+        Table rounds = new Table();
+        rounds.top().right();
+        rounds.setFillParent(true);
+        rounds.add(roundLabel).padTop(20).padRight(20);
+        stage.addActor(rounds);
+
+        livesLabel = new Label("Vidas: " + player.getLives(), skin);
+        livesLabel.setFontScale(1.5f);
+        livesLabel.setColor(Color.RED);
+        stage.addActor(livesLabel);
+
+        energyLabel = new Label("Energía: " + player.getEnergy(), skin);
+        energyLabel.setFontScale(1.5f);
+        energyLabel.setColor(Color.BLUE);
+        stage.addActor(energyLabel);
+
+        // Posición
+        Table energyAndLives = new Table();
+        energyAndLives.top().left();
+        energyAndLives.setFillParent(true);
+        energyAndLives.add(livesLabel).padLeft(20).padTop(20).row();
+        energyAndLives.add(energyLabel).padLeft(20);
+        stage.addActor(energyAndLives);
+
+        updateLabels(currentRound);
+    }
+
+    private void drawPlacementZones(EntityManager entityManager, PauseMenu pauseMenu) {
+        shapeRenderer.setProjectionMatrix(stage.getViewport().getCamera().combined);
         shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
         shapeRenderer.setColor(Color.GREEN);
 
-        shapeRenderer.circle(pauseButton.pauseButtonHitbox.x, pauseButton.pauseButtonHitbox.y, pauseButton.pauseButtonHitbox.radius);
+        shapeRenderer.circle(pauseMenu.pauseButtonHitbox.x, pauseMenu.pauseButtonHitbox.y, pauseMenu.pauseButtonHitbox.radius);
         for (Rectangle hitbox : entityManager.getPlacementHitboxes()) {
             shapeRenderer.rect(hitbox.x, hitbox.y, hitbox.width, hitbox.height);
         }
@@ -115,8 +177,8 @@ public class RenderManager {
         shapeRenderer.end();
     }
 
-    private void drawHitboxes(EntityManager entityManager, Viewport viewport) {
-        shapeRenderer.setProjectionMatrix(viewport.getCamera().combined);
+    private void drawHitboxes(EntityManager entityManager) {
+        shapeRenderer.setProjectionMatrix(stage.getViewport().getCamera().combined);
         shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
         shapeRenderer.setColor(Color.RED);
 
@@ -128,8 +190,34 @@ public class RenderManager {
         shapeRenderer.end();
     }
 
+    private void drawBombRanges(EntityManager entityManager) {
+        shapeRenderer.setProjectionMatrix(stage.getViewport().getCamera().combined);
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
+        shapeRenderer.setColor(Color.YELLOW);
+
+        for (Bomb bomb : entityManager.getBombs()) { // Asegúrate de que `EntityManager` exponga las bombas.
+            Circle explosionRange = bomb.getExplosionRange();
+            if (explosionRange != null) {
+                shapeRenderer.circle(explosionRange.x, explosionRange.y, explosionRange.radius);
+            }
+        }
+
+        shapeRenderer.end();
+    }
+
+
+    public void setMaxRound(int maxRound) {
+        this.maxRound = maxRound;
+    }
+
+    public void setPlayer(Player player) {
+        this.player = player;
+    }
+
     public void dispose() {
         shapeRenderer.dispose();
         backgroundImage.remove();
+        roundLabel.remove();
+        skin.dispose();
     }
 }

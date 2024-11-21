@@ -2,140 +2,225 @@ package com.milne.mw.entities;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.scenes.scene2d.Stage;
+
+import static com.milne.mw.Global.loadTexture;
 
 public enum EntityType {
-    PEASHOOTER("lanza guisantes carta.png", "guisante.png", "guisante.png", "guisante2.png", "guisante3.png", "guisante2.png", "proyectil.png", 30, "tower", 50, 50, 0,5,1f) {
+    PEASHOOTER("characters/peashooter/lanzaguisantes-carta.png", "characters/peashooter/lanzaguisantes.png", "characters/peashooter/lanzaguisantes2.png", "characters/peashooter/lanzaguisantes3.png", "characters/peashooter/lanzaguisantes2.png", "characters/projectile/guisante.png",  30, "tower", false, true, 50, 50, 0, 5, 1f, 5, 20) {
         @Override
-        public Character getEntity(float x, float y, Stage stage, EntityManager entityManager) {
-            // Peashooter no se mueve, pasamos canMove=false
-            return new RangedCharacter(this.getTexture(), this.getHitboxWidth(), this.getHitboxHeight(), this.getWalk1Texture(), this.getWalk2Texture(), this.getAttack1Texture(), this.getAttack2Texture(), this.getProjectileTexture(), x, y, this.getLives(), this.getSpeed(), entityManager, stage, this.getType(), this.getRange(), this.getAttackCooldown());
+        public Character getEntity(float x, float y, EntityManager entityManager) {
+            return new RangedCharacter(
+                loadTexture(getTexturePath()), getHitboxWidth(), getHitboxHeight(), loadTexture(getWalk1Path()),
+                loadTexture(getWalk2Path()), loadTexture(getAttack1Path()), loadTexture(getAttack2Path()),
+                loadTexture(getProjectilePath()), x, y, getLives(), getSpeed(), entityManager, getType(),
+                getRange(), getAttackCooldown(), getDamage(), getEnergy(), getCanBeAttacked()
+            );
         }
     },
 
-    COWBOY("CARTA VAQUERO.jpg", "vaqwalk1.png", "vaqwalk1.png", "vaqwalk2.png", "vaqattack2.png", "vaqattack1.png", "bala.png", 50, "tower", 50, 50, 0, 7,1.5f) {
+    COWBOY("characters/cowboy/carta-vaquero.jpg", "characters/cowboy/vaqueroMov1.png", "characters/cowboy/vaqueroMov2.png", "characters/cowboy/vaqueroAtaque1.png", "characters/cowboy/vaqueroMov2.png", "characters/projectile/bala.png",  25, "tower", false, true, 50, 50, 0, 7, 1.5f, 8, 75) {
         @Override
-        public Character getEntity(float x, float y, Stage stage, EntityManager entityManager) {
-            return new RangedCharacter(this.getTexture(), this.getHitboxWidth(), this.getHitboxHeight(), this.getWalk1Texture(), this.getWalk2Texture(), this.getAttack1Texture(), this.getAttack2Texture(), this.getProjectileTexture(), x, y, this.getLives(), this.getSpeed(), entityManager, stage, this.getType(), this.getRange(), this.getAttackCooldown());
+        public Character getEntity(float x, float y, EntityManager entityManager) {
+            return new RangedCharacter(
+                loadTexture(getTexturePath()), getHitboxWidth(), getHitboxHeight(), loadTexture(getWalk1Path()),
+                loadTexture(getWalk2Path()), loadTexture(getAttack1Path()), loadTexture(getAttack2Path()),
+                loadTexture(getProjectilePath()), x, y, getLives(), getSpeed(), entityManager, getType(),
+                getRange(), getAttackCooldown(), getDamage(), getEnergy(), getCanBeAttacked()
+            );
         }
     },
 
-    SKELETON("skeleton.png","skeleton.png", "skeleton paso.png", "skeleton.png", "skeleton2.png", "skeleton3.png", "rayo.png", 5, "enemy", 50, 50, 100,1f) {
+    JIRAIYA("characters/jiraiya/carta-jiraiya.jpg", "characters/jiraiya/jiraiya01.png", "characters/jiraiya/jiraiya02.png", "characters/jiraiya/jiraiya04.png", "characters/jiraiya/jiraiya04.png",  50, "tower", false, false, 50, 50, 40, 3f, 0, 25) {
         @Override
-        public Character getEntity(float x, float y, Stage stage, EntityManager entityManager) {
-            // Skeleton se mueve, pasamos canMove=true
-            return new MeleeCharacter(this.getTexture(), this.getHitboxWidth(), this.getHitboxHeight(), this.getAttack1Texture(), this.getAttack2Texture(), this.getWalk1Texture(), this.getWalk2Texture(), x, y, this.getLives(), this.getSpeed(), entityManager, stage, this.getType(), this.getAttackCooldown());
+        public Character getEntity(float x, float y, EntityManager entityManager) {
+            return new MeleeCharacter(
+                loadTexture(getTexturePath()), getHitboxWidth(), getHitboxHeight(),
+                loadTexture(getAttack1Path()), loadTexture(getAttack2Path()),  loadTexture(getWalk1Path()),
+                loadTexture(getWalk2Path()), x, y, getLives(), getSpeed(), entityManager, getType(), getAttackCooldown(),
+                getDamage(), getEnergy(), getCanBeAttacked()
+            );
+        }
+    },
+
+    VOLTORB("characters/voltorb/carta-voltorb.jpg", "characters/voltorb/vol01.png", "characters/voltorb/vol01.png", "characters/voltorb/ZAAP!.png",  "characters/voltorb/ZAAP!.png", 50, "tower", false, false, 50, 50, 0, 3f, 40, 25) {
+        @Override
+        public Character getEntity(float x, float y, EntityManager entityManager) {
+            return new MeleeCharacter(
+                loadTexture(getTexturePath()), getHitboxWidth(), getHitboxHeight(),
+                loadTexture(getAttack1Path()), loadTexture(getAttack2Path()),  loadTexture(getWalk1Path()),
+                loadTexture(getWalk2Path()), x, y, getLives(), getSpeed(), entityManager, getType(), getAttackCooldown(),
+                getDamage(), getEnergy(), getCanBeAttacked()
+            );
+        }
+    },
+
+    BLOON("characters/bloon/CARTA-GLOBO.jpg", "characters/bloon/globo.png", "characters/bloon/globo1.png", 10, "tower", false, true, 50, 50, 0, 1f, 25, 125) {
+        @Override
+        public Character getEntity(float x, float y, EntityManager entityManager) {
+            return new FlyCharacter(
+                loadTexture(getTexturePath()), getHitboxWidth(), getHitboxHeight(), loadTexture(getWalk1Path()),
+                loadTexture(getAttack1Path()), x, y, getLives(), getSpeed(),
+                entityManager, getType(), getAttackCooldown(), getDamage(), getEnergy(), getCanBeAttacked()
+            );
+        }
+    },
+
+    SKELETON(null, "characters/skeleton/skeleton.png", "characters/skeleton/skeleton paso.png", "characters/skeleton/skeleton2.png", "characters/skeleton/skeleton3.png",  25, "enemy", true, true, 50, 50, 100, 1f, 10, 5) {
+        @Override
+        public Character getEntity(float x, float y, EntityManager entityManager) {
+            return new MeleeCharacter(
+                loadTexture(getTexturePath()), getHitboxWidth(), getHitboxHeight(),
+                loadTexture(getAttack1Path()), loadTexture(getAttack2Path()),  loadTexture(getWalk1Path()),
+                loadTexture(getWalk2Path()), x, y, getLives(), getSpeed(), entityManager, getType(), getAttackCooldown(),
+                getDamage(), getEnergy(), getCanBeAttacked()
+            );
+        }
+    },
+
+    STORMTROOPER("characters/stormtrooper/storm01.png", "characters/stormtrooper/storm01.png", "characters/stormtrooper/storm02.png", "characters/stormtrooper/storm03.png", "characters/stormtrooper/storm02.png", "characters/projectile/laser.png",  35, "enemy", true, true, 50, 50, 100, 5, 1f, 5, 10) {
+        @Override
+        public Character getEntity(float x, float y, EntityManager entityManager) {
+            return new RangedCharacter(
+                loadTexture(getTexturePath()), getHitboxWidth(), getHitboxHeight(), loadTexture(getWalk1Path()),
+                loadTexture(getWalk2Path()), loadTexture(getAttack1Path()), loadTexture(getAttack2Path()),
+                loadTexture(getProjectilePath()), x, y, getLives(), getSpeed(), entityManager, getType(),
+                getRange(), getAttackCooldown(), getDamage(), getEnergy(), getCanBeAttacked()
+            );
+        }
+    },
+
+    BARBARIAN(null, "characters/barbarian/barbaro01.png", "characters/barbarian/barbaro02.png", "characters/barbarian/barbaro03.png", "characters/barbarian/barbaro04.png", 40, "enemy", true, true, 50, 50, 50, 0.5f, 15, 15) {
+        @Override
+        public Character getEntity(float x, float y, EntityManager entityManager) {
+            return new MeleeCharacter(
+                loadTexture(getTexturePath()), getHitboxWidth(), getHitboxHeight(),
+                loadTexture(getAttack1Path()), loadTexture(getAttack2Path()),  loadTexture(getWalk1Path()),
+                loadTexture(getWalk2Path()), x, y, getLives(), getSpeed(), entityManager, getType(), getAttackCooldown(),
+                getDamage(), getEnergy(), getCanBeAttacked()
+            );
+        }
+    },
+
+    SOLDIER(null, "characters/soldier/soldado01.png", "characters/soldier/soldado02.png", "characters/soldier/soldado03.png", "characters/soldier/soldado04.png", "characters/projectile/bala.png",  20, "enemy", true, true, 50, 50, 75, 7, 1.5f, 8, 12) {
+        @Override
+        public Character getEntity(float x, float y, EntityManager entityManager) {
+            return new RangedCharacter(
+                loadTexture(getTexturePath()), getHitboxWidth(), getHitboxHeight(), loadTexture(getWalk1Path()),
+                loadTexture(getWalk2Path()), loadTexture(getAttack1Path()), loadTexture(getAttack2Path()),
+                loadTexture(getProjectilePath()), x, y, getLives(), getSpeed(), entityManager, getType(),
+                getRange(), getAttackCooldown(), getDamage(), getEnergy(), getCanBeAttacked()
+            );
+        }
+    },
+
+    PLANE(null, "characters/wingmonkey/wingmonkey.png", "characters/wingmonkey/wingmonkey1.png", 1, "enemy", false, false, 50, 50, 533, 0.233f, 0, 0) {
+        @Override
+        public Character getEntity(float x, float y, EntityManager entityManager) {
+            return new FlyCharacter(
+                loadTexture(getTexturePath()), getHitboxWidth(), getHitboxHeight(), loadTexture(getWalk1Path()),
+                loadTexture(getAttack1Path()), x, y, getLives(), getSpeed(),
+                entityManager, getType(), getAttackCooldown(), getDamage(), getEnergy(), getCanBeAttacked()
+            );
         }
     };
 
-    // Definición de atributos
-    private Texture cardTexturePath = null;
-    private Texture texture;
-    private Texture attack1Texture;
-    private Texture attack2Texture;
-    private Texture projectileTexture;
-    private Texture walk1Texture, walk2Texture;
-    private int lives;
+    // Atributos
+    private Texture cardTexture;
+    private String texturePath;
+    private String walk1Path, walk2Path;
+    private String attack1Path, attack2Path;
+    private String projectilePath;
+    private int lives, hitboxWidth, hitboxHeight, speed, range, damage, energy;
     private String type;
-    private int hitboxWidth;
-    private int hitboxHeight;
-    private int speed;
-    private int range;
     private float attackCooldown;
+    private boolean canBeSpawned;
+    private boolean canBeAttacked;
 
-    // Constructor para personajes a distancia sin movimiento
-    EntityType(String cardTexturePath, String texturePath, String walk1Path, String walk2Path, String attack1Path, String attack2Path, String projectilePath, int lives, String type, int hitboxWidth, int hitboxHeight, int speed, int range, float attackCooldown) {
+    // Constructor
+    EntityType(String cardTexturePath, String walk1Path, String walk2Path, String attack1Path, String attack2Path, String projectilePath, int lives, String type, boolean canBeSpawned, boolean canBeAttacked, int hitboxWidth, int hitboxHeight, int speed, int range, float attackCooldown, int damage, int energy) {
         if (cardTexturePath != null) {
-            this.cardTexturePath = new Texture(Gdx.files.internal(cardTexturePath));
+            this.cardTexture = new Texture(Gdx.files.internal(cardTexturePath));
         }
-        this.texture = new Texture(Gdx.files.internal(texturePath));
-        this.walk1Texture = new Texture(Gdx.files.internal(walk1Path));
-        this.walk2Texture = new Texture(Gdx.files.internal(walk2Path));
-        this.attack1Texture = new Texture(Gdx.files.internal(attack1Path));
-        this.attack2Texture = new Texture(Gdx.files.internal(attack2Path));
-        this.projectileTexture = new Texture(Gdx.files.internal(projectilePath));
+        this.texturePath = walk1Path;
+        this.walk1Path = walk1Path;
+        this.walk2Path = walk2Path;
+        this.attack1Path = attack1Path;
+        this.attack2Path = attack2Path;
+        this.projectilePath = projectilePath;
         this.lives = lives;
         this.type = type;
+        this.canBeSpawned = canBeSpawned;
+        this.canBeAttacked = canBeAttacked;
         this.hitboxWidth = hitboxWidth;
         this.hitboxHeight = hitboxHeight;
         this.speed = speed;
         this.range = range;
         this.attackCooldown = attackCooldown;
+        this.damage = damage;
+        this.energy = energy;
     }
 
-    EntityType(String cardTexturePath,String texturePath, String walk1Path, String walk2Path, String attack1Path, String attack2Path, String projectilePath, int lives, String type, int hitboxWidth, int hitboxHeight, int speed, float attackCooldown) {
+    // Constructor alternativo para entidades sin proyectil
+    EntityType(String cardTexturePath, String walk1Path, String walk2Path, String attack1Path, String attack2Path, int lives, String type, boolean canBeSpawned, boolean canBeAttacked, int hitboxWidth, int hitboxHeight, int speed, float attackCooldown, int damage, int energy) {
         if (cardTexturePath != null) {
-            this.cardTexturePath = new Texture(Gdx.files.internal(cardTexturePath));
+            this.cardTexture = new Texture(Gdx.files.internal(cardTexturePath));
         }
-        this.texture = new Texture(Gdx.files.internal(texturePath));
-        this.attack1Texture = new Texture(Gdx.files.internal(attack1Path));
-        this.attack2Texture = new Texture(Gdx.files.internal(attack2Path));
-        this.projectileTexture = new Texture(Gdx.files.internal(projectilePath));
-        this.walk1Texture = new Texture(Gdx.files.internal(walk1Path));
-        this.walk2Texture = new Texture(Gdx.files.internal(walk2Path));
+        this.texturePath = walk1Path;
+        this.attack1Path = attack1Path;
+        this.attack2Path = attack2Path;
+        this.walk1Path = walk1Path;
+        this.walk2Path = walk2Path;
         this.lives = lives;
         this.type = type;
+        this.canBeSpawned = canBeSpawned;
+        this.canBeAttacked = canBeAttacked;
         this.hitboxWidth = hitboxWidth;
         this.hitboxHeight = hitboxHeight;
         this.speed = speed;
         this.attackCooldown = attackCooldown;
+        this.damage = damage;
+        this.energy = energy;
     }
 
-    public abstract Character getEntity(float x, float y, Stage stage, EntityManager entityManager);
-
-    public Texture getCardTexture() {
-        return cardTexturePath;
+    EntityType(String cardTexturePath, String walkPath, String attackPath, int lives, String type, boolean canBeSpawned, boolean canBeAttacked, int hitboxWidth, int hitboxHeight, int speed, float attackCooldown, int damage, int energy) {
+        if (cardTexturePath != null) {
+            this.cardTexture = new Texture(Gdx.files.internal(cardTexturePath));
+        }
+        this.texturePath = walkPath;
+        this.attack1Path = attackPath;
+        this.walk1Path = walkPath;
+        this.lives = lives;
+        this.type = type;
+        this.canBeSpawned = canBeSpawned;
+        this.canBeAttacked = canBeAttacked;
+        this.hitboxWidth = hitboxWidth;
+        this.hitboxHeight = hitboxHeight;
+        this.speed = speed;
+        this.attackCooldown = attackCooldown;
+        this.damage = damage;
+        this.energy = energy;
     }
 
-    public Texture getTexture() {
-        return texture;
-    }
+    public abstract Character getEntity(float x, float y, EntityManager entityManager);
 
-    public Texture getAttack1Texture() {
-        return attack1Texture;
-    }
-
-    public Texture getAttack2Texture() {
-        return attack2Texture;
-    }
-
-    public Texture getProjectileTexture() {
-        return projectileTexture;
-    }
-
-    public Texture getWalk1Texture() {
-        return walk1Texture;
-    }
-
-    public Texture getWalk2Texture() {
-        return walk2Texture;
-    }
-
-    public int getLives() {
-        return lives;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public int getHitboxWidth() {
-        return hitboxWidth;
-    }
-
-    public int getHitboxHeight() {
-        return hitboxHeight;
-    }
-
-    public int getSpeed() {
-        return speed;
-    }
-
-    public int getRange() {
-        return range;
-    }
-
-    public float getAttackCooldown() {
-        return attackCooldown;
+    public boolean getCanBeSpawned() { return canBeSpawned; }
+    public Texture getCardTexture() { return cardTexture; }
+    public String getTexturePath() { return texturePath; }
+    public String getWalk1Path() { return walk1Path; }
+    public String getWalk2Path() { return walk2Path; }
+    public String getAttack1Path() { return attack1Path; }
+    public String getAttack2Path() { return attack2Path; }
+    public String getProjectilePath() { return projectilePath; }
+    public String getType() { return type; }
+    public int getLives() { return lives; }
+    public int getHitboxWidth() { return hitboxWidth; }
+    public int getHitboxHeight() { return hitboxHeight; }
+    public int getSpeed() { return speed; }
+    public int getRange() { return range; }
+    public float getAttackCooldown() { return attackCooldown; }
+    public int getDamage() { return damage; }
+    public int getEnergy() { return energy; }
+    public boolean getCanBeAttacked() {
+        return canBeAttacked;
     }
 }

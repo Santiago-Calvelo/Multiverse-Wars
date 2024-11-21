@@ -12,7 +12,9 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.viewport.FitViewport;
-import com.badlogic.gdx.utils.viewport.Viewport;
+import com.milne.mw.screens.MainMenuScreen;
+
+import static com.milne.mw.Global.loadTexture;
 
 public class IntroductionScreen implements Screen {
 
@@ -34,41 +36,39 @@ public class IntroductionScreen implements Screen {
         "\n\n\nControles y Mecánicas del Juego en Modo Dos Jugadores:\n• Mouse/Touchpad: Para colocar las torres y recoger dinero.\n• Click izquierdo: Seleccionar y colocar tropas.\n• Click derecho: Vender tropas.\n• Tecla ESC: Pausar el juego.",
         "\n\n\n\nMecánicas del Juego en Modo Dos Jugadores:\n• Generación y Consumo de Dinero: Cada jugador tiene su propio dinero. Ambos ganan dinero por la eliminación de enemigos, pero solo el dueño de una tropa de apoyo recibe el dinero generado por esa tropa.\n• Tipos de Personajes: Distancia, Volador, Cuerpo a Cuerpo, Apoyo."
     };
-    private Viewport viewport;
 
     public IntroductionScreen(Game game) {
         this.game = game;
-        this.viewport = new FitViewport(800, 600); // Tamaño base, se ajustará
-        stage = new Stage(viewport);
-        Gdx.input.setInputProcessor(stage);
+        this.stage = new Stage(new FitViewport(800, 600)); // Crear el Stage con un FitViewport
+        Gdx.input.setInputProcessor(stage); // Asignar el input al Stage
         skin = new Skin(Gdx.files.internal("uiskin.json"));
 
         // Cargar la textura de la imagen de fondo
-        backgroundTexture = new Texture(Gdx.files.internal("introduccion.jpg"));
+        backgroundTexture = loadTexture("introduction/introduccion.jpg");
         backgroundImage = new Image(backgroundTexture);
 
         // Configurar el tamaño de la imagen de fondo
-        backgroundImage.setSize(viewport.getWorldWidth(), viewport.getWorldHeight());
+        backgroundImage.setSize(stage.getViewport().getWorldWidth(), stage.getViewport().getWorldHeight());
 
         // Agregar la imagen de fondo al stage
         stage.addActor(backgroundImage);
 
         // Crear y configurar el Label para mostrar las instrucciones
         instructionsLabel = new Label(instructions[0], skin);
-        instructionsLabel.setPosition(viewport.getWorldWidth() / 4f, viewport.getWorldHeight() / 2f);
-        instructionsLabel.setWidth(viewport.getWorldWidth() / 2f);
+        instructionsLabel.setPosition(stage.getViewport().getWorldWidth() / 4f, stage.getViewport().getWorldHeight() / 2f);
+        instructionsLabel.setWidth(stage.getViewport().getWorldWidth() / 2f);
         instructionsLabel.setWrap(true);
         stage.addActor(instructionsLabel);
 
         // Crear y configurar el Label para mostrar el número de página
         pageLabel = new Label("Pagina 1", skin);
-        pageLabel.setPosition(viewport.getWorldWidth() - 150, 75); // Ajustar la posición del número de página
+        pageLabel.setPosition(stage.getViewport().getWorldWidth() - 150, 75); // Ajustar la posición del número de página
         stage.addActor(pageLabel);
 
         // Cargar y agregar las flechas para cambiar de página
-        Image leftArrow = new Image(new Texture(Gdx.files.internal("izqui.png")));
+        Image leftArrow = new Image(loadTexture("introduction/izqui.png"));
         leftArrow.setSize(50, 50); // Ajustar el tamaño de la flecha de la izquierda
-        leftArrow.setPosition(50, viewport.getWorldHeight() / 2f - leftArrow.getHeight() / 2);
+        leftArrow.setPosition(50, stage.getViewport().getWorldHeight() / 2f - leftArrow.getHeight() / 2);
         leftArrow.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -81,10 +81,10 @@ public class IntroductionScreen implements Screen {
         });
         stage.addActor(leftArrow);
 
-        Image rightArrow = new Image(new Texture(Gdx.files.internal("dere.png")));
+        Image rightArrow = new Image(loadTexture("introduction/dere.png"));
         rightArrow.setSize(50, 50); // Ajustar el tamaño de la flecha de la derecha
-        rightArrow.setPosition(viewport.getWorldWidth() - 100,
-            viewport.getWorldHeight() / 2f - rightArrow.getHeight() / 2);
+        rightArrow.setPosition(stage.getViewport().getWorldWidth() - 100,
+            stage.getViewport().getWorldHeight() / 2f - rightArrow.getHeight() / 2);
         rightArrow.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -118,17 +118,14 @@ public class IntroductionScreen implements Screen {
 
     @Override
     public void resize(int width, int height) {
-        viewport.update(width, height, true);
         stage.getViewport().update(width, height, true);
     }
 
     @Override
-    public void pause() {
-    }
+    public void pause() {}
 
     @Override
-    public void resume() {
-    }
+    public void resume() {}
 
     @Override
     public void hide() {

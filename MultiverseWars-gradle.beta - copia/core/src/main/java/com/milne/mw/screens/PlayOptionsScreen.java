@@ -7,34 +7,33 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
-import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.viewport.FitViewport;
-import com.badlogic.gdx.utils.viewport.Viewport;
 import com.milne.mw.maps.MapSelectionScreen;
+
+import static com.milne.mw.Global.loadTexture;
 
 public class PlayOptionsScreen implements Screen {
     private Game game;
     private Stage stage;
     private Skin skin;
     private Texture menuImage;
-    private Viewport viewport;
 
     public PlayOptionsScreen(Game game) {
         this.game = game;
-        this.viewport = new FitViewport(800, 600);
-        this.stage = new Stage(viewport);
+        this.stage = new Stage(new FitViewport(800, 600));
         Gdx.input.setInputProcessor(stage);
         this.skin = new Skin(Gdx.files.internal("uiskin.json"));
     }
 
     @Override
     public void show() {
-        menuImage = new Texture(Gdx.files.internal("menu.png"));
+        menuImage = loadTexture("multiverse-wars/menu.png");
         Image background = new Image(menuImage);
-        background.setSize(viewport.getWorldWidth(), viewport.getWorldHeight());
+        background.setSize(stage.getViewport().getWorldWidth(), stage.getViewport().getWorldHeight());
         stage.addActor(background);
 
         createMenuButtons();
@@ -42,7 +41,7 @@ public class PlayOptionsScreen implements Screen {
 
     private void createMenuButtons() {
         TextButton singlePlayerButton = new TextButton("Un Jugador", skin);
-        singlePlayerButton.setPosition(viewport.getWorldWidth() / 2f - singlePlayerButton.getWidth() / 2, viewport.getWorldHeight() / 2f - 100);
+        singlePlayerButton.setPosition(stage.getViewport().getWorldWidth() / 2f - singlePlayerButton.getWidth() / 2, stage.getViewport().getWorldHeight() / 2f - 100);
         singlePlayerButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -51,7 +50,7 @@ public class PlayOptionsScreen implements Screen {
         });
 
         TextButton twoPlayersButton = new TextButton("Dos Jugadores", skin);
-        twoPlayersButton.setPosition(viewport.getWorldWidth() / 2f - twoPlayersButton.getWidth() / 2, viewport.getWorldHeight() / 2f - 150);
+        twoPlayersButton.setPosition(stage.getViewport().getWorldWidth() / 2f - twoPlayersButton.getWidth() / 2, stage.getViewport().getWorldHeight() / 2f - 150);
         twoPlayersButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -60,7 +59,7 @@ public class PlayOptionsScreen implements Screen {
         });
 
         TextButton exitButton = new TextButton("Volver al Menu", skin);
-        exitButton.setPosition(viewport.getWorldWidth() / 2f - exitButton.getWidth() / 2, viewport.getWorldHeight() / 2f - 200);
+        exitButton.setPosition(stage.getViewport().getWorldWidth() / 2f - exitButton.getWidth() / 2, stage.getViewport().getWorldHeight() / 2f - 200);
         exitButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -82,18 +81,14 @@ public class PlayOptionsScreen implements Screen {
 
     @Override
     public void resize(int width, int height) {
-        viewport.update(width, height, true);
+        stage.getViewport().update(width, height, true);
     }
 
     @Override
-    public void pause() {
-
-    }
+    public void pause() {}
 
     @Override
-    public void resume() {
-
-    }
+    public void resume() {}
 
     @Override
     public void hide() {

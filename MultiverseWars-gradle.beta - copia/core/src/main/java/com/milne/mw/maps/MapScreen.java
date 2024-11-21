@@ -4,48 +4,52 @@ import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.utils.viewport.FitViewport;
-import com.badlogic.gdx.utils.viewport.Viewport;
+import com.milne.mw.difficulty.Difficulty;
+import com.milne.mw.entities.SellTowerListener;
+import com.milne.mw.menu.PauseMenu;
+import com.milne.mw.menu.VictoryMenu;
+import com.milne.mw.player.Player;
 import com.milne.mw.renders.RenderManager;
 import com.milne.mw.entities.EntityManager;
 import com.milne.mw.entities.EntityType;
 import com.milne.mw.MusicManager;
-import com.badlogic.gdx.scenes.scene2d.InputEvent;
-import com.badlogic.gdx.scenes.scene2d.InputListener;
-import com.badlogic.gdx.scenes.scene2d.ui.Image;
-import java.util.EnumSet;
 
 public class MapScreen implements Screen {
     private Game game;
     private Stage stage;
-    private Viewport viewport;
     private RenderManager renderManager;
     private EntityManager entityManager;
-    private BitmapFont font;
-    private PauseButton pauseButton;
+    private Player player;
+    private PauseMenu pauseMenu;
+    private VictoryMenu victoryMenu;
 
-    public MapScreen(Game game, Texture map) {
+    public MapScreen(Game game, Texture map, Difficulty difficultyLevel) {
         this.game = game;
-        this.viewport = new FitViewport(800, 600);
-        this.stage = new Stage(viewport);
+        this.stage = new Stage(new FitViewport(800, 600));
         Gdx.input.setInputProcessor(stage);
-            
         renderManager = RenderManager.getInstance(map, stage);
-        entityManager = new EntityManager(stage, viewport);
-        pauseButton = new PauseButton(viewport, stage, game, entityManager);
-        font = new BitmapFont();
+        player = new Player(difficultyLevel.getInitalLives(), difficultyLevel.getInitialEnergy(), difficultyLevel.getEnergyGenerationRate());
+        entityManager = new EntityManager(stage, difficultyLevel, player);
+        pauseMenu = new PauseMenu(stage, game, entityManager);
+        victoryMenu = new VictoryMenu(stage, game, pauseMenu);
 
         addEntityCardsToPanel();
-        entityManager.startEnemySpawner(5f);
+        entityManager.startEnemySpawner();
+        entityManager.setVictoryMenu(victoryMenu);
+        stage.addListener(new SellTowerListener(entityManager));
+
+        renderManager.setPlayer(player);
+        renderManager.setMaxRound(difficultyLevel.getMaxRound());
+        renderManager.initializeLabels(entityManager.getRound());
     }
 
     private void addEntityCardsToPanel() {
-        float xPos = 105;
-        float yPos = viewport.getWorldHeight() - 85;
+        float xPos = 97;
+        float yPos = stage.getViewport().getWorldHeight() - 82.5f;
 
         for (EntityType entityType : EntityType.values()) {
             if (entityType.getCardTexture() != null) {
@@ -53,41 +57,18 @@ public class MapScreen implements Screen {
                 cardImage.setSize(60, 80);
                 cardImage.setPosition(xPos, yPos);
 
-                cardImage.addListener(new InputListener() {
-                    boolean playerSelected = false;
-                    final float originalX = cardImage.getX();
-                    final float originalY = cardImage.getY();
+                CardDragListener listener = new CardDragListener(entityManager, entityType, cardImage);
+                cardImage.addListener(listener);
 
-                    @Override
-                    public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
-                        playerSelected = true;
-                        return true;
-                    }
+                if (cardImage.getParent() == null) {
+                    stage.addActor(cardImage);
+                }
 
-                    @Override
-                    public void touchDragged(InputEvent event, float x, float y, int pointer) {
-                        if (playerSelected) {
-                            cardImage.moveBy(x - cardImage.getWidth() / 2, y - cardImage.getHeight() / 2);
-                        }
-                    }
-
-                    @Override
-                    public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
-                        if (playerSelected) {
-                            float cardX = cardImage.getX();
-                            float cardY = cardImage.getY();
-                            entityManager.handleEntityPlacement(entityType, cardX, cardY, cardImage.getWidth(), cardImage.getHeight());
-                            cardImage.setPosition(originalX, originalY);
-                            playerSelected = false;
-                        }
-                    }
-                });
-
-                stage.addActor(cardImage);
-                xPos += 70;
+                xPos += 70; // Incrementamos la posición para la siguiente carta
             }
         }
     }
+
 
     @Override
     public void show() {
@@ -99,27 +80,22 @@ public class MapScreen implements Screen {
         if (Gdx.input.justTouched()) {
             float touchX = Gdx.input.getX();
             float touchY = Gdx.input.getY();
-            Vector2 worldTouch = viewport.unproject(new Vector2(touchX, touchY));
-            pauseButton.handleInput(worldTouch.x, worldTouch.y);
+            Vector2 worldTouch = stage.getViewport().unproject(new Vector2(touchX, touchY));
+            pauseMenu.handleInput(worldTouch.x, worldTouch.y);
         }
-        renderManager.render(viewport, pauseButton.getIsPaused(), entityManager, delta, pauseButton);
-        entityManager.removeOffScreenCharacters();
+        renderManager.render(pauseMenu.getIsPaused(), entityManager, delta, pauseMenu);
     }
 
     @Override
     public void resize(int width, int height) {
-        viewport.update(width, height, true);
+        stage.getViewport().update(width, height, true);
     }
 
     @Override
-    public void pause() {
-
-    }
+    public void pause() {}
 
     @Override
-    public void resume() {
-
-    }
+    public void resume() {}
 
     @Override
     public void hide() {
@@ -135,11 +111,7 @@ public class MapScreen implements Screen {
         if (renderManager != null) {
             RenderManager.resetInstance();
         }
-        stage.clear(); // Limpia todos los actores del stage
+        stage.clear();
         stage.dispose();
-    }
-
-
-    public void setDifficulty(int difficultyLevel) {
     }
 }

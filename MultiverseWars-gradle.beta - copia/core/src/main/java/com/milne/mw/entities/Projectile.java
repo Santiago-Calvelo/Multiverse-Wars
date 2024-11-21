@@ -2,31 +2,37 @@ package com.milne.mw.entities;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Rectangle;
-import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.actions.MoveToAction;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 
 public class Projectile {
     private Image image;
     private Rectangle hitbox;
-    private int damage = 1;
+    private int damage;
+    private Character targetEnemy;
     private EntityManager entityManager;
     private String type;
 
-    public Projectile(Texture texture, float x, float y, EntityManager entityManager, String type) {
+    public Projectile(Texture texture, float x, float y, EntityManager entityManager, Character targetEnemy, String type, int damage) {
         this.image = new Image(texture);
         this.image.setSize(20, 20);
         this.image.setPosition(x, y);
         this.hitbox = new Rectangle(x, y, 20, 20);
         this.entityManager = entityManager;
+        this.targetEnemy = targetEnemy;
         this.type = type;
+        this.damage = damage;
 
         moveAction();
     }
 
     private void moveAction() {
         MoveToAction moveAction = new MoveToAction();
-        moveAction.setPosition(image.getX() + 800, image.getY());
+        if (this.type.equalsIgnoreCase("tower")) {
+            moveAction.setPosition(hitbox.x + 800, hitbox.y);
+        } else {
+            moveAction.setPosition(hitbox.x - 800, hitbox.y);
+        }
         moveAction.setDuration(2);
         image.addAction(moveAction);
     }
@@ -41,21 +47,14 @@ public class Projectile {
     }
 
     private void checkForCollision() {
-        for (Character character : entityManager.getCharacters()) {
-            if (hitbox.overlaps(character.getHitbox()) && !this.type.equalsIgnoreCase(character.getType())) {
-                character.takeDamage(damage);
-                entityManager.removeProjectile(this);
-                break;
-            }
+        if (targetEnemy != null && hitbox.overlaps(targetEnemy.getHitbox())) {
+            targetEnemy.takeDamage(damage);
+            entityManager.removeProjectile(this);
         }
     }
 
     public Image getImage() {
         return image;
-    }
-
-    public String getType() {
-        return type;
     }
 
     public void dispose() {
