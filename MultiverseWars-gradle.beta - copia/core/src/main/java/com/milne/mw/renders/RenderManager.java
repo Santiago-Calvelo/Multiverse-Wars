@@ -88,7 +88,6 @@ public class RenderManager {
     private void updateWalkAnimation(float delta, EntityManager entityManager) {
         walkAnimationTime += delta;
 
-        // Alterna la textura de caminata cada 0.5 segundos
         if (walkAnimationTime >= 0.5f) {
             for (Character character : entityManager.getCharacters()) {
                 if (character.getLives() > 0) {
@@ -104,19 +103,16 @@ public class RenderManager {
         }
     }
 
-    // Método para iniciar la animación del ataque
     public void animateCharacterAttack(Character character, float cooldown) {
-        // Crea una nueva animación de ataque y la añade a la lista
         attackAnimations.add(new AttackAnimation(character, cooldown));
     }
 
     private void updateAttackAnimations(float delta) {
-        // Usa un iterador para actualizar y eliminar animaciones finalizadas
         Iterator<AttackAnimation> iterator = attackAnimations.iterator();
         while (iterator.hasNext()) {
             AttackAnimation animation = iterator.next();
             if (animation.update(delta)) {
-                iterator.remove(); // Elimina la animación si ha terminado
+                iterator.remove();
             }
         }
     }
@@ -126,13 +122,14 @@ public class RenderManager {
             this.currentRound = currentRound;
         }
         roundLabel.setText(currentRound + "/" + maxRound);
-        livesLabel.setText("Vidas: " + player.getLives());
-        energyLabel.setText("Energía: " + player.getEnergy());
+        livesLabel.setText("  " + player.getLives());
+        energyLabel.setText(" " + player.getEnergy());
     }
 
     public void initializeLabels(int currentRound) {
 
         skin = new Skin(Gdx.files.internal("uiskin.json"));
+
         roundLabel = new Label("", skin);
         roundLabel.setFontScale(2f);
         roundLabel.setColor(Color.WHITE);
@@ -146,20 +143,22 @@ public class RenderManager {
         livesLabel = new Label("Vidas: " + player.getLives(), skin);
         livesLabel.setFontScale(1.5f);
         livesLabel.setColor(Color.RED);
-        stage.addActor(livesLabel);
+
+        Table livesTable = new Table();
+        livesTable.top().left();
+        livesTable.setFillParent(true);
+        livesTable.add(livesLabel).padLeft(590).padTop(42);
+        stage.addActor(livesTable);
 
         energyLabel = new Label("Energía: " + player.getEnergy(), skin);
         energyLabel.setFontScale(1.5f);
         energyLabel.setColor(Color.BLUE);
-        stage.addActor(energyLabel);
 
-        // Posición
-        Table energyAndLives = new Table();
-        energyAndLives.top().left();
-        energyAndLives.setFillParent(true);
-        energyAndLives.add(livesLabel).padLeft(20).padTop(20).row();
-        energyAndLives.add(energyLabel).padLeft(20);
-        stage.addActor(energyAndLives);
+        Table energyTable = new Table();
+        energyTable.bottom().left();
+        energyTable.setFillParent(true);
+        energyTable.add(energyLabel).padLeft(20).padBottom(509);
+        stage.addActor(energyTable);
 
         updateLabels(currentRound);
     }
@@ -195,14 +194,13 @@ public class RenderManager {
         shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
         shapeRenderer.setColor(Color.YELLOW);
 
-        for (Bomb bomb : entityManager.getBombs()) { // Asegúrate de que `EntityManager` exponga las bombas.
+        for (Bomb bomb : entityManager.getBombs()) {
             Circle explosionRange = bomb.getExplosionRange();
             shapeRenderer.circle(explosionRange.x, explosionRange.y, explosionRange.radius);
         }
 
         shapeRenderer.end();
     }
-
 
     public void setMaxRound(int maxRound) {
         this.maxRound = maxRound;

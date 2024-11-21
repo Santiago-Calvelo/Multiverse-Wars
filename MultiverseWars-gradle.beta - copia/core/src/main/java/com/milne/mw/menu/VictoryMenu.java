@@ -36,7 +36,7 @@ public class VictoryMenu {
         textButtonStyle.font = new BitmapFont();
         textButtonStyle.fontColor = Color.WHITE;
 
-        pauseBackground = new Image(loadTexture("multiverse-wars/win.jpg"));
+        pauseBackground = new Image(loadTexture("WIN/win.jpg"));
         pauseBackground.setSize(stage.getViewport().getWorldWidth(), stage.getViewport().getWorldHeight());
 
 
