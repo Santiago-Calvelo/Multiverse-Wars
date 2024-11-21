@@ -23,18 +23,19 @@ public class BossCharacter extends Character {
     private BossAnimator animator;
     private BossAttacks currentSpecialAttack = null;
     private HashMap<BossAttacks, BossAttack> attackMap = new HashMap<>();
-    private float hitboxWidth, hitboxHeight;
+    private final float RIGHT_LIMIT, LEFT_LIMIT;
+    private boolean movingRight = true;
 
 
     public BossCharacter(Texture texture, float x, float y, int hitboxWidth, int hitboxHeight, int lives,
-                         EntityManager entityManager, int speed, Texture walkTexture, Texture attackTexture, Texture forceSmash, String type, float attackCooldown, int damage, int energy, BossAnimator animator) {
+                         EntityManager entityManager, int speed, Texture walkTexture, Texture attackTexture, Texture forceSmash, String type, float attackCooldown, int damage, int energy, BossAnimator animator, boolean canBeAttacked) {
         super(texture, x, y, hitboxWidth, hitboxHeight, lives, entityManager, speed,
-            walkTexture, walkTexture, attackTexture, attackTexture, type, attackCooldown, damage, energy);
+            walkTexture, walkTexture, attackTexture, attackTexture, type, attackCooldown, damage, energy, canBeAttacked);
         this.animator = animator;
-        this.hitboxWidth = hitboxWidth;
-        this.hitboxHeight = hitboxHeight;
         attackMap.put(BossAttacks.FORCE_SMASH, new ForceSmashAttack(forceSmash));
         attackMap.put(BossAttacks.MOVE_FORCE, new MoveForceAttack());
+        this.RIGHT_LIMIT = x;
+        this.LEFT_LIMIT = 1f;
     }
 
     @Override
@@ -42,6 +43,8 @@ public class BossCharacter extends Character {
         super.update(delta);
 
         if (getLives() > 0) {
+            checkLimitsMaps();
+
             switchLaneAccumulator += delta;
             if (switchLaneAccumulator >= 10f) {
                 switchLane();
@@ -64,8 +67,29 @@ public class BossCharacter extends Character {
                     startSpecialAttack(BossAttacks.MOVE_FORCE);
                 }
             }
+
         }
     }
+
+    private void checkLimitsMaps() {
+        float hitboxX = this.getHitbox().x;
+        if (isNearLimit(hitboxX, LEFT_LIMIT) && !movingRight) {
+            movingRight = true;
+            changeDirection();
+        } else if (isNearLimit(hitboxX, RIGHT_LIMIT) && movingRight) {
+            movingRight = false;
+            changeDirection();
+        }
+    }
+
+
+    private void changeDirection() {
+        pause();
+        float targetX = movingRight ? RIGHT_LIMIT : LEFT_LIMIT; // Nuevo objetivo
+        super.setTargetX(targetX); // Llama al método del padre para iniciar el movimiento
+        resumeMovement();
+    }
+
 
     private void startSpecialAttack(BossAttacks attack) {
         BossAttack bossAttack = attackMap.get(attack);
@@ -75,7 +99,7 @@ public class BossCharacter extends Character {
             specialDuration = 0f;
             currentSpecialAttack = attack;
             animator.reset();
-            bossAttack.execute(this, entityManager, animator);
+            bossAttack.execute(this, entityManager, animator, getDamage());
             lastAttack = attack;
             resetAccumulatorForAttack(attack);
         }
@@ -97,37 +121,26 @@ public class BossCharacter extends Character {
     }
 
     protected Circle getRange() {
-        float forceSmashRadius = (float) Math.sqrt(entityManager.getCellWidth() * entityManager.getCellWidth() +
-            entityManager.getCellHeight() * entityManager.getCellHeight());
+        float forceSmashRadius = (float) (Math.sqrt(entityManager.getCellWidth() * entityManager.getCellWidth() +
+            entityManager.getCellHeight() * entityManager.getCellHeight())) * entityManager.getDifficultyLevel().getBossRangeScale();
 
-        switch (entityManager.getDifficultyLevel()) {
-            case EASY:
-                forceSmashRadius *= 1;
-                break;
-            case MEDIUM:
-                forceSmashRadius *= 2;
-                break;
-            case HARD:
-                forceSmashRadius *= 2.5f;
-                break;
-        }
 
-        return new Circle(image.getX() + image.getWidth() / 2, image.getY() + image.getHeight() / 2, forceSmashRadius);
+        return new Circle(getHitboxCenter().x, getHitboxCenter().y, forceSmashRadius);
     }
 
     private void switchLane() {
         switchLaneAccumulator = 0f;
-        float[] validYlanes = { 358.0f, 279.0f, 200.0f, 121.0f, 42.0f };
+        float[] validYlanes = {  279.0f, 200.0f, 121.0f };
         float targetY;
         Random random = new Random();
         do {
-            targetY = validYlanes[random.nextInt(validYlanes.length)] - hitboxHeight / 2;
-        } while (targetY == image.getY());
+            targetY = validYlanes[random.nextInt(validYlanes.length)] - getHitbox().height / 2;
+        } while (targetY == getHitbox().y);
 
         pause();
 
         MoveToAction moveAction = new MoveToAction();
-        moveAction.setPosition(image.getX(), targetY);
+        moveAction.setPosition(getHitbox().x, targetY);
         moveAction.setDuration(1f);
 
         RunnableAction onCompleteAction = new RunnableAction();
@@ -144,8 +157,8 @@ public class BossCharacter extends Character {
            Character character = entityManager.getCharacters().get(i);
             if (character.getType().equalsIgnoreCase("tower")) {
                 float distance = (float) Math.sqrt(
-                    Math.pow(character.getImage().getX() - this.getImage().getX(), 2) +
-                        Math.pow(character.getImage().getY() - this.getImage().getY(), 2)
+                    Math.pow(character.getHitbox().x - this.getHitbox().x, 2) +
+                        Math.pow(character.getHitbox().y - this.getHitbox().y, 2)
                 );
                 if (distance < closestDistance) {
                     closestDistance = distance;
@@ -157,16 +170,19 @@ public class BossCharacter extends Character {
         return closestCharacter;
     }
 
+    private boolean isNearLimit(float position, float limit) {
+        return Math.abs(position - limit) < 1f;
+    }
+
 
     public void finishSpecial() {
         isExecutingSpecial = false;
         currentSpecialAttack = null; // Limpia el ataque especial actual
-        System.out.println("Especial terminado.");
     }
 
     @Override
     public void attack() {
-        System.out.println("Ataque básico de sable láser.");
+
     }
 
     @Override

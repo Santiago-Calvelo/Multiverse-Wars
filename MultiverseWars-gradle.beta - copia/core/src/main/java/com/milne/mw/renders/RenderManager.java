@@ -197,7 +197,9 @@ public class RenderManager {
 
         for (Bomb bomb : entityManager.getBombs()) { // Asegúrate de que `EntityManager` exponga las bombas.
             Circle explosionRange = bomb.getExplosionRange();
-            shapeRenderer.circle(explosionRange.x, explosionRange.y, explosionRange.radius);
+            if (explosionRange != null) {
+                shapeRenderer.circle(explosionRange.x, explosionRange.y, explosionRange.radius);
+            }
         }
 
         shapeRenderer.end();

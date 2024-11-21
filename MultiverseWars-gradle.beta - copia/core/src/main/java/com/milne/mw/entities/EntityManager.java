@@ -163,8 +163,8 @@ public class EntityManager {
         if (currentRoundIndex == difficultyLevel.getMaxRound() && !bossIsAlive) {
             bossIsAlive = true;
             BossAnimator animator = new BossAnimator(stage);
-            int hitboxWidth = 50;
-            int hitboxHeight = 50;
+            int hitboxWidth = 150;
+            int hitboxHeight = 150;
             float adjustedX = stage.getViewport().getWorldWidth() - (float) hitboxWidth / 2;
             float adjustedY = 200.0f - (float) hitboxHeight / 2;
             bossFinal = new BossCharacter(
@@ -172,13 +172,13 @@ public class EntityManager {
                 adjustedX,
                 adjustedY,
                 hitboxWidth, hitboxHeight,
-                3000,
+                difficultyLevel.getBossLives(),
                 this,
                 25,
                 loadTexture("characters/boss/boss.png"),
                 loadTexture("characters/boss/boss.png"),
                 loadTexture("characters/boss/force-aura.png"),
-                "enemy", 1f, 30, 0, animator
+                "enemy", 0, 1, 0, animator, true
             );
             spawnBossFinal(bossFinal, adjustedX, adjustedY);
         } else if(currentRoundIndex > difficultyLevel.getMaxRound()) {
@@ -253,7 +253,6 @@ public class EntityManager {
 
             if (character.getImage().getX() < 0) {
                 character.takeDamage(character.getLives());
-                System.out.println(character.getLives());
             }
         }
     }

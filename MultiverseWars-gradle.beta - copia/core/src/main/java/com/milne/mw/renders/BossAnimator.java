@@ -32,7 +32,7 @@ public class BossAnimator {
             forceSmashImage.setSize(forceSmashRange.radius * 2, forceSmashRange.radius * 2);
             forceSmashImage.setPosition(forceSmashRange.x - forceSmashRange.radius, forceSmashRange.y - forceSmashRange.radius);
             stage.addActor(forceSmashImage);
-            forceSmashImage.setZIndex(5);
+            forceSmashImage.setZIndex(1);
         }
 
         RunnableAction updatePosition = new RunnableAction();

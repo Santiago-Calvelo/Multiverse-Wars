@@ -29,9 +29,9 @@ public class Projectile {
     private void moveAction() {
         MoveToAction moveAction = new MoveToAction();
         if (this.type.equalsIgnoreCase("tower")) {
-            moveAction.setPosition(image.getX() + 800, image.getY());
+            moveAction.setPosition(hitbox.x + 800, hitbox.y);
         } else {
-            moveAction.setPosition(image.getX() - 800, image.getY());
+            moveAction.setPosition(hitbox.x - 800, hitbox.y);
         }
         moveAction.setDuration(2);
         image.addAction(moveAction);

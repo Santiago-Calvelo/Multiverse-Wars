@@ -14,8 +14,7 @@ public class MoveForceAttack implements BossAttack {
     private final float duration = 1f; // Duración del ataque
 
     @Override
-    public void execute(BossCharacter boss, EntityManager entityManager, BossAnimator animator) {
-        System.out.println("Move Force activado!");
+    public void execute(BossCharacter boss, EntityManager entityManager, BossAnimator animator, int damage) {
         Character closestCharacter = boss.findClosestTower();
 
         if (closestCharacter != null) {
@@ -35,8 +34,8 @@ public class MoveForceAttack implements BossAttack {
             targetHitbox = entityManager.getPlacementHitboxes().get(newIndex);
         } while (entityManager.getPositionMap().containsKey(newIndex));
 
-        float targetX = targetHitbox.x + targetHitbox.width / 2 - tower.getImage().getWidth() / 2;
-        float targetY = targetHitbox.y + targetHitbox.height / 2 - tower.getImage().getHeight() / 2;
+        float targetX = targetHitbox.x + targetHitbox.width / 2 - tower.getHitbox().getWidth() / 2;
+        float targetY = targetHitbox.y + targetHitbox.height / 2 - tower.getHitbox().getHeight() / 2;
 
         entityManager.releasePosition(tower);
         tower.pause();

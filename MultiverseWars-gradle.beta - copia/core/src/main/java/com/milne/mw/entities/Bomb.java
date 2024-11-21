@@ -1,22 +1,19 @@
 package com.milne.mw.entities;
 
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Circle;
-import com.badlogic.gdx.scenes.scene2d.actions.MoveToAction;
+import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 
 import static com.milne.mw.Global.loadTexture;
 
 public class Bomb {
-    private Image image;
+    private final Image image;
     private boolean isDetonated = false;
     private Circle explosionRange;
-    private int damage;
-    private EntityManager entityManager;
-    private float targetY; // Posición más baja del globo
-    private float explosionDisplayTime = 0.5f; // Tiempo para mostrar la explosión (en segundos)
-    private float explosionTimer = 0;
+    private final int damage;
+    private final EntityManager entityManager;
+    private final float explosionDisplayTime = 0.5f; // Tiempo para mostrar la explosión
 
     public Bomb(float x, float y, int damage, EntityManager entityManager, float targetY) {
         this.image = new Image(loadTexture("characters/projectile/bomba.png"));
@@ -24,8 +21,8 @@ public class Bomb {
         this.image.setPosition(x, y);
         this.damage = damage;
         this.entityManager = entityManager;
-        this.targetY = targetY;
 
+        // Define el rango de la explosión basado en las dimensiones de las celdas
         float explosionRadius = (float) Math.sqrt(entityManager.getCellWidth() * entityManager.getCellWidth() +
             entityManager.getCellHeight() * entityManager.getCellHeight());
         this.explosionRange = new Circle(x + image.getWidth() / 2, y + image.getHeight() / 2, explosionRadius);
@@ -35,10 +32,11 @@ public class Bomb {
     }
 
     private void moveDownward(float targetY) {
-        MoveToAction moveAction = new MoveToAction();
-        moveAction.setPosition(image.getX(), targetY);
-        moveAction.setDuration(0.5f);
-        image.addAction(moveAction);
+        // Mueve la bomba hacia abajo hasta la posición objetivo
+        image.addAction(Actions.sequence(
+            Actions.moveTo(image.getX(), targetY, 0.5f),
+            Actions.run(this::detonate) // Detona cuando termina de moverse
+        ));
     }
 
     private void updateExplosionRange() {
@@ -46,46 +44,46 @@ public class Bomb {
     }
 
     public void update(float delta) {
-        if (!isDetonated) {
-            updateExplosionRange();
-            if (Math.abs(image.getY() - targetY) < 1) {
-                detonate();
-            }
-        } else {
-            explosionTimer += delta;
-            if (explosionTimer >= explosionDisplayTime) {
-                entityManager.removeBomb(this);
-                dispose();
-            }
+        if (isDetonated) {
+            return; // No actualices si ya explotó
         }
+        updateExplosionRange();
     }
 
     private void detonate() {
-        updateExplosionRange();
-        image.clearActions();
+        if (isDetonated) return; // Evita múltiples detonaciones
 
+        // Cambia la textura a la de la explosión
         image.setDrawable(new TextureRegionDrawable(loadTexture("characters/projectile/explosion.png")));
         image.setSize(explosionRange.radius * 2, explosionRange.radius * 2);
         image.setPosition(explosionRange.x - explosionRange.radius, explosionRange.y - explosionRange.radius);
 
-        // Aplica daño a los enemigos dentro del rango
-        for (Character character : entityManager.getCharacters()) {
-            float characterX = character.getImage().getX() + character.getImage().getWidth() / 2;
-            float characterY = character.getImage().getY() + character.getImage().getHeight() / 2;
-
-            if (!character.getType().equalsIgnoreCase("tower") && explosionRange.contains(characterX, characterY)) {
-                character.takeDamage(damage);
+        // Aplica daño a los personajes dentro del rango de explosión
+        entityManager.getCharacters().forEach(character -> {
+            if (!character.getType().equalsIgnoreCase("tower")) {
+                if (explosionRange.overlaps(new Circle(
+                    character.getHitboxCenter().x,
+                    character.getHitboxCenter().y,
+                    0))) {
+                    character.takeDamage(damage);
+                }
             }
-        }
+        });
 
+        // Marca como detonada y programa la eliminación
         isDetonated = true;
+        image.addAction(Actions.sequence(
+            Actions.delay(explosionDisplayTime),
+            Actions.run(() -> entityManager.removeBomb(this)),
+            Actions.run(this::dispose)
+        ));
     }
-
-
 
     public void dispose() {
         image.clearActions();
+        explosionRange = null;
         image.remove();
+
     }
 
     public Circle getExplosionRange() {
@@ -95,6 +93,4 @@ public class Bomb {
     public Image getImage() {
         return image;
     }
-
 }
-

@@ -2,6 +2,7 @@ package com.milne.mw.entities.boss;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Circle;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.actions.RunnableAction;
 import com.milne.mw.entities.EntityManager;
@@ -16,20 +17,16 @@ public class ForceSmashAttack implements BossAttack {
     }
 
     @Override
-    public void execute(BossCharacter boss, EntityManager entityManager, BossAnimator animator) {
-        System.out.println("Force Smash activado!");
-
+    public void execute(BossCharacter boss, EntityManager entityManager, BossAnimator animator, int damage) {
         RunnableAction applyDamage = new RunnableAction();
         applyDamage.setRunnable(() -> {
             Circle forceSmashRange = boss.getRange();
             animator.playForceSmashAnimation(texture, boss, forceSmashRange, duration);
 
             entityManager.getCharacters().forEach(enemy -> {
-                float characterX = enemy.getImage().getX() + enemy.getImage().getWidth() / 2;
-                float characterY = enemy.getImage().getY() + enemy.getImage().getHeight() / 2;
-
-                if (enemy.getType().equalsIgnoreCase("tower") && forceSmashRange.contains(characterX, characterY)) {
-                    enemy.takeDamage(30);
+                Vector2 hitboxCenterEnemy = enemy.getHitboxCenter();
+                if (enemy.getType().equalsIgnoreCase("tower") && forceSmashRange.contains(hitboxCenterEnemy)) {
+                    enemy.takeDamage(damage);
                 }
             });
         });

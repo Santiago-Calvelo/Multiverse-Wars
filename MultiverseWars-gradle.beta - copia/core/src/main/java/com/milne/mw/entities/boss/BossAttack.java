@@ -4,6 +4,6 @@ import com.milne.mw.entities.EntityManager;
 import com.milne.mw.renders.BossAnimator;
 
 public interface BossAttack {
-    void execute(BossCharacter boss, EntityManager entityManager, BossAnimator animator);
+    void execute(BossCharacter boss, EntityManager entityManager, BossAnimator animator, int damage);
     float getDuration();
 }
