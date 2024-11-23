@@ -29,8 +29,8 @@ public class Player {
         }
     }
 
-    public void loseLife() {
-        lives--;
+    public void loseLife(int lives) {
+        this.lives -= lives;
     }
 
     public int getLives() {

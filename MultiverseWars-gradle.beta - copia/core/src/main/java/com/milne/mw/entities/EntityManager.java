@@ -7,6 +7,8 @@ import com.milne.mw.difficulty.Difficulty;
 import com.milne.mw.difficulty.Round;
 import com.milne.mw.difficulty.RoundManager;
 import com.milne.mw.entities.boss.BossCharacter;
+import com.milne.mw.entities.flycharacter.Bomb;
+import com.milne.mw.entities.rangedcharacter.Projectile;
 import com.milne.mw.menu.VictoryMenu;
 import com.milne.mw.player.Player;
 import com.milne.mw.renders.BossAnimator;
@@ -40,6 +42,9 @@ public class EntityManager {
     private VictoryMenu victoryMenu;
     private boolean bossIsAlive = false;
     private Character bossFinal;
+    private EntityType[] enemyTypes = EntityType.values();
+    private Array<EntityType> enemyList = new Array<>();
+    private float enemiesSpawnAccumulator = 0;
 
     public EntityManager(Stage stage, Difficulty difficultyLevel, Player player) {
         this.stage = stage;
@@ -187,6 +192,25 @@ public class EntityManager {
         }
     }
 
+    private void startSpawnEnemies() {
+        for (EntityType type : enemyTypes) {
+            if (type.getType().equalsIgnoreCase("enemy") && type.getCanBeSpawned()) {
+                enemyList.add(type);
+            }
+        }
+
+        if (!enemyList.isEmpty()) {
+            Random r = new Random();
+            int randomIndex = (int) (Math.random() * enemyList.size);
+            EntityType randomEnemy = enemyList.get(randomIndex);
+            float[] validYlanes = { 358.0f, 279.0f, 200.0f, 121.0f, 42.0f };
+
+            float spawnX = stage.getViewport().getWorldWidth();
+            float spawnY = validYlanes[r.nextInt(validYlanes.length)];
+            spawnEntity(randomEnemy, spawnX, spawnY);
+        }
+    }
+
     private void scaleStatsAllPlacedCharacters() {
         for (Character character : characters) {
             character.scaleStats(difficultyLevel, currentRoundIndex);
@@ -200,6 +224,11 @@ public class EntityManager {
                     bossIsAlive = false;
                     bossFinal = null;
                     currentRoundIndex++;
+                }
+              enemiesSpawnAccumulator += delta;
+                if (enemiesSpawnAccumulator >= 5f) {
+                    startSpawnEnemies();
+                    enemiesSpawnAccumulator = 0;
                 }
             }
 
@@ -251,8 +280,9 @@ public class EntityManager {
     public void removeOffScreenCharacters() {
         for (int i = 0; i < characters.size; i++) {
             Character character = characters.get(i);
-
-            if (character.getImage().getX() < 0) {
+            if (character.getHitbox().x == character.getLEFT_LIMIT()) {
+                character.setEnergy(0);
+                player.loseLife(character.getDamageToPlayer());
                 character.takeDamage(character.getLives());
             }
         }
@@ -327,10 +357,21 @@ public class EntityManager {
     }
 
     public void dispose() {
+
         for (Character character : characters) {
-            removeCharacter(character);
+            character.dispose();
         }
         characters.clear();
+
+        for (Bomb bomb : bombs) {
+            bomb.dispose();
+        }
+        bombs.clear();
+
+        for (Projectile projectile : projectiles) {
+            projectile.dispose();
+        }
+        projectiles.clear();
     }
 
     public Array<Bomb> getBombs() {
@@ -340,4 +381,5 @@ public class EntityManager {
     public HashMap<Integer, Character> getPositionMap() {
         return positionMap;
     }
+
 }

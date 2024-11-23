@@ -11,10 +11,11 @@ import com.milne.mw.entities.Character;
 import java.util.Random;
 
 public class MoveForceAttack implements BossAttack {
-    private final float duration = 1f; // Duración del ataque
+    private float duration; // Duración del ataque
 
     @Override
-    public void execute(BossCharacter boss, EntityManager entityManager, BossAnimator animator, int damage) {
+    public void execute(BossCharacter boss, EntityManager entityManager, BossAnimator animator, int damage, float duration) {
+        this.duration = duration;
         Character closestCharacter = boss.findClosestTower();
 
         if (closestCharacter != null) {
@@ -49,7 +50,6 @@ public class MoveForceAttack implements BossAttack {
         onCompleteAction.setRunnable(() -> {
             entityManager.getPositionMap().put(finalNewIndex, tower);
             tower.resumeMovement();
-            boss.finishSpecial();
         });
 
         tower.getImage().addAction(Actions.sequence(moveAction, onCompleteAction));

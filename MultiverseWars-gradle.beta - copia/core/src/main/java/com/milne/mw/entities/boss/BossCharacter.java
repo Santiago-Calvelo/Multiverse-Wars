@@ -17,6 +17,7 @@ public class BossCharacter extends Character {
     private float forceSmashAccumulator = 0f;
     private float dashAttackAccumulator = 0f;
     private float moveForceAccumulator = 0f;
+    private float moveForceCooldown, forceSmashCooldown, dashAttackCooldown;
     private boolean isExecutingSpecial = false;
     private float switchLaneAccumulator = 0f;
     private float specialDuration = 0f;
@@ -24,20 +25,20 @@ public class BossCharacter extends Character {
     private BossAnimator animator;
     private BossAttacks currentSpecialAttack = null;
     private HashMap<BossAttacks, BossAttack> attackMap = new HashMap<>();
-    private final float RIGHT_LIMIT, LEFT_LIMIT;
+    private boolean isDashing = false;
     private boolean movingRight = true;
-
 
     public BossCharacter(Texture texture, float x, float y, int hitboxWidth, int hitboxHeight, int lives,
                          EntityManager entityManager, int speed, Texture walkTexture, Texture attackTexture, Texture forceSmash, String type, float attackCooldown, int damage, int energy, BossAnimator animator, boolean canBeAttacked) {
         super(texture, x, y, hitboxWidth, hitboxHeight, lives, entityManager, speed,
-            walkTexture, walkTexture, attackTexture, attackTexture, type, attackCooldown, damage, energy, canBeAttacked);
+            walkTexture, walkTexture, attackTexture, attackTexture, type, attackCooldown, damage, energy, canBeAttacked,0);
         this.animator = animator;
         attackMap.put(BossAttacks.FORCE_SMASH, new ForceSmashAttack(forceSmash));
         attackMap.put(BossAttacks.MOVE_FORCE, new MoveForceAttack());
         attackMap.put(BossAttacks.DASH_ATTACK, new DashAttack());
-        this.RIGHT_LIMIT = x;
-        this.LEFT_LIMIT = 1f;
+        this.moveForceCooldown = entityManager.getDifficultyLevel().getMoveForceCooldown();
+        this.forceSmashCooldown = entityManager.getDifficultyLevel().getForceSmashCooldown();
+        this.dashAttackCooldown = entityManager.getDifficultyLevel().getDashCooldown();
     }
 
     @Override
@@ -48,7 +49,7 @@ public class BossCharacter extends Character {
             checkLimitsMaps();
 
             switchLaneAccumulator += delta;
-            if (switchLaneAccumulator >= 10f) {
+            if (switchLaneAccumulator >= 10f && !isDashing) {
                 switchLane();
             }
 
@@ -64,12 +65,13 @@ public class BossCharacter extends Character {
                 moveForceAccumulator += delta;
                 dashAttackAccumulator += delta;
 
-                if (forceSmashAccumulator >= 5f && lastAttack != BossAttacks.FORCE_SMASH) { // Cooldown de Force Smash
+                if (forceSmashAccumulator >= forceSmashCooldown && lastAttack != BossAttacks.FORCE_SMASH) { // Cooldown de Force Smash
                     startSpecialAttack(BossAttacks.FORCE_SMASH);
-                } else if (moveForceAccumulator >= 5f && lastAttack != BossAttacks.MOVE_FORCE) { // Cooldown de Move Force
+                } else if (moveForceAccumulator >= moveForceCooldown && lastAttack != BossAttacks.MOVE_FORCE) { // Cooldown de Move Force
                     startSpecialAttack(BossAttacks.MOVE_FORCE);
-                } else if (dashAttackAccumulator >= 10f && lastAttack != BossAttacks.DASH_ATTACK) {
+                } else if (dashAttackAccumulator >= dashAttackCooldown && lastAttack != BossAttacks.DASH_ATTACK) {
                     startSpecialAttack(BossAttacks.DASH_ATTACK);
+                    isDashing = true;
                 }
             }
 
@@ -78,20 +80,19 @@ public class BossCharacter extends Character {
 
     private void checkLimitsMaps() {
         float hitboxX = this.getHitbox().x;
-        if (isNearLimit(hitboxX, LEFT_LIMIT) && !movingRight) {
+        if (isNearLimit(hitboxX, getLEFT_LIMIT()) && !movingRight) {
             movingRight = true;
             changeDirection();
-        } else if (isNearLimit(hitboxX, RIGHT_LIMIT) && movingRight) {
+        } else if (isNearLimit(hitboxX, getRIGHT_LIMIT()) && movingRight) {
             movingRight = false;
             changeDirection();
         }
     }
 
     private void changeDirection() {
-        pause();
-        float targetX = movingRight ? RIGHT_LIMIT : LEFT_LIMIT; // Nuevo objetivo
-        super.setTargetX(targetX); // Llama al método del padre para iniciar el movimiento
-        resumeMovement();
+        float targetX = getMovingDirectionTargetX();
+        super.setTargetX(targetX);
+        startMovement();
     }
 
     private void startSpecialAttack(BossAttacks attack) {
@@ -102,10 +103,40 @@ public class BossCharacter extends Character {
             specialDuration = 0f;
             currentSpecialAttack = attack;
             animator.reset();
-            bossAttack.execute(this, entityManager, animator, getDamage());
+            bossAttack.execute(this, entityManager, animator, getDamageSpecial(attack), getDurationSpecial(attack));
             lastAttack = attack;
             resetAccumulatorForAttack(attack);
         }
+    }
+
+    private float getDurationSpecial(BossAttacks attack) {
+        float duration = 1f;
+
+        switch (attack) {
+            case FORCE_SMASH:
+                duration = entityManager.getDifficultyLevel().getForceSmashDuration();
+                break;
+            case DASH_ATTACK:
+                duration = entityManager.getDifficultyLevel().getDashDuration();
+                break;
+        }
+
+        return duration;
+    }
+
+    private int getDamageSpecial(BossAttacks attack) {
+        int damage = 0;
+
+        switch (attack) {
+            case FORCE_SMASH:
+                damage = entityManager.getDifficultyLevel().getForceSmashDamage();
+                break;
+            case DASH_ATTACK:
+                damage = entityManager.getDifficultyLevel().getDashDamage();
+                break;
+        }
+
+        return damage;
     }
 
     private void resetAccumulatorForAttack(BossAttacks attack) {
@@ -120,6 +151,16 @@ public class BossCharacter extends Character {
                 dashAttackAccumulator = 0f;
                 break;
         }
+    }
+
+    public void resetAll() {
+        this.isDashing = false;
+        this.setSpeed(getBASE_SPEED());
+        this.forceSmashAccumulator = 0f;
+        this.moveForceAccumulator = 0f;
+        this.dashAttackAccumulator = 0f;
+        this.switchLaneAccumulator = 0f;
+        this.isExecutingSpecial = false;
     }
 
     private float getCurrentSpecialDuration() {
@@ -180,18 +221,29 @@ public class BossCharacter extends Character {
         return Math.abs(position - limit) < 1f;
     }
 
+    protected float getMovingDirectionTargetX() {
+        return movingRight ? getRIGHT_LIMIT() : getLEFT_LIMIT();
+    }
+
+    public boolean getIsDashing() {
+        return isDashing;
+    }
 
     public void finishSpecial() {
         isExecutingSpecial = false;
+        if (isDashing) {
+            isDashing = false;
+        }
         currentSpecialAttack = null; // Limpia el ataque especial actual
     }
 
+
     @Override
     public void attack() {
-
     }
 
     @Override
     public void checkForAttack(Array<Character> characters) {
     }
+
 }

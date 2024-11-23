@@ -1,21 +1,23 @@
-package com.milne.mw.entities;
+package com.milne.mw.entities.rangedcharacter;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Array;
+import com.milne.mw.entities.Character;
+import com.milne.mw.entities.EntityManager;
 
-public class RangedCharacter extends Character {
+public class RangedCharacter extends com.milne.mw.entities.Character {
     private final Texture projectileTexture;
-    private Character targetEnemy;
+    private com.milne.mw.entities.Character targetEnemy;
     private final int range;
 
     public RangedCharacter(Texture texture, int hitboxWidth, int hitboxHeight, Texture walk1Texture,
                            Texture walk2Texture, Texture attack1Texture, Texture attack2Texture,
                            Texture projectileTexture, float x, float y, int lives,
                            int speed, EntityManager entityManager,
-                           String type, int range, float attackCooldown, int damage, int energy, boolean canBeAttacked) {
+                           String type, int range, float attackCooldown, int damage, int energy, boolean canBeAttacked, int damageToPlayer) {
         super(texture, x, y, hitboxWidth, hitboxHeight, lives, entityManager, speed,
-            walk1Texture, walk2Texture, attack1Texture, attack2Texture, type, attackCooldown, damage, energy, canBeAttacked);
+            walk1Texture, walk2Texture, attack1Texture, attack2Texture, type, attackCooldown, damage, energy, canBeAttacked, damageToPlayer);
         this.projectileTexture = projectileTexture;
         this.range = range;
     }
@@ -24,9 +26,9 @@ public class RangedCharacter extends Character {
     public void attack() {
         float x;
         if (getType().equalsIgnoreCase("tower")) {
-            x = image.getX() + image.getWidth();
+            x = getHitbox().x + getHitbox().getWidth();
         } else {
-            x = image.getX() - image.getWidth();
+            x = getHitbox().x - getHitbox().getWidth();
         }
         Projectile projectile = new Projectile(projectileTexture, x,
             getHitboxCenter().y, entityManager, targetEnemy, getType(), getDamage());
@@ -34,9 +36,9 @@ public class RangedCharacter extends Character {
     }
 
     @Override
-    public void checkForAttack(Array<Character> characters) {
+    public void checkForAttack(Array<com.milne.mw.entities.Character> characters) {
         for (int i = 0; i < characters.size; i++) {
-            Character enemy = characters.get(i);
+            com.milne.mw.entities.Character enemy = characters.get(i);
             if (!enemy.getType().equalsIgnoreCase(getType())) {
                 onEnemyInRange(enemy);
             }
@@ -50,7 +52,7 @@ public class RangedCharacter extends Character {
         }
     }
 
-    public void onEnemyInRange(Character enemy) {
+    public void onEnemyInRange(com.milne.mw.entities.Character enemy) {
         if (enemy != this && isInSameRow(enemy) && isInRange(enemy) && isInFront(enemy) && enemy.getCanBeAttacked()) {
             targetEnemy = enemy;
             if (this.getSpeed() != 0) {
@@ -61,7 +63,7 @@ public class RangedCharacter extends Character {
         }
     }
 
-    private boolean isInFront(Character enemy) {
+    private boolean isInFront(com.milne.mw.entities.Character enemy) {
         boolean isInFront = false;
         Rectangle thisHitbox = this.getHitbox();
         Rectangle enemyHitbox = enemy.getHitbox();
@@ -80,7 +82,7 @@ public class RangedCharacter extends Character {
     }
 
 
-    private boolean isInSameRow(Character enemy) {
+    private boolean isInSameRow(com.milne.mw.entities.Character enemy) {
         Rectangle thisHitbox = this.getHitbox();
         Rectangle enemyHitbox = enemy.getHitbox();
 

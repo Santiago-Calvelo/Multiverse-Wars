@@ -1,15 +1,17 @@
-package com.milne.mw.entities;
+package com.milne.mw.entities.rangedcharacter;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.scenes.scene2d.actions.MoveToAction;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
+import com.milne.mw.entities.Character;
+import com.milne.mw.entities.EntityManager;
 
 public class Projectile {
     private Image image;
     private Rectangle hitbox;
     private int damage;
-    private Character targetEnemy;
+    private com.milne.mw.entities.Character targetEnemy;
     private EntityManager entityManager;
     private String type;
 

@@ -108,10 +108,13 @@ public class MapScreen implements Screen {
         if (entityManager != null) {
             entityManager.dispose();
         }
-        if (renderManager != null) {
-            RenderManager.resetInstance();
+        if (stage != null) {
+            stage.clear(); // Limpia los actores
+            stage.dispose(); // Libera recursos gráficos asociados
+            stage = null; // Evita llamar a dispose() nuevamente
         }
-        stage.clear();
-        stage.dispose();
+        if (renderManager != null) {
+            RenderManager.resetInstance(); // Libera recursos del RenderManager
+        }
     }
 }

@@ -7,6 +7,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Array;
 import com.milne.mw.difficulty.Difficulty;
+import com.milne.mw.entities.flycharacter.FlyCharacter;
 import com.milne.mw.renders.RenderManager;
 
 public abstract class Character {
@@ -25,14 +26,16 @@ public abstract class Character {
     private int damage, energy;
     private final int BASE_LIVES, BASE_SPEED, BASE_DAMAGE;
     private int lastScaledRound = -1;
-    private boolean canBeAttacked;
+    private final boolean canBeAttacked;
+    private int damageToPlayer;
     private float targetX;
+    private final float RIGHT_LIMIT, LEFT_LIMIT;
 
     public Character(Texture texture, float x, float y, int hitboxWidth, int hitboxHeight, int lives,
                      EntityManager entityManager, int speed,
                      Texture walk1Texture, Texture walk2Texture, Texture attack1Texture,
                      Texture attack2Texture, String type,
-                     float attackCooldown, int damage, int energy, boolean canBeAttacked) {
+                     float attackCooldown, int damage, int energy, boolean canBeAttacked, int damageToPlayer) {
         this.image = new Image(texture);
         this.image.setPosition(x, y);
         if (!(this instanceof FlyCharacter)) {
@@ -57,23 +60,24 @@ public abstract class Character {
         this.BASE_DAMAGE = damage;
         this.energy = energy;
         this.canBeAttacked = canBeAttacked;
+        this.damageToPlayer = damageToPlayer;
+        this.RIGHT_LIMIT = x;
+        this.LEFT_LIMIT = 0f;
 
-        this.targetX = -hitbox.getWidth();
+        this.targetX = LEFT_LIMIT;
         if (speed != 0) {
             startMovement();
         }
     }
 
     public void startMovement() {
-        if (!isMoving) {
-            moveAction = new MoveToAction();
-            float distanceX = Math.abs(hitbox.x - targetX);
-            float duration = distanceX / speed;
-            moveAction.setPosition(targetX, getHitbox().y);
-            moveAction.setDuration(duration);
-            image.addAction(moveAction);
-            isMoving = true;
-        }
+        moveAction = new MoveToAction();
+        float distanceX = Math.abs(hitbox.x - targetX);
+        float duration = distanceX / speed;
+        moveAction.setPosition(targetX, getHitbox().y);
+        moveAction.setDuration(duration);
+        image.addAction(moveAction);
+        isMoving = true;
     }
 
     public void update(float delta) {
@@ -96,9 +100,17 @@ public abstract class Character {
         }
     }
 
+    public void removeCharacter() {
+        entityManager.removeCharacter(this);
+    }
+
     public void tryAttack() {
         RenderManager.getInstance().animateCharacterAttack(this, attackCooldown);
-        if (canAttack) {
+
+        if (this instanceof FlyCharacter) {
+            this.isMoving = false;
+        }
+        if (canAttack && !isMoving) {
             attack();
             canAttack = false;
             cooldownElapsed = 0;
@@ -117,21 +129,20 @@ public abstract class Character {
 
     public void pause() {
         if (isMoving) {
-            image.clearActions(); // Detiene cualquier acción activa
-            isMoving = false; // Marca el estado como no moviéndose
+            image.clearActions();
+            isMoving = false;
         }
     }
 
     public void resumeMovement() {
-        if (!isMoving && speed != 0) {
+        if (!isMoving && BASE_SPEED != 0) {
             startMovement();
         }
     }
 
     public void stopMovementAndAttack() {
         if (isMoving) {
-            image.clearActions();
-            isMoving = false;
+            pause();
         }
         tryAttack();
     }
@@ -143,6 +154,10 @@ public abstract class Character {
     public Texture getAttack1Texture() { return attack1Texture; }
     public Texture getAttack2Texture() { return attack2Texture; }
 
+    public float getAttackCooldown() {
+            return attackCooldown;
+    }
+
     public boolean getCanBeAttacked () {
         return canBeAttacked;
     }
@@ -150,6 +165,18 @@ public abstract class Character {
     public Rectangle getHitbox() {
         hitbox.setPosition(image.getX(), image.getY());
         return hitbox;
+    }
+
+    public float getRIGHT_LIMIT() {
+        return RIGHT_LIMIT;
+    }
+
+    public float getLEFT_LIMIT() {
+        return LEFT_LIMIT;
+    }
+
+    public int getBASE_SPEED() {
+        return BASE_SPEED;
     }
 
     public int getDamage() { return damage; }
@@ -172,4 +199,13 @@ public abstract class Character {
         image.clearActions();
         image.remove();
     }
+
+    public void setEnergy(int energy) {
+        this.energy = energy;
+    }
+
+    public int getDamageToPlayer() {
+        return damageToPlayer;
+    }
 }
+

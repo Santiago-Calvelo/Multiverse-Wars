@@ -12,7 +12,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
-import com.milne.mw.entities.Bomb;
+import com.milne.mw.entities.flycharacter.Bomb;
 import com.milne.mw.entities.Character;
 import com.milne.mw.entities.EntityManager;
 import com.milne.mw.Global;
@@ -215,9 +215,17 @@ public class RenderManager {
     }
 
     public void dispose() {
-        shapeRenderer.dispose();
-        backgroundImage.remove();
-        roundLabel.remove();
-        skin.dispose();
+        if (shapeRenderer != null) {
+            shapeRenderer.dispose();
+            shapeRenderer = null;
+        }
+        if (backgroundImage != null) {
+            backgroundImage.remove();
+            backgroundImage = null;
+        }
+        if (skin != null) {
+            skin.dispose();
+            skin = null;
+        }
     }
 }
