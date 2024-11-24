@@ -24,7 +24,7 @@ public class PauseMenu {
     private Game game;
     private EntityManager entityManager;
     private Image pauseBackground;
-    public Circle pauseButtonHitbox;
+    private Circle pauseButtonHitbox;
     private Stage stage;
     private boolean enable = true;
 
@@ -101,6 +101,10 @@ public class PauseMenu {
         pauseBackground.remove();
         resumeButton.remove();
         mainMenuButton.remove();
+    }
+
+    public Circle getPauseButtonHitbox() {
+        return pauseButtonHitbox;
     }
 
     public void setEnable(boolean enable) {

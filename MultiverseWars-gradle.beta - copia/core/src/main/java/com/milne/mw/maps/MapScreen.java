@@ -10,6 +10,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.milne.mw.difficulty.Difficulty;
 import com.milne.mw.entities.SellTowerListener;
+import com.milne.mw.menu.GameOverMenu;
 import com.milne.mw.menu.PauseMenu;
 import com.milne.mw.menu.VictoryMenu;
 import com.milne.mw.player.Player;
@@ -26,6 +27,7 @@ public class MapScreen implements Screen {
     private Player player;
     private PauseMenu pauseMenu;
     private VictoryMenu victoryMenu;
+    private GameOverMenu gameOverMenu;
 
     public MapScreen(Game game, Texture map, Difficulty difficultyLevel) {
         this.game = game;
@@ -36,10 +38,12 @@ public class MapScreen implements Screen {
         entityManager = new EntityManager(stage, difficultyLevel, player);
         pauseMenu = new PauseMenu(stage, game, entityManager);
         victoryMenu = new VictoryMenu(stage, game, pauseMenu);
+        gameOverMenu = new GameOverMenu(stage, game, pauseMenu, entityManager);
 
         addEntityCardsToPanel();
         entityManager.startEnemySpawner();
         entityManager.setVictoryMenu(victoryMenu);
+        entityManager.setGameOverMenu(gameOverMenu);
         stage.addListener(new SellTowerListener(entityManager));
 
         renderManager.setPlayer(player);
@@ -82,6 +86,7 @@ public class MapScreen implements Screen {
             float touchY = Gdx.input.getY();
             Vector2 worldTouch = stage.getViewport().unproject(new Vector2(touchX, touchY));
             pauseMenu.handleInput(worldTouch.x, worldTouch.y);
+            gameOverMenu.handleInput(worldTouch.x, worldTouch.y);
         }
         renderManager.render(pauseMenu.getIsPaused(), entityManager, delta, pauseMenu);
     }
@@ -105,6 +110,7 @@ public class MapScreen implements Screen {
 
     @Override
     public void dispose() {
+        victoryMenu.dispose();
         if (entityManager != null) {
             entityManager.dispose();
         }

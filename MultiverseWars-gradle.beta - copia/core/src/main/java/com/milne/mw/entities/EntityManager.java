@@ -9,6 +9,7 @@ import com.milne.mw.difficulty.RoundManager;
 import com.milne.mw.entities.boss.BossCharacter;
 import com.milne.mw.entities.flycharacter.Bomb;
 import com.milne.mw.entities.rangedcharacter.Projectile;
+import com.milne.mw.menu.GameOverMenu;
 import com.milne.mw.menu.VictoryMenu;
 import com.milne.mw.player.Player;
 import com.milne.mw.renders.BossAnimator;
@@ -40,6 +41,7 @@ public class EntityManager {
     private int enemiesInGame = 0;
     private int currentRoundIndex = 0;
     private VictoryMenu victoryMenu;
+    private GameOverMenu gameOverMenu;
     private boolean bossIsAlive = false;
     private Character bossFinal;
     private EntityType[] enemyTypes = EntityType.values();
@@ -188,7 +190,7 @@ public class EntityManager {
             );
             spawnBossFinal(bossFinal, adjustedX, adjustedY);
         } else if(currentRoundIndex > difficultyLevel.getMaxRound()) {
-            victoryMenu.createVictoryMenu();
+            victoryMenu.createMenu();
         }
     }
 
@@ -233,6 +235,10 @@ public class EntityManager {
             }
 
             player.update(delta);
+
+            if (!player.isAlive()) {
+                gameOverMenu.createMenu();
+            }
 
             removeOffScreenCharacters();
 
@@ -382,4 +388,7 @@ public class EntityManager {
         return positionMap;
     }
 
+    public void setGameOverMenu(GameOverMenu gameOverMenu) {
+        this.gameOverMenu = gameOverMenu;
+    }
 }

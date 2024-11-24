@@ -169,7 +169,7 @@ public class RenderManager {
         shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
         shapeRenderer.setColor(Color.GREEN);
 
-        shapeRenderer.circle(pauseMenu.pauseButtonHitbox.x, pauseMenu.pauseButtonHitbox.y, pauseMenu.pauseButtonHitbox.radius);
+        shapeRenderer.circle(pauseMenu.getPauseButtonHitbox().x, pauseMenu.getPauseButtonHitbox().y, pauseMenu.getPauseButtonHitbox().radius);
         for (Rectangle hitbox : entityManager.getPlacementHitboxes()) {
             shapeRenderer.rect(hitbox.x, hitbox.y, hitbox.width, hitbox.height);
         }
