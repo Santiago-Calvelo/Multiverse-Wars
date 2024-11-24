@@ -86,6 +86,12 @@ public class MapScreen implements Screen {
             float touchY = Gdx.input.getY();
             Vector2 worldTouch = stage.getViewport().unproject(new Vector2(touchX, touchY));
             pauseMenu.handleInput(worldTouch.x, worldTouch.y);
+        }
+
+        if (Gdx.input.justTouched() && !player.isAlive()) {
+            float touchX = Gdx.input.getX();
+            float touchY = Gdx.input.getY();
+            Vector2 worldTouch = stage.getViewport().unproject(new Vector2(touchX, touchY));
             gameOverMenu.handleInput(worldTouch.x, worldTouch.y);
         }
         renderManager.render(pauseMenu.getIsPaused(), entityManager, delta, pauseMenu);
@@ -110,7 +116,6 @@ public class MapScreen implements Screen {
 
     @Override
     public void dispose() {
-        victoryMenu.dispose();
         if (entityManager != null) {
             entityManager.dispose();
         }

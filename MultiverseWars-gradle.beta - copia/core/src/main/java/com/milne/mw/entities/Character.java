@@ -89,12 +89,20 @@ public abstract class Character {
         }
     }
 
-    public void scaleStats(Difficulty difficulty, int roundNumber) {
+    public void scaleStatsBoss(float scalingFactor) {
+        this.lives = Math.round(BASE_LIVES * scalingFactor);
+        this.damage = Math.round(BASE_DAMAGE * scalingFactor);
+        this.speed = Math.round(BASE_SPEED * Math.min(scalingFactor, 1.05f));
+    }
+
+    public void scaleStats(float scalingFactor, int roundNumber) {
         if (lastScaledRound != roundNumber) {
             lastScaledRound = roundNumber;
 
-            float multiplier = 1.0f + (roundNumber * difficulty.getScalingFactor());
-            this.lives = Math.round(BASE_LIVES * multiplier);
+            float multiplier = 1.0f + (roundNumber * scalingFactor);
+            if (!this.getType().equalsIgnoreCase("tower")) {
+                this.lives = Math.round(BASE_LIVES * multiplier);
+            }
             this.damage = Math.round(BASE_DAMAGE * multiplier);
             this.speed = Math.round(BASE_SPEED * Math.min(multiplier, 1.05f));
         }

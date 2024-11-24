@@ -136,13 +136,11 @@ public class RoundManager {
     }
 
     public Round getRound(int index) {
-        if (index < rounds.size() || index > rounds.size()) {
-            return rounds.get(index);
-        }
-        return null; // Manejo de índice fuera de rango
+        return rounds.get(index);
     }
 
-    public int getTotalRounds() {
-        return rounds.size();
+    public void reset() {
+        rounds.clear();
+        configureRounds();
     }
 }

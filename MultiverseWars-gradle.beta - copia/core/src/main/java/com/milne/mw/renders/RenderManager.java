@@ -1,5 +1,6 @@
 package com.milne.mw.renders;
 
+import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
@@ -16,6 +17,7 @@ import com.milne.mw.entities.flycharacter.Bomb;
 import com.milne.mw.entities.Character;
 import com.milne.mw.entities.EntityManager;
 import com.milne.mw.Global;
+import com.milne.mw.menu.GameOverMenu;
 import com.milne.mw.menu.PauseMenu;
 import com.milne.mw.player.Player;
 
@@ -83,6 +85,17 @@ public class RenderManager {
         }
 
         updateAttackAnimations(delta);
+    }
+
+    public void drawButtonsHitbox(GameOverMenu gameOverMenu) {
+        shapeRenderer.setProjectionMatrix(stage.getViewport().getCamera().combined);
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
+        shapeRenderer.setColor(Color.GREEN);
+
+        Rectangle retryHitbox = gameOverMenu.getRetryButton();
+        shapeRenderer.rect(retryHitbox.x, retryHitbox.y, retryHitbox.width, retryHitbox.height);
+
+        shapeRenderer.end();
     }
 
     private void updateWalkAnimation(float delta, EntityManager entityManager) {
