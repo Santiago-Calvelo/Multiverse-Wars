@@ -50,6 +50,7 @@ public class EntityManager {
     private float enemiesSpawnAccumulator = 0;
     private float bossScalingFactor;
 
+
     public EntityManager(Stage stage, Difficulty difficultyLevel, Player player) {
         this.stage = stage;
         this.difficultyLevel = difficultyLevel;
@@ -109,38 +110,30 @@ public class EntityManager {
 
         Character entity = entityType.getEntity(adjustedX, adjustedY, this);
         entity.scaleStats(difficultyLevel.getScalingFactor(), currentRoundIndex);
-        entity.getImage().setPosition(adjustedX, adjustedY);
-        stage.addActor(entity.getImage());
         characters.add(entity);
 
         return entity;
     }
 
     public void spawnBossFinal(Character bossFinal, float x, float y) {
-        bossFinal.getImage().setPosition(x, y);
-        stage.addActor(bossFinal.getImage());
         characters.add(bossFinal);
     }
 
     public void addProjectile(Projectile projectile) {
         projectiles.add(projectile);
-        stage.addActor(projectile.getImage());
     }
 
     public void addBomb(Bomb bomb) {
         bombs.add(bomb);
-        stage.addActor(bomb.getImage()); // Añadir la imagen de la bomba al escenario
     }
 
     public void removeBomb(Bomb bomb) {
         bombs.removeValue(bomb, true);
-        stage.getActors().removeValue(bomb.getImage(), true);
         bomb.dispose();
     }
 
     public void removeProjectile(Projectile projectile) {
         projectiles.removeValue(projectile, true);
-        stage.getActors().removeValue(projectile.getImage(), true);
         projectile.dispose();
     }
 
@@ -365,6 +358,10 @@ public class EntityManager {
         return characters;
     }
 
+    public Array<Projectile> getProjectiles() {
+        return projectiles;
+    }
+
     public float getCellWidth() {
         return CELL_WIDTH;
     }
@@ -379,8 +376,6 @@ public class EntityManager {
             enemiesInGame--;
         }
         releasePosition(character);
-        character.getImage().remove();
-        stage.getActors().removeValue(character.getImage(), true);
         characters.removeValue(character, true);
         character.dispose();
     }

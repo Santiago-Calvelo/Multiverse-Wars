@@ -2,6 +2,7 @@ package com.milne.mw.renders;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.Color;
@@ -17,12 +18,16 @@ import com.milne.mw.entities.flycharacter.Bomb;
 import com.milne.mw.entities.Character;
 import com.milne.mw.entities.EntityManager;
 import com.milne.mw.Global;
+import com.milne.mw.entities.rangedcharacter.Projectile;
 import com.milne.mw.menu.GameOverMenu;
 import com.milne.mw.menu.PauseMenu;
 import com.milne.mw.player.Player;
-
+import com.badlogic.gdx.scenes.scene2d.actions.Actions;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import java.util.ArrayList;
 import java.util.Iterator;
+import static com.milne.mw.Global.loadTexture;
+
 
 public class RenderManager {
     private static RenderManager instance;
@@ -74,6 +79,8 @@ public class RenderManager {
             entityManager.update(delta);
             updateWalkAnimation(delta, entityManager);
             updateLabels(entityManager.getRound());
+            updateEntityVisuals(entityManager);
+            renderBombs(entityManager);
         }
         pauseMenu.checkForEscapeKey();
         stage.draw();
@@ -86,6 +93,77 @@ public class RenderManager {
 
         updateAttackAnimations(delta);
     }
+
+    private void renderBombs(EntityManager entityManager) {
+        for (Bomb bomb : entityManager.getBombs()) {
+            // Buscar el actor gráfico correspondiente
+            Array<Actor> actors = stage.getActors();
+            Image bombImage = null;
+            int i = 0;
+
+            do {
+                Actor actor = actors.get(i);
+                if (actor instanceof Image && actor.getUserObject() == bomb) {
+                    bombImage = (Image) actor;
+                }
+                i++;
+            } while (bombImage == null && i < actors.size);
+
+            if (bombImage == null) {
+                // Si no existe, crear un nuevo actor para la bomba
+                bombImage = new Image(bomb.getBombTexture());
+                bombImage.setSize(30, 30);
+                bombImage.setPosition(bomb.getX(), bomb.getY());
+                bombImage.setUserObject(bomb); // Asociar con la bomba lógica
+                stage.addActor(bombImage);
+            } else {
+                // Actualizar la posición gráfica
+                bombImage.setPosition(bomb.getX(), bomb.getY());
+            }
+
+            if (bomb.isDetonated()) {
+                // Cambiar textura a explosión y programar eliminación
+                bombImage.setDrawable(new TextureRegionDrawable(bomb.getExplosionTexture()));
+                bombImage.setSize(bomb.getExplosionRadius() * 2, bomb.getExplosionRadius() * 2);
+                bombImage.setPosition(
+                    bomb.getX() - bomb.getExplosionRadius(),
+                    bomb.getY() - bomb.getExplosionRadius()
+                );
+
+                Image finalBombImage = bombImage;
+                bombImage.addAction(Actions.sequence(
+                    Actions.delay(bomb.getExplosionDisplayTime()),
+                    Actions.run(() -> {
+                        finalBombImage.remove(); // Eliminar del Stage
+                        entityManager.removeBomb(bomb);
+                    })
+                ));
+            }
+        }
+
+    }
+
+
+    private void updateEntityVisuals(EntityManager entityManager) {
+        // Renderizar `Characters`
+        for (Character character : entityManager.getCharacters()) {
+            if (!stage.getActors().contains(character.getImage(), true)) {
+                stage.addActor(character.getImage()); // Añadir al stage si no está presente.
+            }
+            // Actualizar posición o estado gráfico de la entidad.
+            character.getImage().setPosition(character.getHitbox().x, character.getHitbox().y);
+        }
+
+        // Renderizar `Projectiles`
+        for (Projectile projectile : entityManager.getProjectiles()) {
+            if (!stage.getActors().contains(projectile.getImage(), true)) {
+                stage.addActor(projectile.getImage()); // Añadir al stage si no está presente.
+            }
+            projectile.getImage().setPosition(projectile.getHitbox().x, projectile.getHitbox().y);
+        }
+    }
+
+
 
     public void drawButtonsHitbox(GameOverMenu gameOverMenu) {
         shapeRenderer.setProjectionMatrix(stage.getViewport().getCamera().combined);
