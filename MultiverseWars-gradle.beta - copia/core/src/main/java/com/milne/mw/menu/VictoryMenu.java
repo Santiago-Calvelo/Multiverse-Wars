@@ -18,8 +18,7 @@ import static com.milne.mw.Global.loadTexture;
 public class VictoryMenu {
     private TextButton mainMenuButton;
     private Game game;
-    private EntityManager entityManager;
-    private Image pauseBackground;
+    private Image victoryBackground;
     private Stage stage;
     private PauseMenu pauseMenu;
 
@@ -29,15 +28,15 @@ public class VictoryMenu {
         this.pauseMenu = pauseMenu;
     }
 
-    public void createVictoryMenu() {
+    public void createMenu() {
         pauseMenu.setEnable(false);
         pauseMenu.togglePause();
         TextButton.TextButtonStyle textButtonStyle = new TextButton.TextButtonStyle();
         textButtonStyle.font = new BitmapFont();
         textButtonStyle.fontColor = Color.WHITE;
 
-        pauseBackground = new Image(loadTexture("multiverse-wars/win.jpg"));
-        pauseBackground.setSize(stage.getViewport().getWorldWidth(), stage.getViewport().getWorldHeight());
+        victoryBackground = new Image(loadTexture("multiverse-wars/win.jpg"));
+        victoryBackground.setSize(stage.getViewport().getWorldWidth(), stage.getViewport().getWorldHeight());
 
 
         mainMenuButton = new TextButton("Volver al Menu", textButtonStyle);
@@ -53,18 +52,18 @@ public class VictoryMenu {
     }
 
     private void addVictoryMenuToStage() {
-        stage.addActor(pauseBackground);
+        stage.addActor(victoryBackground);
         stage.addActor(mainMenuButton);
     }
 
     private void removeVictoryMenuFromStage() {
-        pauseBackground.remove();
+        victoryBackground.remove();
         mainMenuButton.remove();
     }
 
     public void dispose() {
         removeVictoryMenuFromStage();
-        pauseBackground.remove();
+        victoryBackground.remove();
         mainMenuButton.remove();
     }
 }

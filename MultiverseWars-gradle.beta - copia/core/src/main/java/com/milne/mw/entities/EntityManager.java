@@ -7,9 +7,13 @@ import com.milne.mw.difficulty.Difficulty;
 import com.milne.mw.difficulty.Round;
 import com.milne.mw.difficulty.RoundManager;
 import com.milne.mw.entities.boss.BossCharacter;
+import com.milne.mw.entities.flycharacter.Bomb;
+import com.milne.mw.entities.rangedcharacter.Projectile;
+import com.milne.mw.menu.GameOverMenu;
 import com.milne.mw.menu.VictoryMenu;
 import com.milne.mw.player.Player;
 import com.milne.mw.renders.BossAnimator;
+import com.milne.mw.renders.RenderManager;
 
 import java.util.*;
 
@@ -38,8 +42,13 @@ public class EntityManager {
     private int enemiesInGame = 0;
     private int currentRoundIndex = 0;
     private VictoryMenu victoryMenu;
+    private GameOverMenu gameOverMenu;
     private boolean bossIsAlive = false;
     private Character bossFinal;
+    private EntityType[] enemyTypes = EntityType.values();
+    private Array<EntityType> enemyList = new Array<>();
+    private float enemiesSpawnAccumulator = 0;
+    private float bossScalingFactor;
 
     public EntityManager(Stage stage, Difficulty difficultyLevel, Player player) {
         this.stage = stage;
@@ -50,6 +59,7 @@ public class EntityManager {
         bombs = new Array<>();
         this.placementHitboxes = new ArrayList<>();
         initPlacementPoints();
+
         roundManager = new RoundManager();
     }
 
@@ -77,7 +87,7 @@ public class EntityManager {
         int i = 0;
         Rectangle cardArea = new Rectangle(x, y, cardWidth, cardHeight);
 
-        if (entityType.getEnergy() <= player.getEnergy()) {
+        if (entityType.getEnergy() <= player.getEnergy() && !placementHitboxes.isEmpty()) {
             do {
                 Rectangle hitbox = placementHitboxes.get(i);
                 if (!positionMap.containsKey(i) && hitbox.overlaps(cardArea)) {
@@ -86,10 +96,10 @@ public class EntityManager {
                     Character entity = spawnEntity(entityType, centerX, centerY);
                     positionMap.put(i, entity);
                     placed = true;
+                    player.modifyEnergy(-entityType.getEnergy());
                 }
                 i++;
             } while (!placed && i < placementHitboxes.size());
-            player.modifyEnergy(-entityType.getEnergy());
         }
     }
 
@@ -98,7 +108,7 @@ public class EntityManager {
         float adjustedY = y - (float) entityType.getHitboxHeight() / 2;
 
         Character entity = entityType.getEntity(adjustedX, adjustedY, this);
-        entity.scaleStats(difficultyLevel, currentRoundIndex);
+        entity.scaleStats(difficultyLevel.getScalingFactor(), currentRoundIndex);
         entity.getImage().setPosition(adjustedX, adjustedY);
         stage.addActor(entity.getImage());
         characters.add(entity);
@@ -155,8 +165,10 @@ public class EntityManager {
             spawnEntity(enemyType, x, y);
             spawnAccumulator = 0;
             enemiesInGame++;
+            System.out.println("Ingresé al primer if");
         } else if (enemiesInGame == 0 && !bossIsAlive) {
             currentRoundIndex++;
+            System.out.println("Sumando...");
             scaleStatsAllPlacedCharacters();
         }
 
@@ -181,14 +193,45 @@ public class EntityManager {
                 "enemy", 0, 1, 0, animator, true
             );
             spawnBossFinal(bossFinal, adjustedX, adjustedY);
+            bossScalingFactor = difficultyLevel.getBossScalingFactor();
         } else if(currentRoundIndex > difficultyLevel.getMaxRound()) {
-            victoryMenu.createVictoryMenu();
+            placementHitboxes.clear();
+            victoryMenu.createMenu();
+        }
+    }
+
+    private void startSpawnEnemies() {
+        for (EntityType type : enemyTypes) {
+            if (type.getType().equalsIgnoreCase("enemy") && type.getCanBeSpawned()) {
+                enemyList.add(type);
+            }
+        }
+
+        if (!enemyList.isEmpty()) {
+            Random r = new Random();
+            int randomIndex = (int) (Math.random() * enemyList.size);
+            EntityType randomEnemy = enemyList.get(randomIndex);
+            float[] validYlanes = { 358.0f, 279.0f, 200.0f, 121.0f, 42.0f };
+
+            float spawnX = stage.getViewport().getWorldWidth();
+            float spawnY = validYlanes[r.nextInt(validYlanes.length)];
+            Character enemy = spawnEntity(randomEnemy, spawnX, spawnY);
+            enemy.scaleStatsBoss(bossScalingFactor);
         }
     }
 
     private void scaleStatsAllPlacedCharacters() {
         for (Character character : characters) {
-            character.scaleStats(difficultyLevel, currentRoundIndex);
+            character.scaleStats(difficultyLevel.getScalingFactor(), currentRoundIndex);
+        }
+    }
+
+    private void reduceInterval() {
+        float minIntervalSpawn = 1.5f;
+        spawnInterval -= 0.1f;
+
+        if (spawnInterval < minIntervalSpawn) {
+            spawnInterval = minIntervalSpawn;
         }
     }
 
@@ -200,9 +243,25 @@ public class EntityManager {
                     bossFinal = null;
                     currentRoundIndex++;
                 }
+                bossScalingFactor *= delta;
+
+                if (bossScalingFactor >= 1f) {
+                    bossScalingFactor = difficultyLevel.getBossScalingFactor();
+                }
+
+                enemiesSpawnAccumulator += delta;
+                if (enemiesSpawnAccumulator >= spawnInterval) {
+                    startSpawnEnemies();
+                    reduceInterval();
+                    enemiesSpawnAccumulator = 0;
+                }
             }
 
             player.update(delta);
+
+            if (!player.isAlive()) {
+                gameOverMenu.createMenu(player);
+            }
 
             removeOffScreenCharacters();
 
@@ -250,8 +309,9 @@ public class EntityManager {
     public void removeOffScreenCharacters() {
         for (int i = 0; i < characters.size; i++) {
             Character character = characters.get(i);
-
-            if (character.getImage().getX() < 0) {
+            if (character.getHitbox().x == character.getLEFT_LIMIT()) {
+                character.setEnergy(0);
+                player.loseLife(character.getDamageToPlayer());
                 character.takeDamage(character.getLives());
             }
         }
@@ -325,11 +385,36 @@ public class EntityManager {
         character.dispose();
     }
 
+    public void reset() {
+        dispose();
+        positionMap.clear();
+        roundManager.reset();
+        currentRoundIndex = 0;
+        enemiesInGame = 0;
+        bossIsAlive = false;
+        bossFinal = null;
+        enemyList.clear();
+        initPlacementPoints();
+
+        startEnemySpawner();
+    }
+
     public void dispose() {
         for (Character character : characters) {
-            removeCharacter(character);
+            character.dispose();
         }
         characters.clear();
+
+        for (Bomb bomb : bombs) {
+            bomb.dispose();
+        }
+        bombs.clear();
+
+        for (Projectile projectile : projectiles) {
+            projectile.dispose();
+        }
+        projectiles.clear();
+
     }
 
     public Array<Bomb> getBombs() {
@@ -338,5 +423,9 @@ public class EntityManager {
 
     public HashMap<Integer, Character> getPositionMap() {
         return positionMap;
+    }
+
+    public void setGameOverMenu(GameOverMenu gameOverMenu) {
+        this.gameOverMenu = gameOverMenu;
     }
 }

@@ -1,5 +1,6 @@
 package com.milne.mw.renders;
 
+import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
@@ -12,10 +13,11 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
-import com.milne.mw.entities.Bomb;
+import com.milne.mw.entities.flycharacter.Bomb;
 import com.milne.mw.entities.Character;
 import com.milne.mw.entities.EntityManager;
 import com.milne.mw.Global;
+import com.milne.mw.menu.GameOverMenu;
 import com.milne.mw.menu.PauseMenu;
 import com.milne.mw.player.Player;
 
@@ -83,6 +85,17 @@ public class RenderManager {
         }
 
         updateAttackAnimations(delta);
+    }
+
+    public void drawButtonsHitbox(GameOverMenu gameOverMenu) {
+        shapeRenderer.setProjectionMatrix(stage.getViewport().getCamera().combined);
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
+        shapeRenderer.setColor(Color.GREEN);
+
+        Rectangle retryHitbox = gameOverMenu.getRetryButton();
+        shapeRenderer.rect(retryHitbox.x, retryHitbox.y, retryHitbox.width, retryHitbox.height);
+
+        shapeRenderer.end();
     }
 
     private void updateWalkAnimation(float delta, EntityManager entityManager) {
@@ -169,7 +182,7 @@ public class RenderManager {
         shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
         shapeRenderer.setColor(Color.GREEN);
 
-        shapeRenderer.circle(pauseMenu.pauseButtonHitbox.x, pauseMenu.pauseButtonHitbox.y, pauseMenu.pauseButtonHitbox.radius);
+        shapeRenderer.circle(pauseMenu.getPauseButtonHitbox().x, pauseMenu.getPauseButtonHitbox().y, pauseMenu.getPauseButtonHitbox().radius);
         for (Rectangle hitbox : entityManager.getPlacementHitboxes()) {
             shapeRenderer.rect(hitbox.x, hitbox.y, hitbox.width, hitbox.height);
         }
@@ -215,9 +228,17 @@ public class RenderManager {
     }
 
     public void dispose() {
-        shapeRenderer.dispose();
-        backgroundImage.remove();
-        roundLabel.remove();
-        skin.dispose();
+        if (shapeRenderer != null) {
+            shapeRenderer.dispose();
+            shapeRenderer = null;
+        }
+        if (backgroundImage != null) {
+            backgroundImage.remove();
+            backgroundImage = null;
+        }
+        if (skin != null) {
+            skin.dispose();
+            skin = null;
+        }
     }
 }

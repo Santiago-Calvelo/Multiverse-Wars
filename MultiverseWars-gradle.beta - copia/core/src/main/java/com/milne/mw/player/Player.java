@@ -1,12 +1,16 @@
 package com.milne.mw.player;
 
 public class Player {
+    private int initialLives;
+    private int initialEnergy;
     private int lives;
     private int energy;
     private final float energyGenerationRate;
     private float energyAccumulator;
 
     public Player(int initialLives, int initialEnergy, float energyGenerationRate) {
+        this.initialLives = initialLives;
+        this.initialEnergy = initialEnergy;
         this.lives = initialLives;
         this.energy = initialEnergy;
         this.energyGenerationRate = energyGenerationRate;
@@ -29,8 +33,8 @@ public class Player {
         }
     }
 
-    public void loseLife() {
-        lives--;
+    public void loseLife(int lives) {
+        this.lives -= lives;
     }
 
     public int getLives() {
@@ -43,5 +47,10 @@ public class Player {
 
     public boolean isAlive() {
         return lives > 0;
+    }
+
+    public void reset() {
+        lives = initialLives;
+        energy = initialEnergy;
     }
 }

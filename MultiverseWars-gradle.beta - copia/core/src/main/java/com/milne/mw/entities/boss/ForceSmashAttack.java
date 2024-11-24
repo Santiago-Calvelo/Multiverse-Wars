@@ -10,14 +10,15 @@ import com.milne.mw.renders.BossAnimator;
 
 public class ForceSmashAttack implements BossAttack {
     private final Texture texture; // Textura específica para el ataque
-    private final float duration = 3f; // Duración del ataque
+    private float duration; // Duración del ataque
 
     public ForceSmashAttack(Texture texture) {
         this.texture = texture;
     }
 
     @Override
-    public void execute(BossCharacter boss, EntityManager entityManager, BossAnimator animator, int damage) {
+    public void execute(BossCharacter boss, EntityManager entityManager, BossAnimator animator, int damage, float duration) {
+        this.duration = duration;
         RunnableAction applyDamage = new RunnableAction();
         applyDamage.setRunnable(() -> {
             Circle forceSmashRange = boss.getRange();
@@ -35,8 +36,7 @@ public class ForceSmashAttack implements BossAttack {
             Actions.repeat((int) (duration / 0.5f), Actions.sequence(
                 applyDamage,
                 Actions.delay(0.5f) // Intervalo entre daños
-            )),
-            Actions.run(boss::finishSpecial)
+            ))
         ));
     }
 

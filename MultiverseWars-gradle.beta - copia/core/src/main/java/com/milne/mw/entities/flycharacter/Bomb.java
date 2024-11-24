@@ -1,9 +1,10 @@
-package com.milne.mw.entities;
+package com.milne.mw.entities.flycharacter;
 
 import com.badlogic.gdx.math.Circle;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
+import com.milne.mw.entities.EntityManager;
 
 import static com.milne.mw.Global.loadTexture;
 
@@ -44,10 +45,9 @@ public class Bomb {
     }
 
     public void update(float delta) {
-        if (isDetonated) {
-            return; // No actualices si ya explotó
+        if (!isDetonated) {
+            updateExplosionRange();
         }
-        updateExplosionRange();
     }
 
     private void detonate() {
